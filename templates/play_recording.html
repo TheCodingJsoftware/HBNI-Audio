@@ -1,0 +1,267 @@
+<html class="audio-html">
+
+
+<title>{{file_name}}</title>
+
+<head>
+    <script src="/static/jquery.js"></script>
+    <script src="/static/bootstrap.js"></script>
+    <script src="/static/bootstrap-select.js"></script>
+    <script src="/static/materialize.min.js"></script>
+    <link type="text/css" href="/static/bootstrap.css" rel="stylesheet" />
+    <link type="text/css" href="/static/bootstrap-select.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/materialize.min.css">
+    <link rel="stylesheet" href="/static/icon.css">
+    <link type="text/css" rel="stylesheet" href='/static/main.css' />
+    <link rel="icon" href="/static/icon.png">
+
+
+    <meta property="og:title" content="HBNI Audio Archive - {{file_name}}" />
+    <meta property="og:url" content="http://audioarchives.hbni.net:5050" />
+    <meta property="og:image" content="http://audioarchives.hbni.net/static/hbnilogo.png" />
+    <meta property="og:description" content="{{file_name}}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+    <ul id="slide-out" class="side-nav">
+        <input type="text" placeholder="Search for recordings" id="navbarSearch" autocomplete="off">
+        <div class="collection" id="navbarRecordingsList">
+            {% for groupName in downloadableRecordings %}
+            {% for itemName, itemData in downloadableRecordings[groupName].items() %}
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title activator grey-text text-darken-4">{{itemData["display_name"]}}<i class="material-icons right">info_outline</i></span>
+                    <p>{{itemData["description"]}}</p>
+                    <p>{{itemData["date"]}}</p>
+                </div>
+                <div class="card-reveal">
+                    <span class="card-title grey-text text-darken-4"><i class="material-icons right">close</i>{{itemData["display_name"]}}</span>
+                    <p>{{ itemName }}</p>
+                </div>
+                <div class="sticky-action">
+                    <div class="card-action">
+                        <a href={{ itemData["downloadLink"] }}><i class="material-icons left">play_arrow</i>Play</a>
+                    </div>
+                    <div class="card-action">
+                        <a href="{{ url_for('static', filename='/Recordings/' + itemData['file_name']) }}" download><i class="material-icons left">download</i>Download</a>
+                    </div>
+                </div>
+            </div>
+
+            {% endfor %}
+            {% endfor %}
+        </div>
+    </ul>
+    <nav>
+        <div class="nav-wrapper">
+            <a class="brand-logo center">HBNI Audio Streaming Archive</a>
+            <ul id="nav-mobile" class="left">
+                <li> <a data-activates="slide-out" class="button-collapse"
+                    style="padding: 0; display: block; position: fixed; top: 0; left: 0;"><i class="material-icons" style="font-size: 36px;">menu</i></a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <br>
+    <br>
+    <br>
+    <div class="audio-container">
+        <div>
+            <div class="icon-container">
+                <svg xmlns="http://www.w3.org/2000/svg" class="audio-icon" viewBox="0 0 20 20" fill="currentColor">
+                    <path
+                        d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z" />
+                </svg>
+            </div>
+            <br>
+            <p>{{file_name}}</p>
+            <br>
+            <div class="audio-player">
+                <audio>
+                    <source src="{{ url_for('static', filename='/Recordings/' + file_name) }}" type="audio/mpeg">
+                </audio>
+                <div class="row">
+                    <div class="col s2 m2 l2">
+                        <a class="btn-floating btn waves-effect waves-light aqua player-button"><i
+                                class="material-icons player-icon">play_arrow</i></a>
+                    </div>
+                    <div class="col s7 m9 l7">
+                        <input type="range" class="timeline" max="100" value="0">
+                    </div>
+                    <div class="col s2 m2 l2">
+                        <a class="btn-floating btn waves-effect waves-light aqua sound-button"><i
+                                class="material-icons sound-icon">volume_up</i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a class="waves-effect waves-light btn" target="_blank" href="{{ url_for('static', filename='/Recordings/' + file_name) }}" download>
+            <i class="material-icons left">download</i>Download
+        </a>
+    </div>
+    <canvas id="canvas"></canvas>
+    <a class="btn-floating btn-large waves-effect waves-light aqua" href="http://audioarchives.hbni.net:5050"
+        style="position: fixed; bottom: 25px; right: 25px;"><i class="material-icons">home</i></a>
+</body>
+<script>
+    const playerButton = document.querySelector('.player-button'),
+        audio = document.querySelector('audio'),
+        timeline = document.querySelector('.timeline'),
+        soundButton = document.querySelector('.sound-button'),
+        playerIcon = document.querySelector('.player-icon'),
+        soundIcon = document.querySelector('.sound-icon'),
+        playIcon = `play_arrow`,
+        pauseIcon = `stop`,
+        volumeOn = `volume_up`,
+        muteIcon = `volume_off`;
+
+    function toggleAudio() {
+        var audio = document.querySelector('audio');
+        var canvas = document.querySelector("canvas");
+        var ctx = canvas.getContext("2d");
+
+        var soundButton = document.querySelector('.sound-button');
+
+        soundButton.addEventListener('click', toggleSound);
+
+        if (audio.paused) {
+            audio.play();
+            playerIcon.innerHTML = pauseIcon;
+        } else {
+            audio.pause();
+            playerIcon.innerHTML = playIcon;
+        }
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            var src = audioContext.createMediaElementSource(audio); // Fixed variable name here
+
+            var analyser = audioContext.createAnalyser();
+
+            src.connect(analyser);
+            analyser.connect(audioContext.destination);
+
+            var fftSize = 256; // Default value for mobile
+
+            // Check if the device is a PC (assuming PC if screen width > 768px)
+            if (window.innerWidth > 800) {
+                fftSize = 2048; // Change to 2048 for PC
+            }
+            analyser.fftSize = fftSize;
+            var bufferLength = analyser.frequencyBinCount;
+
+            var dataArray = new Uint8Array(bufferLength);
+
+            // Get the device pixel ratio
+            var devicePixelRatio = window.devicePixelRatio || 1;
+
+            // Adjust canvas dimensions based on device pixel ratio
+            var canvasWidth = canvas.clientWidth * devicePixelRatio;
+            var canvasHeight = canvas.clientHeight * devicePixelRatio;
+
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+
+            var WIDTH = canvas.width;
+            var HEIGHT = canvas.height;
+
+            var barWidth = (WIDTH / bufferLength) * 2.5;
+            var barHeight;
+            var x = 0;
+
+            function renderFrame() {
+                requestAnimationFrame(renderFrame);
+
+                x = 0;
+
+                analyser.getByteFrequencyData(dataArray);
+
+                var bodyBackgroundColor = window.getComputedStyle(document.body).backgroundColor;
+
+                ctx.fillStyle = bodyBackgroundColor;
+                ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+                for (var i = 0; i < bufferLength; i++) {
+                    if (window.innerWidth > 800) {
+                        barHeight = dataArray[i] / 4;
+                        barHeight = Math.min(barHeight, HEIGHT - 10);
+                    } else {
+                        barHeight = dataArray[i] / 2;
+                    }
+
+                    var r = barHeight + (25 * (i / bufferLength));
+                    var g = barHeight + 250 * (i / bufferLength);
+                    var b = barHeight + 50 * (i / bufferLength);
+
+                    ctx.fillStyle = "rgb(40, 176, 163)";
+                    ctx.fillRect(x, HEIGHT - barHeight, barWidth, barHeight);
+
+                    x += barWidth + 1;
+                }
+            }
+
+            audio.play();
+            renderFrame();
+        }
+    }
+
+    playerButton.addEventListener('click', toggleAudio);
+
+    function changeTimelinePosition() {
+        const percentagePosition = (100 * audio.currentTime) / audio.duration;
+        timeline.style.backgroundSize = `${percentagePosition}% 100%`;
+        timeline.value = percentagePosition;
+    }
+
+    audio.ontimeupdate = changeTimelinePosition;
+
+    function audioEnded() {
+        playerIcon.innerHTML = playIcon;
+    }
+
+    audio.onended = audioEnded;
+
+    function changeSeek() {
+        const time = (timeline.value * audio.duration) / 100;
+        audio.currentTime = time;
+    }
+
+    timeline.addEventListener('change', changeSeek);
+    var audioContext;
+
+    function toggleSound() {
+        audio.muted = !audio.muted;
+        soundIcon.innerHTML = audio.muted ? muteIcon : volumeOn;
+    }
+    function togglePopup(x) {
+        x.classList.toggle("change");
+        if (x.classList.contains("change")) {
+            window.location.href = "#recordings";
+        } else {
+            window.location.href = "#";
+        }
+
+    }
+    $(document).ready(function () {
+        $('#navbarSearch').on('input', function () {
+            var searchText = $(this).val().trim().toLowerCase();
+            $('#navbarRecordingsList .card').each(function () {
+                var card = $(this);
+                var cardRevealContent = card.find('.card-reveal p').text().trim().toLowerCase();
+                if (cardRevealContent.indexOf(searchText) === -1) {
+                    card.hide();
+                } else {
+                    card.show();
+                }
+            });
+        });
+        $('.button-collapse').sideNav({
+            menuWidth: 300, // Default is 300
+            edge: 'left', // Choose the horizontal origin
+            closeOnClick: true, // Closes side-nav on <a> clicks, useful for Angular/Meteor
+            draggable: true, // Choose whether you can drag to open on touch screens,
+        });
+    });
+</script>
+
+</html>
