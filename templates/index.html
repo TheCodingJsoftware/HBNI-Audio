@@ -110,15 +110,8 @@
                 <div class="scroll">
                     {% for itemName, itemData in downloadableRecordings[groupName].items() %}
                     <a class="waves-effect waves-light btn" target="_blank" onclick="buttonPressed('{{ itemName }}')" href="{{ itemData['downloadLink'] }}">
-                        <i class="material-icons left">
-                            {% if "play_recording" in itemData['downloadLink'] %}
-                            play_arrow
-                            {% elif "mega" in itemData['downloadLink'] or "google" in itemData['downloadLink'] %}
-                            cloud
-                            {% else %}
-                            download
-                            {% endif %}
-                        </i>{{ itemName }}
+                        <i class="material-icons left">{% if "play_recording" in itemData['downloadLink'] %}play_arrow{% elif "mega" in itemData['downloadLink'] or "google" in itemData['downloadLink'] %}cloud{% else %}download{% endif %}</i>
+                        {{ itemName }}
                     </a>
                     {% endfor %}
                 </div>
