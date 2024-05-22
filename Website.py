@@ -1,4 +1,5 @@
 import calendar
+import contextlib
 import datetime
 import json
 import os
@@ -12,10 +13,10 @@ from urllib.parse import unquote
 import requests
 from flask import (
     Flask,
-    request,
-    jsonify,
     current_app,
+    jsonify,
     render_template,
+    request,
     send_file,
     send_from_directory,
     url_for,
@@ -25,20 +26,14 @@ app = Flask(__name__)
 s = sched.scheduler(time.time, time.sleep)
 
 
-
 @app.route("/")
 def index() -> None:
     with open("static/download_links.json", "r", encoding="utf-8") as f:
         data = json.load(f)
-    with open("static/recording_status.json", 'r', encoding="utf-8") as f:
+    with open("static/recording_status.json", "r", encoding="utf-8") as f:
         recording_status = json.load(f)
 
-    return render_template(
-        "index.html",
-        downloadableRecordings=get_grouped_data(data),
-        title="HBNI Audio Streaming Archive",
-        recording_status=recording_status
-    )
+    return render_template("index.html", downloadableRecordings=get_grouped_data(data), title="HBNI Audio Streaming Archive", recording_status=recording_status)
 
 
 @app.route("/play_recording/<path:file_name>")
@@ -46,9 +41,11 @@ def play_recording(file_name: str):
     with open("static/download_links.json", "r", encoding="utf-8") as f:
         download_links_data = json.load(f)
     item_name = unquote(file_name.split("/play_recording/")[-1])
-    download_links_data[item_name]["visit_count"] += 1
-    with open("static/download_links.json", "w", encoding="utf-8") as f:
-        json.dump(download_links_data, f, indent=4)
+    with contextlib.suppress(KeyError):
+        download_links_data[item_name]["visit_count"] += 1
+        download_links_data[item_name]["latest_visit"] = datetime.datetime.now().strftime('%B %d %A %Y %I:%M %p')
+        with open("static/download_links.json", "w", encoding="utf-8") as f:
+            json.dump(download_links_data, f, indent=4)
 
     return render_template(
         "play_recording.html",
@@ -56,19 +53,21 @@ def play_recording(file_name: str):
         downloadableRecordings=get_grouped_data(download_links_data),
     )
 
-@app.route('/button_pressed', methods=['POST'])
+
+@app.route("/button_pressed", methods=["POST"])
 def process_button_click():
-    data = request.get_json()
-    item_name = data.get('itemName').replace(":", "_") + ".mp3"
-    with open("static/download_links.json", "r", encoding="utf-8") as f:
-        download_links_data = json.load(f)
-    download_links_data[item_name]["click_count"] += 1
-    with open("static/download_links.json", "w", encoding="utf-8") as f:
-        json.dump(download_links_data, f, indent=4)
-    response_data = {
-        'downloadLink': download_links_data[item_name]["downloadLink"]
-    }
-    return jsonify(response_data)
+    with contextlib.suppress(Exception):
+        data = request.get_json()
+        item_name = data.get("itemName").replace(":", "_") + ".mp3"
+        with open("static/download_links.json", "r", encoding="utf-8") as f:
+            download_links_data = json.load(f)
+        download_links_data[item_name]["click_count"] += 1
+        download_links_data[item_name]["latest_click"] = datetime.datetime.now().strftime('%B %d %A %Y %I:%M %p')
+        with open("static/download_links.json", "w", encoding="utf-8") as f:
+            json.dump(download_links_data, f, indent=4)
+        response_data = {"downloadLink": download_links_data[item_name]["downloadLink"]}
+        return jsonify(response_data)
+
 
 @app.route("/frequently-asked-questions.html")
 def frequently_asked_questions():
@@ -76,11 +75,13 @@ def frequently_asked_questions():
         "frequently-asked-questions.html",
     )
 
+
 @app.route("/download_links.json")
 def download_links():
     with open("static/download_links.json", "r", encoding="utf-8") as f:
         contents = f.read()
     return contents
+
 
 def get_grouped_data(json_data):
     today = datetime.date.today()
@@ -88,27 +89,11 @@ def get_grouped_data(json_data):
     current_week = today.isocalendar()[1]
     current_year = today.year
 
-    groups = {
-        "Today": {},
-        "Yesterday": {},
-        "Two Days Ago": {},
-        "Three Days Ago": {},
-        "Sometime This Week": {},
-        "Last Week": {},
-        "Sometime This Month": {},
-        "Last Month": {},
-        "Two Months Ago": {},
-        "Three Months Ago": {},
-        "Sometime This Year": {},
-        "Last Year": {},
-        "Two Years Ago": {},
-        "Three Years Ago": {},
-        "Everything Else": {}
-    }
+    groups = {"Today": {}, "Yesterday": {}, "Two Days Ago": {}, "Three Days Ago": {}, "Sometime This Week": {}, "Last Week": {}, "Sometime This Month": {}, "Last Month": {}, "Two Months Ago": {}, "Three Months Ago": {}, "Sometime This Year": {}, "Last Year": {}, "Two Years Ago": {}, "Three Years Ago": {}, "Everything Else": {}}
 
     for item, itemData in json_data.items():
-        itemData['display_name'] = itemData['host'].replace("/","").title()
-        itemData['file_name'] = unquote(itemData['downloadLink'].split('/play_recording/')[-1])
+        itemData["display_name"] = itemData["host"].replace("/", "").title()
+        itemData["file_name"] = unquote(itemData["downloadLink"].split("/play_recording/")[-1])
         item_date = datetime.datetime.strptime(json_data[item]["date"], "%B %d %A %Y %I_%M %p").date()
         item_week = item_date.isocalendar()[1]
         diff = today - item_date
@@ -139,11 +124,11 @@ def get_grouped_data(json_data):
                 groups["Three Months Ago"].update({item: itemData})
             else:
                 groups["Sometime This Year"].update({item: itemData})
-        elif item_date.year == current_year -1:
+        elif item_date.year == current_year - 1:
             groups["Last Year"].update({item: itemData})
-        elif item_date.year == current_year -2:
+        elif item_date.year == current_year - 2:
             groups["Two Years Ago"].update({item: itemData})
-        elif item_date.year == current_year -3:
+        elif item_date.year == current_year - 3:
             groups["Three Years Ago"].update({item: itemData})
         else:
             groups["Everything Else"].update({item: itemData})
@@ -157,6 +142,16 @@ def get_grouped_data(json_data):
 
     return groups
 
+# * To make changes to databse
+# with open("static/download_links.json", "r", encoding="utf-8") as f:
+#     download_links_data = json.load(f)
+
+# for link, link_data in download_links_data.items():
+#     download_links_data[link].setdefault("latest_visit", None)
+#     download_links_data[link].setdefault("latest_click", None)
+
+# with open("static/download_links.json", "w", encoding="utf-8") as f:
+#     json.dump(download_links_data, f, indent=4)
 
 # threading.Thread(target=downloadThread).start()
 # app.run(host="10.0.0.217", port=5000, debug=False, threaded=True)
