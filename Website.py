@@ -1,25 +1,15 @@
-import calendar
 import contextlib
 import datetime
 import json
-import os
 import sched
-import threading
 import time
-from os import listdir
-from os.path import isfile, join
 from urllib.parse import unquote
 
-import requests
 from flask import (
     Flask,
-    current_app,
     jsonify,
     render_template,
     request,
-    send_file,
-    send_from_directory,
-    url_for,
 )
 
 app = Flask(__name__)
