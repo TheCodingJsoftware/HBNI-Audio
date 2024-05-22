@@ -17,7 +17,7 @@
 
 
     <meta property="og:title" content="HBNI Audio Archive - {{file_name}}" />
-    <meta property="og:url" content="http://audioarchives.hbni.net:5050" />
+    <meta property="og:url" content="http://audioarchives.hbni.net" />
     <meta property="og:image" content="http://audioarchives.hbni.net/static/hbnilogo.png" />
     <meta property="og:description" content="{{file_name}}" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -31,20 +31,26 @@
             {% for itemName, itemData in downloadableRecordings[groupName].items() %}
             <div class="card">
                 <div class="card-content">
-                    <span class="card-title activator grey-text text-darken-4">{{itemData["display_name"]}}<i class="material-icons right">info_outline</i></span>
+                    <span class="card-title activator grey-text text-darken-4">{{itemData["display_name"]}}<i
+                            class="material-icons right">info_outline</i></span>
                     <p>{{itemData["description"]}}</p>
-                    <p>{{itemData["date"]}}</p>
+                    <p>{{itemData["date"].replace("_", ":")}}</p>
                 </div>
-                <div class="card-reveal">
-                    <span class="card-title grey-text text-darken-4"><i class="material-icons right">close</i>{{itemData["display_name"]}}</span>
-                    <p>{{ itemName }}</p>
+                <div class="card-reveal" id="{{itemName}}">
+                    <span class="card-title grey-text text-darken-4"><i
+                        class="material-icons right">close</i>{{itemData["display_name"]}}</span>
+                    <p>{{itemData["description"]}}</p>
+                    <p>Length: {{itemName.split(" - ")[-1]}}</p>
+                    <p>Visits: {{itemData["visit_count"]}}</p>
+                    <p>Clicks: {{itemData["click_count"]}}</p>
                 </div>
                 <div class="sticky-action">
                     <div class="card-action">
                         <a href={{ itemData["downloadLink"] }}><i class="material-icons left">play_arrow</i>Play</a>
                     </div>
                     <div class="card-action">
-                        <a href="{{ url_for('static', filename='/Recordings/' + itemData['file_name']) }}" download><i class="material-icons left">download</i>Download</a>
+                        <a href="{{ url_for('static', filename='Recordings/' + itemData['file_name']) }}" download><i
+                                class="material-icons left">download</i>Download</a>
                     </div>
                 </div>
             </div>
@@ -58,7 +64,8 @@
             <a class="brand-logo center">HBNI Audio Streaming Archive</a>
             <ul id="nav-mobile" class="left">
                 <li> <a data-activates="slide-out" class="button-collapse"
-                    style="padding: 0; display: block; position: fixed; top: 0; left: 0;"><i class="material-icons" style="font-size: 36px;">menu</i></a>
+                        style="padding: 0; display: block; position: fixed; top: 0; left: 0;"><i class="material-icons"
+                            style="font-size: 36px;">menu</i></a>
                 </li>
             </ul>
         </div>
@@ -75,7 +82,7 @@
                 </svg>
             </div>
             <br>
-            <p>{{file_name}}</p>
+            <p>{{file_name.replace("_", ":").replace(".mp3", "")}}</p>
             <br>
             <div class="audio-player">
                 <audio>
@@ -83,25 +90,26 @@
                 </audio>
                 <div class="row">
                     <div class="col s2 m2 l2">
-                        <a class="btn-floating btn waves-effect waves-light aqua player-button"><i
+                        <a class="btn-floating btn waves-effect waves-light aqua player-button" style="height: 50px; width: 50px;"><i
                                 class="material-icons player-icon">play_arrow</i></a>
                     </div>
                     <div class="col s7 m9 l7">
                         <input type="range" class="timeline" max="100" value="0">
                     </div>
                     <div class="col s2 m2 l2">
-                        <a class="btn-floating btn waves-effect waves-light aqua sound-button"><i
+                        <a class="btn-floating btn waves-effect waves-light aqua sound-button" style="height: 50px; width: 50px;"><i
                                 class="material-icons sound-icon">volume_up</i></a>
                     </div>
                 </div>
             </div>
         </div>
-        <a class="waves-effect waves-light btn" target="_blank" href="{{ url_for('static', filename='/Recordings/' + file_name) }}" download>
+        <a class="waves-effect waves-light btn" target="_blank"
+            href="{{ url_for('static', filename='/Recordings/' + file_name) }}" download>
             <i class="material-icons left">download</i>Download
         </a>
     </div>
     <canvas id="canvas"></canvas>
-    <a class="btn-floating btn-large waves-effect waves-light aqua" href="http://audioarchives.hbni.net:5050"
+    <a class="btn-floating btn-large waves-effect waves-light aqua" href="http://audioarchives.hbni.net"
         style="position: fixed; bottom: 25px; right: 25px;"><i class="material-icons">home</i></a>
 </body>
 <script>
@@ -243,25 +251,28 @@
 
     }
     $(document).ready(function () {
-        $('#navbarSearch').on('input', function () {
-            var searchText = $(this).val().trim().toLowerCase();
-            $('#navbarRecordingsList .card').each(function () {
-                var card = $(this);
-                var cardRevealContent = card.find('.card-reveal p').text().trim().toLowerCase();
-                if (cardRevealContent.indexOf(searchText) === -1) {
-                    card.hide();
-                } else {
-                    card.show();
-                }
-            });
-        });
-        $('.button-collapse').sideNav({
-            menuWidth: 300, // Default is 300
-            edge: 'left', // Choose the horizontal origin
-            closeOnClick: true, // Closes side-nav on <a> clicks, useful for Angular/Meteor
-            draggable: true, // Choose whether you can drag to open on touch screens,
+    $('#navbarSearch').on('input', function () {
+        var searchText = $(this).val().trim().toLowerCase();
+
+        $('#navbarRecordingsList .card').each(function () {
+            var card = $(this);
+            var cardId = card.find('.card-reveal').attr('id').toLowerCase();
+
+            if (cardId.indexOf(searchText) === -1) {
+                card.hide();
+            } else {
+                card.show();
+            }
         });
     });
+
+    $('.button-collapse').sideNav({
+        menuWidth: 300,
+        edge: 'left',
+        closeOnClick: true,
+        draggable: true,
+    });
+});
 </script>
 
 </html>
