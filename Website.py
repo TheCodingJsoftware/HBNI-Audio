@@ -12,6 +12,8 @@ from urllib.parse import unquote
 import requests
 from flask import (
     Flask,
+    request,
+    jsonify,
     current_app,
     render_template,
     send_file,
@@ -26,25 +28,47 @@ s = sched.scheduler(time.time, time.sleep)
 
 @app.route("/")
 def index() -> None:
-    data = loadJson()
-    groupedData = groupDates(data)
+    with open("static/download_links.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+    with open("static/recording_status.json", 'r', encoding="utf-8") as f:
+        recording_status = json.load(f)
 
     return render_template(
         "index.html",
-        downloadableRecordings=groupedData,
+        downloadableRecordings=get_grouped_data(data),
         title="HBNI Audio Streaming Archive",
+        recording_status=recording_status
     )
 
 
 @app.route("/play_recording/<path:file_name>")
-def play_recording(file_name):
-    data = loadJson()
-    groupedData = groupDates(data)
+def play_recording(file_name: str):
+    with open("static/download_links.json", "r", encoding="utf-8") as f:
+        download_links_data = json.load(f)
+    item_name = unquote(file_name.split("/play_recording/")[-1])
+    download_links_data[item_name]["visit_count"] += 1
+    with open("static/download_links.json", "w", encoding="utf-8") as f:
+        json.dump(download_links_data, f, indent=4)
+
     return render_template(
         "play_recording.html",
         file_name=file_name,
-        downloadableRecordings=groupedData,
+        downloadableRecordings=get_grouped_data(download_links_data),
     )
+
+@app.route('/button_pressed', methods=['POST'])
+def process_button_click():
+    data = request.get_json()
+    item_name = data.get('itemName').replace(":", "_") + ".mp3"
+    with open("static/download_links.json", "r", encoding="utf-8") as f:
+        download_links_data = json.load(f)
+    download_links_data[item_name]["click_count"] += 1
+    with open("static/download_links.json", "w", encoding="utf-8") as f:
+        json.dump(download_links_data, f, indent=4)
+    response_data = {
+        'downloadLink': download_links_data[item_name]["downloadLink"]
+    }
+    return jsonify(response_data)
 
 @app.route("/frequently-asked-questions.html")
 def frequently_asked_questions():
@@ -58,37 +82,7 @@ def download_links():
         contents = f.read()
     return contents
 
-def getColonyList() -> list[str]:
-    data = loadJson()
-    colonySearchList: list[str] = [fileName.split(" - ")[0] for fileName in data]
-    colonySearchList = sorted(set(colonySearchList))
-    return colonySearchList
-
-
-def getMonthsList() -> list[str]:
-    data = loadJson()
-    monthSearchList: list[str] = []
-    for fileName in data:
-        monthSearchList.extend(
-            month for month in calendar.month_name[1:] if month in fileName
-        )
-    return set(monthSearchList)
-
-
-def getDaysList() -> list[str]:
-    data = loadJson()
-    daySearchList: list[str] = []
-    for fileName in data:
-        daySearchList.extend(day for day in list(calendar.day_name) if day in fileName)
-    return set(daySearchList)
-
-
-def loadJson() -> dict:
-    with open("static/download_links.json", "r") as f:
-        data = json.load(f)
-    return data
-
-def groupDates(json_data):
+def get_grouped_data(json_data):
     today = datetime.date.today()
     current_month = today.month
     current_week = today.isocalendar()[1]
@@ -162,13 +156,6 @@ def groupDates(json_data):
         groups[groupName] = groupData
 
     return groups
-
-def getDownloadLink(fileName: str) -> str:
-    data = loadJson()
-    try:
-        return data[fileName]["downloadLink"]
-    except KeyError:
-        return None
 
 
 # threading.Thread(target=downloadThread).start()
