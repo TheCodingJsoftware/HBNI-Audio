@@ -90,7 +90,7 @@ details[open] {
     }
 }
 
-.page-footer {    
+.page-footer {
     bottom: 35px;
     left: 0;
     position: fixed;
@@ -98,7 +98,9 @@ details[open] {
     height: 150px;
     background-color: #3b8f89;
 }
-
+a{
+    color: blue;
+}
 #noTextMessage {
     text-align: center;
 }
@@ -138,8 +140,15 @@ nav {
     margin: 1em;
 }
 .btn{
-    text-overflow: ellipsis;
-    display: inline-block;
+    display: inline-flex;
+    text-wrap: nowrap;
+    text-overflow: clip;
+    text-wrap: wrap;
+    height: auto;
+    line-height: normal;
+    padding: 10px;
+    text-align: center;
+    align-items: center;
 }
 .fixed-action-btn.horizontal ul li {
     margin: 15px 5px 0 0;
@@ -179,7 +188,7 @@ nav .brand-logo.center{
 	height: 65px;
 	z-index: -3;
 }
-.icon-container{	
+.icon-container{
     width: 40vw;
 	height: 40vw;
 	max-width: 20vw;
