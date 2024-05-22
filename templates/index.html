@@ -145,6 +145,7 @@
 </html>
 
 <script>
+
     class Accordion {
         constructor(el) {
             this.el = el;
@@ -180,8 +181,8 @@
             this.animation = this.el.animate({
                 height: [startHeight, endHeight]
             }, {
-                duration: 400,
-                easing: 'ease-out'
+                duration: 300,
+                easing: 'ease-in-out'
             });
 
             this.animation.onfinish = () => this.onAnimationFinish(false);
@@ -206,8 +207,8 @@
             this.animation = this.el.animate({
                 height: [startHeight, endHeight]
             }, {
-                duration: 400,
-                easing: 'ease-out'
+                duration: 300,
+                easing: 'ease-in-out'
             });
             this.animation.onfinish = () => this.onAnimationFinish(true);
             this.animation.oncancel = () => this.isExpanding = false;
