@@ -14,7 +14,7 @@
     <link rel="icon" href="/static/icon.png">
 
     <meta property="og:title" content="HBNI Audio Archive" />
-    <meta property="og:url" content="http://audioarchives.hbni.net:5050" />
+    <meta property="og:url" content="http://audioarchives.hbni.net" />
     <meta property="og:image" content="http://audioarchives.hbni.net/static/hbnilogo.png" />
     <meta property="og:description" content="Download or relisten to previously broadcasted streams." />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -37,7 +37,7 @@
             <div class="divider"></div>
         </li>
         <li><a class="subheader">Developed by the TheCodingJ's</a></li>
-        <li><a href="http://audioarchives.hbni.net:5050/frequently-asked-questions.html"><i
+        <li><a href="http://audioarchives.hbni.net/faq"><i
                     class="material-icons left">question_answer</i>Frequently Asked Questions</a></p>
         </li>
         <li><a class="subheader">Get the HBNI Audio App on</a></li>
@@ -109,14 +109,36 @@
                 <summary>{{ groupName }}</summary>
                 <div class="scroll">
                     {% for itemName, itemData in downloadableRecordings[groupName].items() %}
-                    <a class="waves-effect waves-light btn" target="_blank" href="{{ itemData['downloadLink'] }}">
-                        <i class="material-icons left">download</i>{{ itemName }}
+                    <a class="waves-effect waves-light btn" target="_blank" onclick="buttonPressed('{{ itemName }}')" href="{{ itemData['downloadLink'] }}">
+                        <i class="material-icons left">
+                            {% if "play_recording" in itemData['downloadLink'] %}
+                            play_arrow
+                            {% elif "mega" in itemData['downloadLink'] or "google" in itemData['downloadLink'] %}
+                            cloud
+                            {% else %}
+                            download
+                            {% endif %}
+                        </i>{{ itemName }}
                     </a>
                     {% endfor %}
                 </div>
             </details>
             {% endfor %}
         </div>
+        {% if recording_status %}
+        <details open>
+            <summary>Currently Recording</summary>
+            <div class="scroll">
+                {% for host, host_data in recording_status.items() %}
+                <a class="waves-effect waves-light btn" target="_blank" href="{{ host_data["link"] }}">
+                    <i class="material-icons left">
+                        record_voice_over
+                    </i>{{host.replace("/", "").title()}} - {{ host_data["description"] }} - {{ host_data["starting_time"] }} - {{ host_data["length"] }}
+                </a>
+                {% endfor %}
+            </div>
+        </details>
+        {% endif %}
     </div>
 </body>
 
@@ -180,4 +202,18 @@
     document.addEventListener("DOMContentLoaded", function () {
         $('#loader').hide();
     });
+    function buttonPressed(itemName) {
+        fetch('/button_pressed', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({itemName: itemName})
+        }).then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error('Something went wrong');
+        }).catch(error => console.error('Error:', error));
+    }
 </script>
