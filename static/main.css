@@ -48,7 +48,7 @@ details {
     cursor: pointer;
     display: block;
     position: relative;
-    transition: 1s background linear;
+    transition: 0.3s background-color ease-in-out;
     margin: 5px;
     color: white;
 }
@@ -56,8 +56,7 @@ details {
 details:hover,
 details:focus {
     background: #2cc7b8;
-    transition: 0.3s color linear;
-    color: black;
+    transition: 0.3s color ease-in-out;
 }
 
 details:before {
@@ -69,25 +68,12 @@ details[open] {
     font-weight: bold;
     color: white;
     background: #16625bdc;
-    animation: animateDown 0.15s linear forwards;
 }
 
 
 #details-group[open] {
     text-decoration: underline;
     background: #145751;
-}
-
-@keyframes animateDown {
-    0% {
-        opacity: 0;
-        transform: translatey(-15px);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translatey(0);
-    }
 }
 
 .page-footer {
