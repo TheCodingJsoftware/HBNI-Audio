@@ -124,9 +124,8 @@
             <div class="scroll">
                 {% for host, host_data in recording_status.items() %}
                 <a class="waves-effect waves-light btn" target="_blank" href="{{ host_data["link"] }}">
-                    <i class="material-icons left">
-                        record_voice_over
-                    </i>{{host.replace("/", "").title()}} - {{ host_data["description"] }} - {{ host_data["starting_time"] }} - {{ host_data["length"] }}
+                    <i class="material-icons left">record_voice_over</i>
+                    {{host.replace("/", "").title()}} - {{ host_data["description"] }} - {{ host_data["starting_time"] }} - {{ host_data["length"] }}
                 </a>
                 {% endfor %}
             </div>
@@ -138,6 +137,74 @@
 </html>
 
 <script>
+    $(document).ready(function () {
+        function resetState() {
+            $('.downloads_container details:first').prop('open', true);
+            $('.downloads_container details:not(:first)').prop('open', false);
+            $('.downloads_container .btn').show();
+            $('.downloads_container details').show();
+            $('#noTextMessage').html("");
+        }
+
+        resetState();
+        $('#search').on('input', function () {
+            var originalSongButtons = $(".waves-effect.waves-light.btn");
+            var originalDetails = $("details");
+            var downloadsPage = $("#downloads");
+            var searchText = $(this).val().trim().toLowerCase();
+            if (searchText === '') {
+                resetState();
+                return;
+            }
+
+            $('.downloads_container details').prop('open', true);
+
+            var filteredFiles = originalSongButtons.filter(function () {
+                return $(this).text().toLowerCase().replace("cloud", "").replace("download", "").replace("play_arrow", "").trim().includes(searchText);
+            });
+            originalSongButtons.hide();
+            filteredFiles.show();
+            originalDetails.each(function () {
+                var details = $(this);
+                var detailFilteredElements = details.find(".waves-effect.waves-light.btn").filter(function () {
+                    return $(this).text().toLowerCase().replace("cloud", "").replace("download", "").replace("play_arrow", "").trim().includes(searchText);
+                });
+                if (detailFilteredElements.length > 0) {
+                    details.show();
+                } else {
+                    details.hide();
+                }
+            });
+            if (downloadsPage.find('details:visible').length == 0) {
+                $('#noTextMessage').html("No broadcasts found with this name");
+            } else {
+                $('#noTextMessage').html("");
+            }
+        });
+        $('.button-collapse').sideNav({
+            menuWidth: 300,
+            edge: 'left',
+            closeOnClick: true,
+            draggable: true,
+        });
+    });
+    document.addEventListener("DOMContentLoaded", function () {
+        $('#loader').hide();
+    });
+    function buttonPressed(itemName) {
+        fetch('/button_pressed', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({itemName: itemName})
+        }).then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error('Something went wrong');
+        }).catch(error => console.error('Error:', error));
+    }
 
     class Accordion {
         constructor(el) {
@@ -219,75 +286,4 @@
     document.querySelectorAll('details').forEach((el) => {
         new Accordion(el);
     });
-    $(document).ready(function () {
-        function resetState() {
-            $('.downloads_container details:first').prop('open', true);
-            $('.downloads_container details:not(:first)').prop('open', false);
-            $('.downloads_container .btn').show();
-            $('.downloads_container details').show();
-            $('#noTextMessage').html("");
-        }
-
-        resetState();
-        $('#search').on('input', function () {
-            var originalSongButtons = $(".waves-effect.waves-light.btn");
-            var originalDetails = $("details");
-            var downloadsPage = $("#downloads");
-            var searchText = $(this).val().trim().toLowerCase();
-
-            if (searchText === '') {
-                resetState();
-                return;
-            }
-
-            // Open all detail views when searching for text
-            $('.downloads_container details').prop('open', true);
-
-            var filteredFiles = originalSongButtons.filter(function () {
-                return $(this).text().toLowerCase().includes(searchText);
-            });
-
-            originalSongButtons.hide();
-            filteredFiles.show();
-            originalDetails.each(function () {
-                var details = $(this);
-                var detailFilteredElements = details.find(".waves-effect.waves-light.btn").filter(function () {
-                    return $(this).css("display") == "block";
-                });
-                if (detailFilteredElements.length > 0) {
-                    details.show();
-                } else {
-                    details.hide();
-                }
-            });
-            if (downloadsPage.find('details:visible').length == 0) {
-                $('#noTextMessage').html("No broadcasts found with this name");
-            } else {
-                $('#noTextMessage').html("");
-            }
-        });
-        $('.button-collapse').sideNav({
-            menuWidth: 300,
-            edge: 'left',
-            closeOnClick: true,
-            draggable: true,
-        });
-    });
-    document.addEventListener("DOMContentLoaded", function () {
-        $('#loader').hide();
-    });
-    function buttonPressed(itemName) {
-        fetch('/button_pressed', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({itemName: itemName})
-        }).then(response => {
-            if (response.ok) {
-                return response.json();
-            }
-            throw new Error('Something went wrong');
-        }).catch(error => console.error('Error:', error));
-    }
 </script>
