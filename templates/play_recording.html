@@ -1,18 +1,15 @@
 <html class="audio-html">
-
-
-<title>{{file_name}}</title>
-
-<head>
+    <head>
+    <title>{{file_name}}</title>
     <script src="/static/jquery.js"></script>
     <script src="/static/bootstrap.js"></script>
     <script src="/static/bootstrap-select.js"></script>
     <script src="/static/materialize.min.js"></script>
     <link type="text/css" href="/static/bootstrap.css" rel="stylesheet" />
     <link type="text/css" href="/static/bootstrap-select.css" rel="stylesheet" />
-    <link rel="stylesheet" href="/static/materialize.min.css">
-    <link rel="stylesheet" href="/static/icon.css">
-    <link type="text/css" rel="stylesheet" href='/static/main.css' />
+    <link type="text/css" href="/static/materialize.min.css" rel="stylesheet" >
+    <link type="text/css" href="/static/icon.css" rel="stylesheet" >
+    <link type="text/css" href="/static/main.css" rel="stylesheet" >
     <link rel="icon" href="/static/icon.png">
 
 
@@ -70,9 +67,6 @@
             </ul>
         </div>
     </nav>
-    <br>
-    <br>
-    <br>
     <div class="audio-container">
         <div>
             <div class="icon-container">
@@ -85,44 +79,79 @@
             <p>{{file_name.replace("_", ":").replace(".mp3", "")}}</p>
             <br>
             <div class="audio-player">
-                <audio>
+                <audio class="audio" id="audio">
                     <source src="{{ url_for('static', filename='/Recordings/' + file_name) }}" type="audio/mpeg">
                 </audio>
-                <div class="row">
-                    <div class="col s2 m2 l2">
-                        <a class="btn-floating btn waves-effect waves-light aqua player-button" style="height: 50px; width: 50px;"><i
-                                class="material-icons player-icon">play_arrow</i></a>
-                    </div>
-                    <div class="col s7 m9 l7">
-                        <input type="range" class="timeline" max="100" value="0">
-                    </div>
-                    <div class="col s2 m2 l2">
-                        <a class="btn-floating btn waves-effect waves-light aqua sound-button" style="height: 50px; width: 50px;"><i
-                                class="material-icons sound-icon">volume_up</i></a>
-                    </div>
+                <div class="row" style="margin: 0; padding: 0; height: 20px;">
+                    <div style="width: 100%;"></div>
+                    <span id="current-time">00:00</span>/
+                    <span id="total-time">00:00</span>
+                </div>
+                <div class="row" style="height: 20px;">
+                    <a class="player-button"><i
+                            class="material-icons player-icon">play_arrow</i></a>
+                            <input type="range" class="timeline" max="100" value="0">
+                    <a class="sound-button"><i
+                            class="material-icons sound-icon">volume_up</i></a>
                 </div>
             </div>
         </div>
-        <a class="waves-effect waves-light btn" target="_blank"
-            href="{{ url_for('static', filename='/Recordings/' + file_name) }}" download>
-            <i class="material-icons left">download</i>Download
-        </a>
     </div>
     <canvas id="canvas"></canvas>
     <a class="btn-floating btn-large waves-effect waves-light aqua" href="http://audioarchives.hbni.net"
-        style="position: fixed; bottom: 25px; right: 25px;"><i class="material-icons">home</i></a>
+        style="position: fixed; bottom: 15px; right: 15px;"><i class="material-icons">home</i></a>
+    <a class="btn-floating btn-large waves-effect waves-light aqua share-button" onclick="sharePage()"
+        style="position: fixed; bottom: 80px; right: 15px; height: 40px; width: 40px;"><i class="material-icons" style="line-height: 40px;">share</i></a>
+    <a class="btn-floating btn-large waves-effect waves-light aqua" target="_blank" style="position: fixed; bottom: 15px; right: 80px; height: 40px; width: 40px;"
+    href="{{ url_for('static', filename='/Recordings/' + file_name) }}" download>
+    <i class="material-icons" style="line-height: 40px;">download</i></a>
 </body>
 <script>
+    function sharePage() {
+        if (navigator.share) {
+            navigator.share({
+                title: document.title,
+                url: window.location.href
+            }).then(() => {
+                console.log('Thanks for sharing!');
+            })
+            .catch(console.error);
+        } else {
+            alert("Share not supported on this browser, do it the old way.");
+        }
+    }
     const playerButton = document.querySelector('.player-button'),
         audio = document.querySelector('audio'),
         timeline = document.querySelector('.timeline'),
         soundButton = document.querySelector('.sound-button'),
         playerIcon = document.querySelector('.player-icon'),
         soundIcon = document.querySelector('.sound-icon'),
+        currentTimeDisplay = document.getElementById('current-time'),
+        totalTimeDisplay = document.getElementById('total-time'),
         playIcon = `play_arrow`,
         pauseIcon = `stop`,
         volumeOn = `volume_up`,
         muteIcon = `volume_off`;
+
+    function updateTime(){
+        var audio = document.querySelector('audio');
+        let currentMinutes = Math.floor(audio.currentTime / 60);
+        let currentSeconds = Math.floor(audio.currentTime - currentMinutes * 60);
+        let durationMinutes = Math.floor(audio.duration / 60);
+        let durationSeconds = Math.floor(audio.duration - durationMinutes * 60);
+
+        currentMinutes = currentMinutes < 10 ? '0' + currentMinutes : currentMinutes;
+        currentSeconds = currentSeconds < 10 ? '0' + currentSeconds : currentSeconds;
+        durationMinutes = durationMinutes < 10 ? '0' + durationMinutes : durationMinutes;
+        durationSeconds = durationSeconds < 10 ? '0' + durationSeconds : durationSeconds;
+
+        currentTimeDisplay.textContent = `${currentMinutes}:${currentSeconds}`;
+        totalTimeDisplay.textContent = `${durationMinutes}:${durationSeconds}`;
+
+        timeline.value = (audio.currentTime / audio.duration) * 100;
+    }
+
+    audio.addEventListener('timeupdate', updateTime);
 
     function toggleAudio() {
         var audio = document.querySelector('audio');
@@ -217,7 +246,6 @@
 
     function changeTimelinePosition() {
         const percentagePosition = (100 * audio.currentTime) / audio.duration;
-        timeline.style.backgroundSize = `${percentagePosition}% 100%`;
         timeline.value = percentagePosition;
     }
 
@@ -226,7 +254,6 @@
     function audioEnded() {
         playerIcon.innerHTML = playIcon;
     }
-
     audio.onended = audioEnded;
 
     function changeSeek() {
@@ -241,6 +268,7 @@
         audio.muted = !audio.muted;
         soundIcon.innerHTML = audio.muted ? muteIcon : volumeOn;
     }
+
     function togglePopup(x) {
         x.classList.toggle("change");
         if (x.classList.contains("change")) {
@@ -251,27 +279,28 @@
 
     }
     $(document).ready(function () {
-    $('#navbarSearch').on('input', function () {
-        var searchText = $(this).val().trim().toLowerCase();
 
-        $('#navbarRecordingsList .card').each(function () {
-            var card = $(this);
-            var cardId = card.find('.card-reveal').attr('id').toLowerCase();
+        $('#navbarSearch').on('input', function () {
+            var searchText = $(this).val().trim().toLowerCase();
 
-            if (cardId.indexOf(searchText) === -1) {
-                card.hide();
-            } else {
-                card.show();
-            }
+            $('#navbarRecordingsList .card').each(function () {
+                var card = $(this);
+                var cardId = card.find('.card-reveal').attr('id').toLowerCase();
+
+                if (cardId.indexOf(searchText) === -1) {
+                    card.hide();
+                } else {
+                    card.show();
+                }
+            });
         });
-    });
 
-    $('.button-collapse').sideNav({
-        menuWidth: 300,
-        edge: 'left',
-        closeOnClick: true,
-        draggable: true,
-    });
+        $('.button-collapse').sideNav({
+            menuWidth: 300,
+            edge: 'left',
+            closeOnClick: true,
+            draggable: true,
+        });
 });
 </script>
 
