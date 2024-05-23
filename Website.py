@@ -59,7 +59,7 @@ def process_button_click():
         return jsonify(response_data)
 
 
-@app.route("/frequently-asked-questions.html")
+@app.route("/faq")
 def frequently_asked_questions():
     return render_template(
         "frequently-asked-questions.html",
