@@ -1,8 +1,8 @@
+import copy
 import contextlib
+import traceback
 import datetime
 import json
-import sched
-import time
 from urllib.parse import unquote
 
 from flask import (
@@ -12,35 +12,43 @@ from flask import (
     request,
 )
 
+
+with open("static/download_links.json", "r", encoding="utf-8") as f:
+    global_data = json.load(f)
+
 app = Flask(__name__)
-s = sched.scheduler(time.time, time.sleep)
 
 
 @app.route("/")
 def index() -> None:
-    with open("static/download_links.json", "r", encoding="utf-8") as f:
-        data = json.load(f)
-    with open("static/recording_status.json", "r", encoding="utf-8") as f:
-        recording_status = json.load(f)
+    try:
+        with open("static/download_links.json", "r", encoding="utf-8") as f:
+            global_data = json.load(f)
 
-    return render_template("index.html", downloadableRecordings=get_grouped_data(data), title="HBNI Audio Streaming Archive", recording_status=recording_status)
+        with open("static/recording_status.json", "r", encoding="utf-8") as f:
+            recording_status = json.load(f)
 
+        return render_template("index.html", downloadableRecordings=get_grouped_data(copy.deepcopy(global_data)), title="HBNI Audio Streaming Archive", recording_status=recording_status)
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": f"{str(e)} {traceback.print_exc()}"}), 500
 
 @app.route("/play_recording/<path:file_name>")
 def play_recording(file_name: str):
+    # item_name = unquote(file_name.split("/play_recording/")[-1])
+    # with contextlib.suppress(KeyError):
+    #     global_data[item_name]["visit_count"] += 1
+    #     global_data[item_name]["latest_visit"] = datetime.datetime.now().strftime('%B %d %A %Y %I:%M %p')
+    #     with open("static/download_links.json", "w", encoding="utf-8") as f:
+    #         json.dump(global_data, f, indent=4)
+
     with open("static/download_links.json", "r", encoding="utf-8") as f:
-        download_links_data = json.load(f)
-    item_name = unquote(file_name.split("/play_recording/")[-1])
-    with contextlib.suppress(KeyError):
-        download_links_data[item_name]["visit_count"] += 1
-        download_links_data[item_name]["latest_visit"] = datetime.datetime.now().strftime('%B %d %A %Y %I:%M %p')
-        with open("static/download_links.json", "w", encoding="utf-8") as f:
-            json.dump(download_links_data, f, indent=4)
+        global_data = json.load(f)
 
     return render_template(
         "play_recording.html",
         file_name=file_name,
-        downloadableRecordings=get_grouped_data(download_links_data),
+        downloadableRecordings=get_grouped_data(copy.deepcopy(global_data)),
     )
 
 
@@ -49,13 +57,11 @@ def process_button_click():
     with contextlib.suppress(Exception):
         data = request.get_json()
         item_name = data.get("itemName").replace(":", "_") + ".mp3"
-        with open("static/download_links.json", "r", encoding="utf-8") as f:
-            download_links_data = json.load(f)
-        download_links_data[item_name]["click_count"] += 1
-        download_links_data[item_name]["latest_click"] = datetime.datetime.now().strftime('%B %d %A %Y %I:%M %p')
-        with open("static/download_links.json", "w", encoding="utf-8") as f:
-            json.dump(download_links_data, f, indent=4)
-        response_data = {"downloadLink": download_links_data[item_name]["downloadLink"]}
+    #     global_data[item_name]["click_count"] += 1
+    #     global_data[item_name]["latest_click"] = datetime.datetime.now().strftime('%B %d %A %Y %I:%M %p')
+    #     with open("static/download_links.json", "w", encoding="utf-8") as f:
+    #         json.dump(global_data, f, indent=4)
+        response_data = {"downloadLink": global_data[item_name]["downloadLink"]}
         return jsonify(response_data)
 
 
