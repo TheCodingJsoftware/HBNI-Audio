@@ -1,131 +1,171 @@
 <html class="audio-html">
-    <head>
+
+<head>
     <title>{{file_name}}</title>
-    <script src="/static/jquery.js"></script>
-    <script src="/static/bootstrap.js"></script>
-    <script src="/static/bootstrap-select.js"></script>
-    <script src="/static/materialize.min.js"></script>
-    <link type="text/css" href="/static/bootstrap.css" rel="stylesheet" />
-    <link type="text/css" href="/static/bootstrap-select.css" rel="stylesheet" />
-    <link type="text/css" href="/static/materialize.min.css" rel="stylesheet" >
-    <link type="text/css" href="/static/icon.css" rel="stylesheet" >
-    <link type="text/css" href="/static/main.css" rel="stylesheet" >
-    <link rel="icon" href="/static/icon.png">
-
-
-    <meta property="og:title" content="HBNI Audio Archive - {{file_name}}" />
-    <meta property="og:url" content="http://audioarchives.hbni.net" />
-    <meta property="og:image" content="http://audioarchives.hbni.net/static/hbnilogo.png" />
-    <meta property="og:description" content="{{file_name}}" />
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="google" content="notranslate">
+    <link href="https://cdn.jsdelivr.net/npm/beercss@3.6.0/dist/cdn/beer.min.css" rel="stylesheet">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.6.0/dist/cdn/beer.min.js"></script>
+    <script type="module"
+        src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js">
+    </script>
+    <link href="/static/theme.css" rel="stylesheet">
+
+    <link rel="icon" href="/static/icon.png">
+    <title>{{ title }}</title>
+    <meta property="og:title" content="HBNI Audio Archive - {{title}}" />
+    <meta property="og:url" content="https://audioarchives.hbni.net" />
+    <meta property="og:image" content="https://audioarchives.hbni.net/static/hbnilogo.png" />
+    <meta property="og:description" content="{{file_name}}" />
 </head>
 
 <body>
-    <ul id="slide-out" class="side-nav">
-        <input type="text" placeholder="Search for recordings" id="navbarSearch" autocomplete="off">
-        <div class="collection" id="navbarRecordingsList">
-            {% for groupName in downloadableRecordings %}
-            {% for itemName, itemData in downloadableRecordings[groupName].items() %}
-            <div class="card">
-                <div class="card-content">
-                    <span class="card-title activator grey-text text-darken-4">{{itemData["display_name"]}}<i
-                            class="material-icons right">info_outline</i></span>
-                    <p>{{itemData["description"]}}</p>
-                    <p>{{itemData["date"].replace("_", ":")}}</p>
+    <header class="fixed primary" id="header">
+        <nav>
+          <button class="circle transparent" onclick="location.href='/';">
+            <i>arrow_back</i>
+          </button>
+          <h5 class="max">{{title}}</h5>
+          <button class="circle transparent" onclick="mode()" id="toggle-theme">
+              <i>dark_mode</i>
+          </button>
+        </nav>
+      </header>
+    <main class="padding center-align middle-align">
+        <div class="center-align middle-align">
+            <article class="no-padding border round" style="margin: auto;">
+                <div class="center-align" style="background-color: var(--primary);">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="max-height: 100px; width: auto; ">
+                        <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z" />
+                    </svg>
                 </div>
-                <div class="card-reveal" id="{{itemName}}">
-                    <span class="card-title grey-text text-darken-4"><i
-                        class="material-icons right">close</i>{{itemData["display_name"]}}</span>
-                    <p>{{itemData["description"]}}</p>
-                    <p>Length: {{itemData["length"]}} min</p>
-                    <p>Visits: {{itemData["visit_count"]}}</p>
-                    <p>Clicks: {{itemData["click_count"]}}</p>
-                </div>
-                <div class="sticky-action">
-                    <div class="card-action">
-                        <a href={{ itemData["downloadLink"] }}><i class="material-icons left">play_arrow</i>Play</a>
+                <div class="padding">
+                    <h5>{{title}}</h5>
+                    <p>{{file_name.replace("_", ":").replace(".mp3", "")}}</p>
+                    <div class="row max">
+                        <label class="checkbox icon">
+                            <input type="checkbox" id="play-button">
+                            <span>
+                            <i>play_arrow</i>
+                            <i>pause</i>
+                            </span>
+                        </label>
+                        <label class="slider">
+                            <input type="range" max="100" value="0" id="timeline">
+                            <span>
+                            </span>
+                        </label>
+                        <label class="checkbox icon">
+                            <input type="checkbox" id="sound-button">
+                            <span>
+                            <i>volume_up</i>
+                            <i>volume_off</i>
+                            </span>
+                        </label>
                     </div>
-                    <div class="card-action">
-                        <a href="{{ url_for('static', filename='Recordings/' + itemData['file_name']) }}" download><i
-                                class="material-icons left">download</i>Download</a>
+                    <div class="center-align middle-align">
+                            <span id="current-time">00:00</span>/
+                            <span id="total-time">00:00</span>
                     </div>
+                    <nav>
+                        <div class="grid max">
+                            <div class="s6">
+                                <button class="border small-round responsive extra small-elevate" id="download-button" data-url="{{ url_for('static', filename='/Recordings/' + file_name) }}">
+                                    <i>download</i>
+                                    <span>Download</span>
+                                  </button>
+                            </div>
+                            <div class="s6">
+                                <button class="border small-round responsive extra small-elevate" onclick="sharePage()">
+                                    <i>share</i>
+                                    <span>Share</span>
+                                </button>
+                            </div>
+                        </div>
+                      </nav>
                 </div>
-            </div>
-
-            {% endfor %}
-            {% endfor %}
+                <canvas id="canvas" style="width: 100%; height: 100px;"></canvas>
+            </article>
         </div>
-    </ul>
-    <nav>
-        <div class="nav-wrapper">
-            <a class="brand-logo center">HBNI Audio Streaming Archive</a>
-            <ul id="nav-mobile" class="left">
-                <li> <a data-activates="slide-out" class="button-collapse"
-                        style="padding: 0; display: block; position: fixed; top: 0; left: 0;"><i class="material-icons"
-                            style="font-size: 36px;">menu</i></a>
-                </li>
-            </ul>
-        </div>
-    </nav>
-    <div class="audio-container">
-        <div>
-            <div class="icon-container">
-                <svg xmlns="http://www.w3.org/2000/svg" class="audio-icon" viewBox="0 0 20 20" fill="currentColor">
-                    <path
-                        d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z" />
-                </svg>
-            </div>
-            <br>
-            <p>{{file_name.replace("_", ":").replace(".mp3", "")}}</p>
-            <br>
-            <div class="audio-player">
-                <audio class="audio" id="audio">
-                    <source src="{{ url_for('static', filename='/Recordings/' + file_name) }}" type="audio/mpeg">
-                </audio>
-                <div class="row" style="margin: 0; padding: 0; height: 20px;">
-                    <div style="width: 100%;"></div>
-                    <span id="current-time">00:00</span>/
-                    <span id="total-time">00:00</span>
-                </div>
-                <div class="row" style="height: 20px;">
-                    <a class="player-button"><i
-                            class="material-icons player-icon">play_arrow</i></a>
-                            <input type="range" class="timeline" max="100" value="0">
-                    <a class="sound-button"><i
-                            class="material-icons sound-icon">volume_up</i></a>
-                </div>
-            </div>
-        </div>
-    </div>
-    <canvas id="canvas"></canvas>
-    <a class="btn-floating btn-large waves-effect waves-light aqua" href="https://audioarchives.hbni.net"
-        style="position: fixed; bottom: 15px; right: 15px;"><i class="material-icons">home</i></a>
-    <a class="btn-floating btn-large waves-effect waves-light aqua share-button" onclick="sharePage()"
-        style="position: fixed; bottom: 80px; right: 15px; height: 40px; width: 40px;"><i class="material-icons" style="line-height: 40px;">share</i></a>
-    <a class="btn-floating btn-large waves-effect waves-light aqua" target="_blank" style="position: fixed; bottom: 15px; right: 80px; height: 40px; width: 40px;"
-    href="{{ url_for('static', filename='/Recordings/' + file_name) }}" download>
-    <i class="material-icons" style="line-height: 40px;">download</i></a>
+        <audio class="audio" id="audio">
+            <source src="{{ url_for('static', filename='/Recordings/' + file_name) }}" type="audio/mpeg">
+        </audio>
+    </main>
 </body>
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const downloadButton = document.getElementById('download-button');
+
+        downloadButton.addEventListener('click', function() {
+            const url = this.getAttribute('data-url');
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', '');
+            link.click();
+        });
+    });
+    function setCookie(name, value, days) {
+        var expires = "";
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + (value || "") + expires + "; path=/";
+    }
+    function getCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
+    const theme = async (from) => {
+        await ui("theme", from);
+    };
+
+    const mode = () => {
+        let currentMode = getCookie("mode") || "light";
+        let newMode = currentMode === "dark" ? "light" : "dark";
+        setCookie("mode", newMode, 365); // Save for 1 year
+        ui("mode", newMode);
+        updateIcon(newMode);
+    };
+
+    const updateIcon = (mode) => {
+        const iconElements = document.querySelectorAll('#toggle-theme i');
+        iconElements.forEach(iconElement => {
+            iconElement.textContent = mode === "dark" ? "light_mode" : "dark_mode";
+        });
+
+    };
+
+    window.addEventListener('load', () => {
+        let savedMode = getCookie("mode") || "light";
+        ui("mode", savedMode);
+    });
     function sharePage() {
         if (navigator.share) {
             navigator.share({
-                title: document.title,
-                url: window.location.href
-            }).then(() => {
-                console.log('Thanks for sharing!');
-            })
-            .catch(console.error);
+                    title: document.title,
+                    url: window.location.href
+                }).then(() => {
+                    console.log('Thanks for sharing!');
+                })
+                .catch(console.error);
         } else {
             alert("Share not supported on this browser, do it the old way.");
         }
     }
-    const playerButton = document.querySelector('.player-button'),
+    const playerButton = document.querySelector('#play-button'),
         audio = document.querySelector('audio'),
-        timeline = document.querySelector('.timeline'),
-        soundButton = document.querySelector('.sound-button'),
-        playerIcon = document.querySelector('.player-icon'),
-        soundIcon = document.querySelector('.sound-icon'),
+        timeline = document.querySelector('#timeline'),
+        soundButton = document.querySelector('#sound-button'),
         currentTimeDisplay = document.getElementById('current-time'),
         totalTimeDisplay = document.getElementById('total-time'),
         playIcon = `play_arrow`,
@@ -133,7 +173,7 @@
         volumeOn = `volume_up`,
         muteIcon = `volume_off`;
 
-    function updateTime(){
+    function updateTime() {
         var audio = document.querySelector('audio');
         let currentMinutes = Math.floor(audio.currentTime / 60);
         let currentSeconds = Math.floor(audio.currentTime - currentMinutes * 60);
@@ -158,19 +198,17 @@
         var canvas = document.querySelector("canvas");
         var ctx = canvas.getContext("2d");
 
-        var soundButton = document.querySelector('.sound-button');
+        var soundButton = document.querySelector('#sound-button');
 
         soundButton.addEventListener('click', toggleSound);
 
         if (audio.paused) {
             audio.play();
-            playerIcon.innerHTML = pauseIcon;
         } else {
             audio.pause();
-            playerIcon.innerHTML = playIcon;
         }
         if (!audioContext) {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            audioContext = new(window.AudioContext || window.webkitAudioContext)();
             var src = audioContext.createMediaElementSource(audio); // Fixed variable name here
 
             var analyser = audioContext.createAnalyser();
@@ -182,7 +220,7 @@
 
             // Check if the device is a PC (assuming PC if screen width > 768px)
             if (window.innerWidth > 800) {
-                fftSize = 2048; // Change to 2048 for PC
+                fftSize = 512; // Change to 2048 for PC
             }
             analyser.fftSize = fftSize;
             var bufferLength = analyser.frequencyBinCount;
@@ -230,7 +268,10 @@
                     var g = barHeight + 250 * (i / bufferLength);
                     var b = barHeight + 50 * (i / bufferLength);
 
-                    ctx.fillStyle = "rgb(40, 176, 163)";
+                    var header = document.getElementById("header");
+                    var headerStyle = getComputedStyle(header);
+                    var headerBackgroundColor = headerStyle.backgroundColor;
+                    ctx.fillStyle = headerBackgroundColor;
                     ctx.fillRect(x, HEIGHT - barHeight, barWidth, barHeight);
 
                     x += barWidth + 1;
@@ -252,7 +293,6 @@
     audio.ontimeupdate = changeTimelinePosition;
 
     function audioEnded() {
-        playerIcon.innerHTML = playIcon;
     }
     audio.onended = audioEnded;
 
@@ -266,42 +306,8 @@
 
     function toggleSound() {
         audio.muted = !audio.muted;
-        soundIcon.innerHTML = audio.muted ? muteIcon : volumeOn;
     }
 
-    function togglePopup(x) {
-        x.classList.toggle("change");
-        if (x.classList.contains("change")) {
-            window.location.href = "#recordings";
-        } else {
-            window.location.href = "#";
-        }
-
-    }
-    $(document).ready(function () {
-
-        $('#navbarSearch').on('input', function () {
-            var searchText = $(this).val().trim().toLowerCase();
-
-            $('#navbarRecordingsList .card').each(function () {
-                var card = $(this);
-                var cardId = card.find('.card-reveal').attr('id').toLowerCase();
-
-                if (cardId.indexOf(searchText) === -1) {
-                    card.hide();
-                } else {
-                    card.show();
-                }
-            });
-        });
-
-        $('.button-collapse').sideNav({
-            menuWidth: 300,
-            edge: 'left',
-            closeOnClick: true,
-            draggable: true,
-        });
-});
 </script>
 
 </html>
