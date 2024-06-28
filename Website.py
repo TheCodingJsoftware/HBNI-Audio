@@ -42,11 +42,9 @@ def play_recording(file_name: str):
     #     with open("static/download_links.json", "w", encoding="utf-8") as f:
     #         json.dump(global_data, f, indent=4)
 
-    with open("static/download_links.json", "r", encoding="utf-8") as f:
-        global_data = json.load(f)
-
     return render_template(
         "play_recording.html",
+        title=file_name.split(" - ")[0],
         file_name=file_name,
         downloadableRecordings=get_grouped_data(copy.deepcopy(global_data)),
     )
@@ -90,6 +88,7 @@ def get_grouped_data(json_data):
     for item, itemData in json_data.items():
         itemData["display_name"] = itemData["host"].replace("/", "").title()
         itemData["file_name"] = unquote(itemData["downloadLink"].split("/play_recording/")[-1])
+        itemData["length"] = int(itemData["length"])
         item_date = datetime.datetime.strptime(json_data[item]["date"], "%B %d %A %Y %I_%M %p").date()
         item_week = item_date.isocalendar()[1]
         diff = today - item_date
