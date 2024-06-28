@@ -1,289 +1,584 @@
 <!doctype html>
-<title>HBNI Audio Archive</title>
 
 <head>
-    <script src="/static/jquery.js"></script>
-    <script src="/static/bootstrap.js"></script>
-    <script src="/static/bootstrap-select.js"></script>
-    <script src="/static/materialize.min.js"></script>
-    <link type="text/css" href="/static/bootstrap.css" rel="stylesheet" />
-    <link type="text/css" href="/static/bootstrap-select.css" rel="stylesheet" />
-    <link rel="stylesheet" href="/static/materialize.min.css">
-    <link rel="stylesheet" href="/static/icon.css">
-    <link type="text/css" rel="stylesheet" href='/static/main.css' />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="google" content="notranslate">
+    <link href="https://cdn.jsdelivr.net/npm/beercss@3.6.0/dist/cdn/beer.min.css" rel="stylesheet">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.6.0/dist/cdn/beer.min.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
+    <link href="/static/theme.css" rel="stylesheet">
     <link rel="icon" href="/static/icon.png">
-
+    <title>HBNI Audio Archive</title>
     <meta property="og:title" content="HBNI Audio Archive" />
-    <meta property="og:url" content="http://audioarchives.hbni.net" />
-    <meta property="og:image" content="http://audioarchives.hbni.net/static/hbnilogo.png" />
+    <meta property="og:url" content="https://audioarchives.hbni.net" />
+    <meta property="og:image" content="https://audioarchives.hbni.net/static/icon.png" />
     <meta property="og:description" content="Download or relisten to previously broadcasted streams." />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
 
 <body>
-    <ul id="home-slide-out" class="side-nav">
-        <li>
-            <div class="user-view">
-                <div class="col s9 push-s3">
-                    <h4 style="font-size: 18px; text-align: left; margin: 0; margin-top: 10px;">HBNI Audio Streaming
-                        Archive
-                    </h4>
-                    <p style="font-size: 11px; line-height: 10px; margin-top: 10px;">Download or relisten to previously
-                        broadcasted streams.</p>
-                </div>
-            </div>
-        </li>
-        <li>
-            <div class="divider"></div>
-        </li>
-        <li><a class="subheader">Developed by the TheCodingJ's</a></li>
-        <li><a href="http://audioarchives.hbni.net/faq"><i
-                    class="material-icons left">question_answer</i>Frequently Asked Questions</a></p>
-        </li>
-        <li><a class="subheader">Get the HBNI Audio App on</a></li>
-        <li><a href="https://github.com/TheCodingJsoftware/HBNI-Audio-Stream-Listener/releases"><i
-                    class="material-icons left">computer</i>Desktop</a></p>
-        </li>
-        <li><a href="https://apps.apple.com/ca/app/hbni-audio-streaming/id1611672333"><i
-                    class="material-icons left">apple</i>Apple</a></p>
-        </li>
-        <li><a href="https://play.google.com/store/apps/details?id=com.thecodingjsoftware.hutteritechurch"><i
-                    class="material-icons left">android</i>Android</a></p>
-        </li>
-        <footer class="page-footer">
-            <div class="container" style="padding: 0;">
-                <p class="grey-text text-lighten-4" style="line-height: 15px;">For questions, comments, or
-                    concerns about this serivce please email: <a
-                        href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a></p>
-            </div>
-            <div class="footer-copyright">
-                <div class="container" style="padding: 0;">
-                    © 2022 TheCodingJ'software
-                </div>
-            </div>
-        </footer>
-    </ul>
-    <nav>
-        <div class="nav-wrapper">
-            <a class="brand-logo center">HBNI Audio Streaming Archive</a>
-            <ul id="nav-mobile" class="left">
-                <li><a data-activates="home-slide-out" class="button-collapse"
-                        style="padding: 0; display: block; position: fixed; top: 0; left: 0;"><i class="material-icons"
-                            style="font-size: 36px;">menu</i></a>
-                </li>
-            </ul>
-        </div>
+    <header class="fixed primary" id="main-header" style="display: none;">
+        <nav>
+            <button class="circle transparent" onclick="ui('#info-dialog');">
+                <img src="/static/icon.png" class="responsive">
+            </button>
+            <h5 class="max center-align small">HBNI Audio Archive</h5>
+            <button class="circle transparent" onclick="mode()" id="toggle-theme">
+                <i>dark_mode</i>
+            </button>
+        </nav>
+    </header>
+    <nav class="left drawer l">
+        <header>
+            <nav>
+                <button class="circle transparent" onclick="ui('#info-dialog');">
+                    <img src="/static/icon.png" class="responsive">
+                </button>
+                <h6>HBNI Audio Archive</h6>
+            </nav>
+        </header>
+        <a href="javascript:void(0)" onclick="mode()" id="toggle-theme">
+            <i>dark_mode</i>
+            <span>Theme</span>
+        </a>
+        <a href="https://github.com/TheCodingJsoftware/HBNI-Audio-Stream-Listener/releases">
+            <i>desktop_windows</i>
+            <span>Download for Windows</span>
+        </a>
+        <a href="https://apps.apple.com/ca/app/hbni-audio-streaming/id1611672333">
+            <i>ios</i>
+            <span>Download for Apple</span>
+        </a>
+        <a href="https://play.google.com/store/apps/details?id=com.thecodingjsoftware.hutteritechurch">
+            <i>android</i>
+            <span>Download for Android</span>
+        </a>
+        <a href="https://github.com/TheCodingJsoftware/HBNI-Audio-Archive">
+            <i>code</i>
+            <span>Github</span>
+        </a>
+        <a href="javascript:void(0)" onclick="ui('#faq-dialog');">
+            <i>help</i>
+            <span>FAQ</span>
+        </a>
+        <a href="javascript:void(0)" onclick="ui('#contact-dialog');">
+            <i>person</i>
+            <span>Contact</span>
+        </a>
     </nav>
-    <br>
-    <br>
-    <br>
-    <br>
-    <div id="downloads">
-        <br>
-        <div class="search-box">
-            <form class="search-form">
-                <input type="text" placeholder="Search for broadcasts" id="search" autocomplete="on">
-            </form>
-        </div>
-        <div style="text-align: center; ">
-            <div class="preloader-wrapper big active" id="loader">
-                <div class="spinner-layer spinner-aqua-only">
-                    <div class="circle-clipper left">
-                        <div class="circle"></div>
+    <nav class="left m">
+        <header>
+            <button class="circle transparent" onclick="ui('#info-dialog');">
+                <img src="/static/icon.png" class="responsive">
+            </button>
+        </header>
+        <a href="javascript:void(0)" onclick="mode()" id="toggle-theme">
+            <i>dark_mode</i>
+            <span>Theme</span>
+        </a>
+        <a href="javascript:void(0)" onclick="ui('#faq-dialog');">
+            <i>help</i>
+            <span>FAQ</span>
+        </a>
+        <a href="javascript:void(0)" onclick="ui('#contact-dialog');">
+            <i>person</i>
+            <span>Contact</span>
+        </a>
+        <button class="transparent link">
+            <i>apps</i>
+            <menu class="no-wrap">
+                <a class="row" href="https://github.com/TheCodingJsoftware/HBNI-Audio-Stream-Listener/releases">
+                    <i>desktop_windows</i>
+                    <span>Windows</span>
+                </a>
+                <a class="row" href="https://apps.apple.com/ca/app/hbni-audio-streaming/id1611672333">
+                    <i>ios</i>
+                    <span>Apple</span>
+                </a>
+                <a class="row"
+                    href="https://play.google.com/store/apps/details?id=com.thecodingjsoftware.hutteritechurch">
+                    <i>android</i>
+                    <span>Android</span>
+                </a>
+                <a class="row" href="https://github.com/TheCodingJsoftware/HBNI-Audio-Archive">
+                    <i>code</i>
+                    <div class="max">
+                        <div>Code</div>
+                        <label>Github</label>
                     </div>
-                    <div class="gap-patch">
-                        <div class="circle"></div>
-                    </div>
-                    <div class="circle-clipper right">
-                        <div class="circle"></div>
-                    </div>
-                </div>
-            </div>
+                </a>
+            </menu>
+        </button>
+    </nav>
+    <nav class="bottom s" id="bottom-nav" style="max-height: 50px;">
+        <a href="javascript:void(0)" onclick="ui('#faq-dialog');">
+            <i>help</i>
+        </a>
+        <a href="javascript:void(0)" onclick="ui('#download-dialog');">
+            <i>apps</i>
+        </a>
+        <a href="javascript:void(0)" onclick="ui('#contact-dialog');">
+            <i>person</i>
+        </a>
+    </nav>
+    <main class="responsive">
+        <div class="field label prefix border">
+            <i>search</i>
+            <input type="text" id="search">
+            <label>Search</label>
         </div>
-        <br>
-        <div id="noTextMessage"></div>
-        <br>
-        <div class="downloads_container">
-            {% for groupName in downloadableRecordings %}
-            <details {% if loop.first %}open{% endif %}>
-                <summary>{{ groupName }}</summary>
-                <div class="scroll">
-                    {% for itemName, itemData in downloadableRecordings[groupName].items() %}
-                    <a class="waves-effect waves-light btn" target="_blank" onclick="buttonPressed('{{ itemName }}')" href="{{ itemData['downloadLink'] }}">
-                        <i class="material-icons left">{% if "play_recording" in itemData['downloadLink'] %}play_arrow{% elif "mega" in itemData['downloadLink'] or "google" in itemData['downloadLink'] %}cloud{% else %}download{% endif %}</i>
-                        {{ itemName }}
-                    </a>
-                    {% endfor %}
-                </div>
-            </details>
-            {% endfor %}
-        </div>
-        {% if recording_status %}
-        <details open>
-            <summary>Currently Recording</summary>
-            <div class="scroll">
-                {% for host, host_data in recording_status.items() %}
-                <a class="waves-effect waves-light btn" target="_blank" href="{{ host_data["link"] }}">
-                    <i class="material-icons left">record_voice_over</i>
-                    {{host.replace("/", "").title()}} - {{ host_data["description"] }} - {{ host_data["starting_time"] }} - {{ host_data["length"] }}
+        <div>
+            <div class="tabs scroll">
+                {% for groupName in downloadableRecordings %}
+                <a data-ui="#{{ groupName.replace(' ', '_') }}" {% if loop.first %}class="active" {% endif %}>
+                    <i>
+                        {% if "Days" in groupName or "Today" in groupName or "Yesterday" in groupName %}
+                        today
+                        {% elif "Week" in groupName %}
+                        date_range
+                        {% else %}
+                        calendar_month
+                        {% endif %}
+                    </i>
+                    <span>{{groupName}}</span>
                 </a>
                 {% endfor %}
             </div>
-        </details>
+            <br>
+            {% for groupName in downloadableRecordings %}
+            <div class="page {% if loop.first %}active{% endif %} left" id="{{ groupName.replace(' ', '_') }}">
+                <article class="large scroll border" id="contents">
+                    <div class="no-results" style="display: none;">No items found</div>
+                    {% for itemName, itemData in downloadableRecordings[groupName].items() %}
+                    <div id="article-version" data-name="{{ itemName }}">
+                        <article>
+                            <div class="row">
+                                <div class="max">
+                                    <h5>{{ itemData["host"].replace("/", "").title() }}</h5>
+                                    <div>{{ itemData["description"]}} </div>
+                                    <div>{{ itemData["date"].replace("_", ":") }}</div>
+                                </div>
+                            </div>
+                            <nav>
+                                <button class="small-round" target="_blank"
+                                    onclick="location.href='{{ itemData['downloadLink'] }}';">
+                                    <i>{% if "play_recording" in itemData['downloadLink'] %}play_arrow{% elif "mega" in itemData['downloadLink'] or "google" in itemData['downloadLink'] %}globe{% else %}download{% endif %}</i>
+                                    <span>{% if "play_recording" in itemData['downloadLink'] %}Play{% else %}Download{% endif %}</span>
+                                </button>
+                                <div>{{ itemData["length"]}} min</div>
+                                {% if "Days" in groupName or "Yesterday" in groupName or "Today" in groupeName %}
+                                <div class="badge none">New</div>
+                                {% endif %}
+                                {% if "mega" in itemData['downloadLink'] %}
+                                <div class="badge none"><i>cloud</i></div>
+                                {% elif "google" in itemData['downloadLink'] %}
+                                <div class="badge none"><i>add_to_drive</i></div>
+                                {% endif %}
+                            </nav>
+                        </article>
+                        <br>
+                    </div>
+                    <div id="link-version" data-name="{{ itemName }}">
+                        <a class="row padding surface-container" href="{{itemData["downloadLink"]}}">
+                            <i>{% if "play_recording" in itemData['downloadLink'] %}play_arrow{% elif "mega" in itemData['downloadLink'] or "google" in itemData['downloadLink'] %}globe{% else %}download{% endif %}</i>
+                            <div class="max">
+                                <h6 class="small">{{ itemData["host"].replace("/","").title() }}</h6>
+                                <div>{{itemData["description"]}} - {{ itemData["date"].replace("_", ":") }} -
+                                    {{ itemData["length"] }} minutes </div>
+                            </div>
+                            {% if "Days" in groupName or "Yesterday" in groupName or "Today" in groupeName %}
+                            <div class="badge none">New</div>
+                            {% endif %}
+                            {% if "mega" in itemData['downloadLink'] %}
+                            <div class="badge none"><i>cloud</i></div>
+                            {% elif "google" in itemData['downloadLink'] %}
+                            <div class="badge none"><i>add_to_drive</i></div>
+                            {% endif %}
+                        </a>
+                        <div class="divider"></div>
+                    </div>
+                    {% endfor %}
+                </article>
+            </div>
+            {% endfor %}
+        </div>
+        {% if recording_status %}
+        <h4 class="center-align">Currently Recording</h4>
+        <div class="tabs scroll">
+            {% for host in recording_status %}
+            <a data-ui="#{{host.replace("/", "").title()}}" {% if loop.first %}class="active" {% endif %}>
+                <i>radio_button_checked</i>
+                <span>{{host.replace("/", "").title()}}</span>
+            </a>
+            {% endfor %}
+        </div>
+        <article class="border round">
+            {% for host, host_data in recording_status.items() %}
+            <div class="page {% if loop.first %}active{% endif %} left" id="{{ host.replace("/", "").title() }}">
+                <article class="no-padding round">
+                    <div class="center-align">
+                        <img class="responsive small top-round" src="/static/hbnilogo.png" id="recording-card-image"
+                            style="height: auto; max-height: 200px; max-width: 400px;">
+                    </div>
+                    <div class="padding">
+                        <progress></progress>
+                        <h5>{{host.replace("/", "").title()}}</h5>
+                        <h6>{{ host_data["description"] }}</h6>
+                        <p>Started: {{ host_data["starting_time"] }}</p>
+                        <p>Length: {{ host_data["length"] }}</p>
+                        <nav>
+                            <button target="_blank" onclick="location.href='{{ host_data["link"] }}';">
+                                <i>record_voice_over</i>
+                                <span>Listen</span>
+                            </button>
+                            <div class="badge none">New</div>
+                        </nav>
+                    </div>
+                </article>
+            </div>
+            {% endfor %}
+        </article>
         {% endif %}
-    </div>
+    </main>
+    <dialog class="max" id="faq-dialog">
+        <h3 class="center-align">Frequently Asked Questions</h3>
+        <div>
+            <h5> How do I play archives without downloading them? </h5>
+            <h6> Apple </h6>
+            <p>
+                1. Install <a class="link" href="https://apps.apple.com/us/app/mega/id706857885">Mega</a> or <a
+                    class="link" href="https://apps.apple.com/ca/app/google-drive/id507874739">GoogleDrive</a> on your
+                phone.
+                (You
+                may or
+                may not have to create an account)
+                2. Go to the <a class="link" href="http://audioarchives.hbni.net">HBNI archive</a> and press any archive
+                you
+                want to
+                listen to.
+                3. You will be redirected to the <a href="https://apps.apple.com/us/app/mega/id706857885">Mega</a>
+                or <a class="link" href="https://apps.apple.com/ca/app/google-drive/id507874739">GoogleDrive</a> app.
+                4. You can directly play the broadcast that way without downloading it to your device.
+            </p>
+            <h6> Android </h6>
+            <p>
+                1. Install <a class="link"
+                    href="https://play.google.com/store/apps/details?id=mega.privacy.android.app&hl=en_US&gl=US">Mega</a>
+                or
+                <a class="link"
+                    href="https://play.google.com/store/apps/details?id=com.google.android.apps.docs">GoogleDrive</a>
+                on
+                your
+                phone. (You may or may not have to create an account)
+                2. Go to the <a class="link" href="http://audioarchives.hbni.net">HBNI archive</a> and press any archive
+                you
+                want to
+                listen to.
+                3. You will be redirected to the <a class="link"
+                    href="https://play.google.com/store/apps/details?id=mega.privacy.android.app&hl=en_US&gl=US">Mega</a>
+                or
+                <a class="link"
+                    href="https://play.google.com/store/apps/details?id=com.google.android.apps.docs">GoogleDrive</a>
+                app.
+                4. You can directly play the broadcast that way without downloading it to your device.
+            </p>
+            <h6> Windows (Computer) </h6>
+            <p>
+                Just press on any archive on the <a class="link" href="http://audioarchives.hbni.net">HBNI archive</a>,
+                you
+                will be redirected to <a class="link" href="https://mega.nz">mega.nz</a> or <a class="link"
+                    href="https://drive.google.com">GoogleDrive</a>, from there you can just press play.
+            </p>
+            <h5> Where are the archives stored? </h5>
+            <h6>
+                2022-07-12 to 2023-07-21</h4>
+                <p>
+                    The archives (as of 2022-07-12 to 2023-07-21) are stored on a file hosting website called <a
+                        class="link" href="https://mega.nz">mega.nz</a>.
+                    The folder where all archives are stored online is <a class="link"
+                        href="https://mega.nz/folder/CxF1AQwS#rucPTrUDuhHE5I76NtpkLA">here</a>.
+                </p>
+                <h6>2023-07-21 to 2023-07-29</h6>
+                <p>
+                    The archives (as of 2023-07-21 to 2023-07-29) are stored on a file hosting website called <a
+                        class="link" href="https://drive.google.com">GoogleDrive</a>.
+                    The folder where all archives are stored online is <a class="link"
+                        href="https://drive.google.com/drive/u/0/folders/1ceDO2zOx8pdEzQDRa-aHXVXhXO-QT-cq">here</a>.
+                </p>
+                <h6>2023-07-29 to today</h6>
+                <p>
+                    The archives (as of 2023-07-29 to today) are stored on our own servers in Pineland Colony.
+                </p>
+                <p>
+                    All data on each broadcast (date, length, host, description, etc...) can be found <a class="link"
+                        href="http://audioarchives.hbni.net/download_links.json">here</a>.
+                    <p style="padding-left: 30px;"> This data is what the archive refers from, whatever changes in this
+                        file,
+                        changes on the <a class="link" href="http://audioarchives.hbni.net">HBNI archive</a>.
+                    </p>
+                    <h5> Why are you using both Mega and GoogleDrive? </h5>
+                    <p>
+                        <a class="link" href="https://mega.nz">mega.nz</a> was easier and quicker to get started with
+                        back in 2022.
+                        However, I have ran out of storage space on my account and needed to
+                        switch
+                        over
+                        to <a class="link" href="https://drive.google.com">GoogleDrive</a> which HBNI supported.
+                    </p>
+                    <h5> Why not migrate the entire database over to GoogleDrive?</h5>
+                    <p>
+                        <a class="link" href="https://mega.nz">mega.nz</a> does not offer a easy way to migrate a
+                        database. As time went
+                        on
+                        <a class="link" href="https://mega.nz">mega.nz</a> methods of uploading files has changed and
+                        and the data that
+                        is
+                        required to migrate them is inconsistent, making it really difficult to port over. Some
+                        broadcasts
+                        would
+                        be
+                        lost in the process which is not ideal.
+                    </p>
+                    <h5> Why stop using GoogleDrive? </h5>
+                    <p>
+                        Google does not allow the creation of a permanent access token to your GoogleDrive, I would have
+                        to
+                        manually refresh
+                        the token every week or so to keep the system working, which is not ideal.
+                    </p>
+                    <h5> I want to remove a broadcast on the archive. </h5>
+                    <p>
+                        Please email me the exact details at: <a class="link"
+                            href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>
+                    </p>
+                    <h5> I don't want any of my broadcasts on the archive and never be recorded. </h5>
+                    <p>
+                        Please email me at: <a class="link"
+                            href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>
+                        **NOTE** The <a class="link"
+                            href="https://github.com/TheCodingJsoftware/HBNI-Audio-Stream-Recorder">HBNI
+                            recorder</a> records all broadcasts by default, if you wish to be exempt from these
+                        conditions,
+                        the
+                        recorder has list
+                        of hosts will never be recorded. Just make sure when you start a broadcast, use the same host
+                        name
+                        each
+                        time.
+                    </p>
+                    <h5> Why is the broadcast not finished or missing?
+                    </h5>
+                    <p>
+                        Often times if a broadcast is not uploaded or is shorter then it should be it is because during
+                        the
+                        recording process we may have lost internet connection, this is something we cannot predict or
+                        do
+                        much
+                        about, thats just how it is.
+                    </p>
+                    <h5>How long does it take to upload archives?</h5>
+                    <p>
+                        Broadcasts should be succesfully uploaded within 5 minutes since its been on the air. This
+                        greatly
+                        depends on the length on the broadcast. Sometimes, when a broadcast has been split up into
+                        multiple
+                        parts or
+                        failed to upload due to losing internet connection we may have to manually upload it which
+                        can take
+                        some
+                        time.
+                    </p>
+        </div>
+        <nav>
+            <button data-ui="#faq-dialog" class="transparent link">Close</button>
+        </nav>
+    </dialog>
+    <div class="overlay blur"></div>
+    <dialog id="download-dialog">
+        <h3 class="center-align">Apps</h3>
+        <button class="row responsive small-round"
+            onclick="location.href='https://github.com/TheCodingJsoftware/HBNI-Audio-Stream-Listener/releases';">
+            <i>desktop_windows</i>
+            <span>Desktop</span>
+        </button>
+        <button class="row responsive small-round"
+            onclick="location.href='https://apps.apple.com/ca/app/hbni-audio-streaming/id1611672333';">
+            <i>ios</i>
+            <span>Apple</span>
+        </button>
+        <button class="row responsive small-round"
+            onclick="location.href='https://play.google.com/store/apps/details?id=com.thecodingjsoftware.hutteritechurch';">
+            <i>android</i>
+            <span>Android</span>
+        </button>
+        <button class="row responsive small-round"
+            onclick="location.href='https://github.com/TheCodingJsoftware/HBNI-Audio-Archive';">
+            <i>code</i>
+            <span>Source Code</span>
+        </button>
+    </dialog>
+    <div class="overlay blur"></div>
+    <dialog id="contact-dialog">
+        <h3 class="center-align">Contact</h3>
+        <p>For questions, comments, or concerns about this serivce please email: <a class="link"
+                href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a></p>
+    </dialog>
+    <div class="overlay blur"></div>
+    <dialog id="info-dialog">
+        <img class="responsive small" src="/static/icon.png" style="height: auto;">
+        <div class="padding">
+            <h6 class="center-align">HBNI Audio Archive</h6>
+            <p class="center-align">Developed by the <a class="link" href="https://thecodingjsoftware.github.io">
+                    TheCodingJ's </a></p>
+            <p class="center-align">© 2022 TheCodingJ'software</p>
+        </div>
+    </dialog>
 </body>
-
-</html>
-
 <script>
-    $(document).ready(function () {
-        function resetState() {
-            $('.downloads_container details:first').prop('open', true);
-            $('.downloads_container details:not(:first)').prop('open', false);
-            $('.downloads_container .btn').show();
-            $('.downloads_container details').show();
-            $('#noTextMessage').html("");
+    function setCookie(name, value, days) {
+        var expires = "";
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
         }
+        document.cookie = name + "=" + (value || "") + expires + "; path=/";
+    }
 
-        resetState();
-        $('#search').on('input', function () {
-            var originalSongButtons = $(".waves-effect.waves-light.btn");
-            var originalDetails = $("details");
-            var downloadsPage = $("#downloads");
-            var searchText = $(this).val().trim().toLowerCase();
-            if (searchText === '') {
-                resetState();
-                return;
+    function getCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
+    const theme = async (from) => {
+        await ui("theme", from);
+    };
+
+    const mode = () => {
+        let currentMode = getCookie("mode") || "light";
+        let newMode = currentMode === "dark" ? "light" : "dark";
+        setCookie("mode", newMode, 365); // Save for 1 year
+        ui("mode", newMode);
+        updateIcon(newMode);
+        updateImageSource();
+    };
+
+    function updateImageSource() {
+        const mode = getCookie('mode') || 'light';
+        const images = document.querySelectorAll('img[id^="recording-card-image"]');
+        images.forEach(image => {
+            image.src = mode === 'dark' ? '/static/hbni_logo_dark.png' : '/static/hbnilogo.png';
+        });
+    }
+
+    const updateIcon = (mode) => {
+        const iconElements = document.querySelectorAll('#toggle-theme i');
+        iconElements.forEach(iconElement => {
+            iconElement.textContent = mode === "dark" ? "light_mode" : "dark_mode";
+        });
+
+    };
+
+    // Check the mode on startup and apply it
+    window.addEventListener('load', () => {
+        let savedMode = getCookie("mode") || "light";
+        ui("mode", savedMode);
+        updateIcon(savedMode);
+        updateImageSource();
+    });
+
+    function checkWidth() {
+        var width = window.innerWidth;
+        var articleVersions = document.querySelectorAll('#article-version');
+        var linkVersions = document.querySelectorAll('#link-version');
+
+        articleVersions.forEach(function (articleVersion) {
+            if (width < 500) {
+                articleVersion.style.display = 'block';
+            } else {
+                articleVersion.style.display = 'none';
+            }
+        });
+
+        linkVersions.forEach(function (linkVersion) {
+            if (width < 500) {
+                linkVersion.style.display = 'none';
+            } else {
+                linkVersion.style.display = 'block';
+            }
+        });
+        searchAndFilter();
+    }
+
+    function searchAndFilter() {
+        const searchInput = document.getElementById('search');
+        var width = window.innerWidth;
+        const query = searchInput.value.toLowerCase();
+        const articles = document.querySelectorAll('#contents');
+
+        articles.forEach(function (article) {
+            const articleVersions = article.querySelectorAll('#article-version');
+            const linkVersions = article.querySelectorAll('#link-version');
+            let foundArticle = false;
+            let foundLink = false;
+            if (width < 500) {
+                articleVersions.forEach(function (articleVersion) {
+                    const name = articleVersion.getAttribute('data-name').toLowerCase();
+                    if (name.includes(query)) {
+                        articleVersion.style.display = 'block';
+                        foundArticle = true;
+                    } else {
+                        articleVersion.style.display = 'none';
+                    }
+                });
+
+            } else {
+                linkVersions.forEach(function (linkVersion) {
+                    const name = linkVersion.getAttribute('data-name').toLowerCase();
+                    if (name.includes(query)) {
+                        linkVersion.style.display = 'block';
+                        foundLink = true;
+                    } else {
+                        linkVersion.style.display = 'none';
+                    }
+                });
             }
 
-            $('.downloads_container details').prop('open', true);
+            const noResults = article.querySelector('.no-results');
+            if (foundArticle || foundLink) {
+                noResults.style.display = 'none';
+            } else {
+                noResults.style.display = 'block';
+            }
+        });
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('search');
 
-            var filteredFiles = originalSongButtons.filter(function () {
-                return $(this).text().toLowerCase().replace("cloud", "").replace("download", "").replace("play_arrow", "").trim().includes(searchText);
-            });
-            originalSongButtons.hide();
-            filteredFiles.show();
-            originalDetails.each(function () {
-                var details = $(this);
-                var detailFilteredElements = details.find(".waves-effect.waves-light.btn").filter(function () {
-                    return $(this).text().toLowerCase().replace("cloud", "").replace("download", "").replace("play_arrow", "").trim().includes(searchText);
-                });
-                if (detailFilteredElements.length > 0) {
-                    details.show();
+        const header = document.getElementById('main-header');
+        const bottomNav = document.getElementById('bottom-nav');
+
+        const observer = new IntersectionObserver(function (entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    header.style.display = 'block';
                 } else {
-                    details.hide();
+                    header.style.display = 'none';
                 }
             });
-            if (downloadsPage.find('details:visible').length == 0) {
-                $('#noTextMessage').html("No broadcasts found with this name");
-            } else {
-                $('#noTextMessage').html("");
-            }
         });
-        $('.button-collapse').sideNav({
-            menuWidth: 300,
-            edge: 'left',
-            closeOnClick: true,
-            draggable: true,
-        });
-    });
-    document.addEventListener("DOMContentLoaded", function () {
-        $('#loader').hide();
-    });
-    function buttonPressed(itemName) {
-        fetch('/button_pressed', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({itemName: itemName})
-        }).then(response => {
-            if (response.ok) {
-                return response.json();
-            }
-            throw new Error('Something went wrong');
-        }).catch(error => console.error('Error:', error));
-    }
 
-    class Accordion {
-        constructor(el) {
-            this.el = el;
-            this.summary = el.querySelector('summary');
-            this.content = el.querySelector('.scroll');
-
-            this.animation = null;
-            this.isClosing = false;
-            this.isExpanding = false;
-            this.summary.addEventListener('click', (e) => this.onClick(e));
-        }
-
-        onClick(e) {
-            e.preventDefault();
-            this.el.style.overflow = 'hidden';
-            if (this.isClosing || !this.el.open) {
-                this.open();
-            } else if (this.isExpanding || this.el.open) {
-                this.shrink();
-            }
-        }
-
-        shrink() {
-            this.isClosing = true;
-
-            const startHeight = `${this.el.offsetHeight}px`;
-            const endHeight = `${this.summary.offsetHeight}px`;
-
-            if (this.animation) {
-                this.animation.cancel();
-            }
-
-            this.animation = this.el.animate({
-                height: [startHeight, endHeight]
-            }, {
-                duration: 300,
-                easing: 'ease-in-out'
-            });
-
-            this.animation.onfinish = () => this.onAnimationFinish(false);
-            this.animation.oncancel = () => this.isClosing = false;
-        }
-
-        open() {
-            this.el.style.height = `${this.el.offsetHeight}px`;
-            this.el.open = true;
-            window.requestAnimationFrame(() => this.expand());
-        }
-
-        expand() {
-            this.isExpanding = true;
-            const startHeight = `${this.el.offsetHeight}px`;
-            const endHeight = `${this.summary.offsetHeight + this.content.offsetHeight}px`;
-
-            if (this.animation) {
-                this.animation.cancel();
-            }
-
-            this.animation = this.el.animate({
-                height: [startHeight, endHeight]
-            }, {
-                duration: 300,
-                easing: 'ease-in-out'
-            });
-            this.animation.onfinish = () => this.onAnimationFinish(true);
-            this.animation.oncancel = () => this.isExpanding = false;
-        }
-
-        onAnimationFinish(open) {
-            this.el.open = open;
-            this.animation = null;
-            this.isClosing = false;
-            this.isExpanding = false;
-            this.el.style.height = this.el.style.overflow = '';
-        }
-    }
-
-    document.querySelectorAll('details').forEach((el) => {
-        new Accordion(el);
+        observer.observe(bottomNav);
+        checkWidth();
+        searchInput.addEventListener('input', searchAndFilter);
+        window.addEventListener('resize', checkWidth);
     });
 </script>
+
+</html>
