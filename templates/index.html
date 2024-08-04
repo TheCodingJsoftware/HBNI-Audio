@@ -7,7 +7,9 @@
     <meta name="google" content="notranslate">
     <link href="https://cdn.jsdelivr.net/npm/beercss@3.6.9/dist/cdn/beer.min.css" rel="stylesheet">
     <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.6.9/dist/cdn/beer.min.js"></script>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
+    <script type="module"
+        src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js">
+    </script>
     <link href="/static/theme.css" rel="stylesheet">
     <link rel="icon" href="/static/icon.png">
     <title>HBNI Audio Archive</title>
@@ -16,7 +18,7 @@
     <meta property="og:image" content="https://audioarchives.hbni.net/static/icon.png" />
     <meta property="og:description" content="Download or relisten to previously broadcasted streams." />
     <script>
-        (function() {
+        (function () {
             let savedMode = localStorage.getItem("mode") || "light";
             if (savedMode === "dark") {
                 document.documentElement.classList.add("dark");
@@ -24,6 +26,12 @@
         })();
     </script>
 </head>
+
+<style>
+    .hidden {
+        display: none !important;
+    }
+</style>
 
 <body class="light">
     <header class="fixed primary" id="main-header" style="display: none;">
@@ -159,7 +167,7 @@
                 <article class="large scroll border small-round no-padding no-margin no-elevate" id="contents">
                     <div class="no-results" style="display: none;">No items found</div>
                     {% for itemName, itemData in downloadableRecordings[groupName].items() %}
-                    <div id="article-version" data-name="{{ itemName }}">
+                    <div id="article-version" class="hidden" data-name="{{ itemName }}">
                         <article class="small-round no-elevate small-margin">
                             <div class="row">
                                 <div class="max">
@@ -169,8 +177,7 @@
                                 </div>
                             </div>
                             <nav>
-                                <button class="small-round" target="_blank"
-                                    onclick="location.href='{{ itemData['downloadLink'] }}';">
+                                <button class="small-round" target="_blank" onclick="location.href='{{ itemData['downloadLink'] }}';">
                                     <i>{% if "play_recording" in itemData['downloadLink'] %}play_arrow{% elif "mega" in itemData['downloadLink'] or "google" in itemData['downloadLink'] %}globe{% else %}download{% endif %}</i>
                                     <span>{% if "play_recording" in itemData['downloadLink'] %}Play{% else %}Download{% endif %}</span>
                                 </button>
@@ -185,9 +192,8 @@
                                 {% endif %}
                             </nav>
                         </article>
-                        <br>
                     </div>
-                    <div id="link-version" data-name="{{ itemName }}">
+                    <div id="link-version" class="hidden" data-name="{{ itemName }}">
                         <a class="row padding surface-container" href="{{itemData["downloadLink"]}}">
                             <i>{% if "play_recording" in itemData['downloadLink'] %}play_arrow{% elif "mega" in itemData['downloadLink'] or "google" in itemData['downloadLink'] %}globe{% else %}download{% endif %}</i>
                             <div class="max">
@@ -236,7 +242,8 @@
                         <p>Started: {{ host_data["starting_time"] }}</p>
                         <p>Length: {{ host_data["length"] }}</p>
                         <nav>
-                            <button class="small-round" target="_blank" onclick="location.href='{{ host_data["link"] }}';">
+                            <button class="small-round" target="_blank"
+                                onclick="location.href='{{ host_data["link"] }}';">
                                 <i>record_voice_over</i>
                                 <span>Listen</span>
                             </button>
@@ -487,19 +494,20 @@
         var width = window.innerWidth;
         var articleVersions = document.querySelectorAll('#article-version');
         var linkVersions = document.querySelectorAll('#link-version');
+
         articleVersions.forEach(function (articleVersion) {
             if (width < 500) {
-                articleVersion.style.display = 'block';
+                articleVersion.classList.remove('hidden');
             } else {
-                articleVersion.style.display = 'none';
+                articleVersion.classList.add('hidden');
             }
         });
 
         linkVersions.forEach(function (linkVersion) {
             if (width < 500) {
-                linkVersion.style.display = 'none';
+                linkVersion.classList.add('hidden');
             } else {
-                linkVersion.style.display = 'block';
+                linkVersion.classList.remove('hidden');
             }
         });
         searchAndFilter();
