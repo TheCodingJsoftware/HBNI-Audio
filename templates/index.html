@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="google" content="notranslate">
-    <link href="https://cdn.jsdelivr.net/npm/beercss@3.6.0/dist/cdn/beer.min.css" rel="stylesheet">
-    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.6.0/dist/cdn/beer.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/beercss@3.6.9/dist/cdn/beer.min.css" rel="stylesheet">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.6.9/dist/cdn/beer.min.js"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
     <link href="/static/theme.css" rel="stylesheet">
     <link rel="icon" href="/static/icon.png">
@@ -131,6 +131,7 @@
         </a>
     </nav>
     <main class="responsive">
+        <br>
         <div class="field label prefix border">
             <i>search</i>
             <input type="text" id="search">
@@ -155,11 +156,11 @@
             </div>
             {% for groupName in downloadableRecordings %}
             <div class="page {% if loop.first %}active{% endif %}" id="{{ groupName.replace(' ', '_') }}">
-                <article class="large scroll no-border no-padding no-margin" id="contents">
+                <article class="large scroll border small-round no-padding no-margin no-elevate" id="contents">
                     <div class="no-results" style="display: none;">No items found</div>
                     {% for itemName, itemData in downloadableRecordings[groupName].items() %}
                     <div id="article-version" data-name="{{ itemName }}">
-                        <article>
+                        <article class="small-round no-elevate small-margin">
                             <div class="row">
                                 <div class="max">
                                     <h5>{{ itemData["host"].replace("/", "").title() }}</h5>
@@ -220,10 +221,10 @@
             </a>
             {% endfor %}
         </div>
-        <article class="no-border small-round no-padding no-margin">
+        <article class="no-border no-padding no-margin no-elevate">
             {% for host, host_data in recording_status.items() %}
             <div class="page {% if loop.first %}active{% endif %}" id="{{ host.replace("/", "").title() }}">
-                <article class="no-padding small-round">
+                <article class="no-padding no-elevate">
                     <div class="center-align">
                         <img class="responsive small top-round" src="/static/hbnilogo.png" id="recording-card-image"
                             style="height: auto; max-height: 200px; max-width: 400px;">
