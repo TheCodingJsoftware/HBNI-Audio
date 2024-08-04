@@ -201,7 +201,7 @@
                                 <div>{{itemData["description"]}} - {{ itemData["date"].replace("_", ":") }} -
                                     {{ itemData["length"] }} minutes </div>
                             </div>
-                            {% if "Days" in groupName or "Yesterday" in groupName or "Today" in groupeName %}
+                            {% if "Days" in groupName or "Yesterday" in groupName or "Today" in groupName %}
                             <div class="badge none">New</div>
                             {% endif %}
                             {% if "mega" in itemData['downloadLink'] %}
