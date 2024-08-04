@@ -15,9 +15,17 @@
     <meta property="og:url" content="https://audioarchives.hbni.net" />
     <meta property="og:image" content="https://audioarchives.hbni.net/static/icon.png" />
     <meta property="og:description" content="Download or relisten to previously broadcasted streams." />
+    <script>
+        (function() {
+            let savedMode = localStorage.getItem("mode") || "light";
+            if (savedMode === "dark") {
+                document.documentElement.classList.add("dark");
+            }
+        })();
+    </script>
 </head>
 
-<body>
+<body class="light">
     <header class="fixed primary" id="main-header" style="display: none;">
         <nav>
             <button class="circle transparent" onclick="ui('#info-dialog');">
@@ -145,10 +153,9 @@
                 </a>
                 {% endfor %}
             </div>
-            <br>
             {% for groupName in downloadableRecordings %}
-            <div class="page {% if loop.first %}active{% endif %} left" id="{{ groupName.replace(' ', '_') }}">
-                <article class="large scroll border" id="contents">
+            <div class="page {% if loop.first %}active{% endif %}" id="{{ groupName.replace(' ', '_') }}">
+                <article class="large scroll no-border no-padding no-margin" id="contents">
                     <div class="no-results" style="display: none;">No items found</div>
                     {% for itemName, itemData in downloadableRecordings[groupName].items() %}
                     <div id="article-version" data-name="{{ itemName }}">
@@ -213,10 +220,10 @@
             </a>
             {% endfor %}
         </div>
-        <article class="border round">
+        <article class="no-border small-round no-padding no-margin">
             {% for host, host_data in recording_status.items() %}
-            <div class="page {% if loop.first %}active{% endif %} left" id="{{ host.replace("/", "").title() }}">
-                <article class="no-padding round">
+            <div class="page {% if loop.first %}active{% endif %}" id="{{ host.replace("/", "").title() }}">
+                <article class="no-padding small-round">
                     <div class="center-align">
                         <img class="responsive small top-round" src="/static/hbnilogo.png" id="recording-card-image"
                             style="height: auto; max-height: 200px; max-width: 400px;">
@@ -228,7 +235,7 @@
                         <p>Started: {{ host_data["starting_time"] }}</p>
                         <p>Length: {{ host_data["length"] }}</p>
                         <nav>
-                            <button target="_blank" onclick="location.href='{{ host_data["link"] }}';">
+                            <button class="small-round" target="_blank" onclick="location.href='{{ host_data["link"] }}';">
                                 <i>record_voice_over</i>
                                 <span>Listen</span>
                             </button>
@@ -241,7 +248,8 @@
         </article>
         {% endif %}
     </main>
-    <dialog class="max" id="faq-dialog">
+    <div class="overlay blur"></div>
+    <dialog id="faq-dialog">
         <h3 class="center-align">Frequently Asked Questions</h3>
         <div>
             <h5> How do I play archives without downloading them? </h5>
@@ -436,41 +444,22 @@
     </dialog>
 </body>
 <script>
-    function setCookie(name, value, days) {
-        var expires = "";
-        if (days) {
-            var date = new Date();
-            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-            expires = "; expires=" + date.toUTCString();
-        }
-        document.cookie = name + "=" + (value || "") + expires + "; path=/";
-    }
-
-    function getCookie(name) {
-        var nameEQ = name + "=";
-        var ca = document.cookie.split(';');
-        for (var i = 0; i < ca.length; i++) {
-            var c = ca[i];
-            while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-        }
-        return null;
-    }
     const theme = async (from) => {
         await ui("theme", from);
     };
 
     const mode = () => {
-        let currentMode = getCookie("mode") || "light";
+        let currentMode = localStorage.getItem("mode") || "light";
         let newMode = currentMode === "dark" ? "light" : "dark";
-        setCookie("mode", newMode, 365); // Save for 1 year
+        localStorage.setItem("mode", newMode); // Save mode to localStorage
         ui("mode", newMode);
         updateIcon(newMode);
         updateImageSource();
+        document.documentElement.classList.toggle("dark", newMode === "dark");
     };
 
     function updateImageSource() {
-        const mode = getCookie('mode') || 'light';
+        const mode = localStorage.getItem('mode') || 'light';
         const images = document.querySelectorAll('img[id^="recording-card-image"]');
         images.forEach(image => {
             image.src = mode === 'dark' ? '/static/hbni_logo_dark.png' : '/static/hbnilogo.png';
@@ -482,22 +471,21 @@
         iconElements.forEach(iconElement => {
             iconElement.textContent = mode === "dark" ? "light_mode" : "dark_mode";
         });
-
     };
 
     // Check the mode on startup and apply it
     window.addEventListener('load', () => {
-        let savedMode = getCookie("mode") || "light";
+        let savedMode = localStorage.getItem("mode") || "light";
         ui("mode", savedMode);
         updateIcon(savedMode);
         updateImageSource();
+        document.documentElement.classList.toggle("dark", savedMode === "dark");
     });
 
     function checkWidth() {
         var width = window.innerWidth;
         var articleVersions = document.querySelectorAll('#article-version');
         var linkVersions = document.querySelectorAll('#link-version');
-
         articleVersions.forEach(function (articleVersion) {
             if (width < 500) {
                 articleVersion.style.display = 'block';
