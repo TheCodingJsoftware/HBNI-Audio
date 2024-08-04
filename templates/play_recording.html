@@ -19,9 +19,18 @@
     <meta property="og:url" content="https://audioarchives.hbni.net" />
     <meta property="og:image" content="https://audioarchives.hbni.net/static/hbnilogo.png" />
     <meta property="og:description" content="{{file_name}}" />
+
+    <script>
+        (function() {
+            let savedMode = localStorage.getItem("mode") || "light";
+            if (savedMode === "dark") {
+                document.documentElement.classList.add("dark");
+            }
+        })();
+    </script>
 </head>
 
-<body>
+<body class="light">
     <header class="fixed primary" id="header">
         <nav>
           <button class="circle transparent" onclick="location.href='/';">
@@ -72,13 +81,13 @@
                     <nav>
                         <div class="grid max">
                             <div class="s6">
-                                <button class="border small-round responsive extra small-elevate" id="download-button" data-url="{{ url_for('static', filename='/Recordings/' + file_name) }}">
+                                <button class="small-round responsive extra" id="download-button" data-url="{{ url_for('static', filename='/Recordings/' + file_name) }}">
                                     <i>download</i>
                                     <span>Download</span>
                                   </button>
                             </div>
                             <div class="s6">
-                                <button class="border small-round responsive extra small-elevate" onclick="sharePage()">
+                                <button class="small-round responsive extra" onclick="sharePage()">
                                     <i>share</i>
                                     <span>Share</span>
                                 </button>
@@ -106,35 +115,13 @@
             link.click();
         });
     });
-    function setCookie(name, value, days) {
-        var expires = "";
-        if (days) {
-            var date = new Date();
-            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-            expires = "; expires=" + date.toUTCString();
-        }
-        document.cookie = name + "=" + (value || "") + expires + "; path=/";
-    }
-    function getCookie(name) {
-        var nameEQ = name + "=";
-        var ca = document.cookie.split(';');
-        for (var i = 0; i < ca.length; i++) {
-            var c = ca[i];
-            while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-        }
-        return null;
-    }
-    const theme = async (from) => {
-        await ui("theme", from);
-    };
-
     const mode = () => {
-        let currentMode = getCookie("mode") || "light";
+        let currentMode = localStorage.getItem("mode") || "light";
         let newMode = currentMode === "dark" ? "light" : "dark";
-        setCookie("mode", newMode, 365); // Save for 1 year
+        localStorage.setItem("mode", newMode); // Save mode to localStorage
         ui("mode", newMode);
         updateIcon(newMode);
+        document.documentElement.classList.toggle("dark", newMode === "dark");
     };
 
     const updateIcon = (mode) => {
@@ -142,8 +129,14 @@
         iconElements.forEach(iconElement => {
             iconElement.textContent = mode === "dark" ? "light_mode" : "dark_mode";
         });
-
     };
+
+    window.addEventListener('load', () => {
+        let savedMode = localStorage.getItem("mode") || "light";
+        ui("mode", savedMode);
+        updateIcon(savedMode);
+        document.documentElement.classList.toggle("dark", savedMode === "dark");
+    });
 
     window.addEventListener('load', () => {
         let savedMode = getCookie("mode") || "light";
