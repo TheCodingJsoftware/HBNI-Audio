@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="google" content="notranslate">
-    <link href="https://cdn.jsdelivr.net/npm/beercss@3.6.9/dist/cdn/beer.min.css" rel="stylesheet">
-    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.6.9/dist/cdn/beer.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/beercss@3.6.13/dist/cdn/beer.min.css" rel="stylesheet">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.6.13/dist/cdn/beer.min.js"></script>
     <script type="module"
         src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js">
     </script>
@@ -32,19 +32,223 @@
         display: none !important;
     }
 </style>
+<header class="fixed primary" id="main-header" style="display: none;">
+    <nav>
+        <button class="circle transparent" onclick="ui('#info-dialog');">
+            <img src="/static/icon.png" class="responsive">
+        </button>
+        <h5 class="max center-align small">HBNI Audio Archive</h5>
+        <button class="circle transparent" onclick="mode()" id="toggle-theme">
+            <i>dark_mode</i>
+        </button>
+    </nav>
+</header>
 
-<body class="light">
-    <header class="fixed primary" id="main-header" style="display: none;">
-        <nav>
-            <button class="circle transparent" onclick="ui('#info-dialog');">
-                <img src="/static/icon.png" class="responsive">
-            </button>
-            <h5 class="max center-align small">HBNI Audio Archive</h5>
-            <button class="circle transparent" onclick="mode()" id="toggle-theme">
-                <i>dark_mode</i>
-            </button>
-        </nav>
-    </header>
+<div class="overlay blur"></div>
+<dialog id="faq-dialog">
+    <h3 class="center-align">Frequently Asked Questions</h3>
+    <div>
+        <h5> How do I play archives without downloading them? </h5>
+        <h6> Apple </h6>
+        <p>
+            1. Install <a class="link" href="https://apps.apple.com/us/app/mega/id706857885">Mega</a> or <a
+                class="link" href="https://apps.apple.com/ca/app/google-drive/id507874739">GoogleDrive</a> on your
+            phone.
+            (You
+            may or
+            may not have to create an account)
+            2. Go to the <a class="link" href="http://audioarchives.hbni.net">HBNI archive</a> and press any archive
+            you
+            want to
+            listen to.
+            3. You will be redirected to the <a href="https://apps.apple.com/us/app/mega/id706857885">Mega</a>
+            or <a class="link" href="https://apps.apple.com/ca/app/google-drive/id507874739">GoogleDrive</a> app.
+            4. You can directly play the broadcast that way without downloading it to your device.
+        </p>
+        <h6> Android </h6>
+        <p>
+            1. Install <a class="link"
+                href="https://play.google.com/store/apps/details?id=mega.privacy.android.app&hl=en_US&gl=US">Mega</a>
+            or
+            <a class="link"
+                href="https://play.google.com/store/apps/details?id=com.google.android.apps.docs">GoogleDrive</a>
+            on
+            your
+            phone. (You may or may not have to create an account)
+            2. Go to the <a class="link" href="http://audioarchives.hbni.net">HBNI archive</a> and press any archive
+            you
+            want to
+            listen to.
+            3. You will be redirected to the <a class="link"
+                href="https://play.google.com/store/apps/details?id=mega.privacy.android.app&hl=en_US&gl=US">Mega</a>
+            or
+            <a class="link"
+                href="https://play.google.com/store/apps/details?id=com.google.android.apps.docs">GoogleDrive</a>
+            app.
+            4. You can directly play the broadcast that way without downloading it to your device.
+        </p>
+        <h6> Windows (Computer) </h6>
+        <p>
+            Just press on any archive on the <a class="link" href="http://audioarchives.hbni.net">HBNI archive</a>,
+            you
+            will be redirected to <a class="link" href="https://mega.nz">mega.nz</a> or <a class="link"
+                href="https://drive.google.com">GoogleDrive</a>, from there you can just press play.
+        </p>
+        <h5> Where are the archives stored? </h5>
+        <h6>
+            2022-07-12 to 2023-07-21</h4>
+            <p>
+                The archives (as of 2022-07-12 to 2023-07-21) are stored on a file hosting website called <a
+                    class="link" href="https://mega.nz">mega.nz</a>.
+                The folder where all archives are stored online is <a class="link"
+                    href="https://mega.nz/folder/CxF1AQwS#rucPTrUDuhHE5I76NtpkLA">here</a>.
+            </p>
+            <h6>2023-07-21 to 2023-07-29</h6>
+            <p>
+                The archives (as of 2023-07-21 to 2023-07-29) are stored on a file hosting website called <a
+                    class="link" href="https://drive.google.com">GoogleDrive</a>.
+                The folder where all archives are stored online is <a class="link"
+                    href="https://drive.google.com/drive/u/0/folders/1ceDO2zOx8pdEzQDRa-aHXVXhXO-QT-cq">here</a>.
+            </p>
+            <h6>2023-07-29 to today</h6>
+            <p>
+                The archives (as of 2023-07-29 to today) are stored on our own servers in Pineland Colony.
+            </p>
+            <p>
+                All data on each broadcast (date, length, host, description, etc...) can be found <a class="link"
+                    href="http://audioarchives.hbni.net/download_links.json">here</a>.
+                <p style="padding-left: 30px;"> This data is what the archive refers from, whatever changes in this
+                    file,
+                    changes on the <a class="link" href="http://audioarchives.hbni.net">HBNI archive</a>.
+                </p>
+                <h5> Why are you using both Mega and GoogleDrive? </h5>
+                <p>
+                    <a class="link" href="https://mega.nz">mega.nz</a> was easier and quicker to get started with
+                    back in 2022.
+                    However, I have ran out of storage space on my account and needed to
+                    switch
+                    over
+                    to <a class="link" href="https://drive.google.com">GoogleDrive</a> which HBNI supported.
+                </p>
+                <h5> Why not migrate the entire database over to GoogleDrive?</h5>
+                <p>
+                    <a class="link" href="https://mega.nz">mega.nz</a> does not offer a easy way to migrate a
+                    database. As time went
+                    on
+                    <a class="link" href="https://mega.nz">mega.nz</a> methods of uploading files has changed and
+                    and the data that
+                    is
+                    required to migrate them is inconsistent, making it really difficult to port over. Some
+                    broadcasts
+                    would
+                    be
+                    lost in the process which is not ideal.
+                </p>
+                <h5> Why stop using GoogleDrive? </h5>
+                <p>
+                    Google does not allow the creation of a permanent access token to your GoogleDrive, I would have
+                    to
+                    manually refresh
+                    the token every week or so to keep the system working, which is not ideal.
+                </p>
+                <h5> I want to remove a broadcast on the archive. </h5>
+                <p>
+                    Please email me the exact details at: <a class="link"
+                        href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>
+                </p>
+                <h5> I don't want any of my broadcasts on the archive and never be recorded. </h5>
+                <p>
+                    Please email me at: <a class="link"
+                        href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>
+                    **NOTE** The <a class="link"
+                        href="https://github.com/TheCodingJsoftware/HBNI-Audio-Stream-Recorder">HBNI
+                        recorder</a> records all broadcasts by default, if you wish to be exempt from these
+                    conditions,
+                    the
+                    recorder has list
+                    of hosts will never be recorded. Just make sure when you start a broadcast, use the same host
+                    name
+                    each
+                    time.
+                </p>
+                <h5> Why is the broadcast not finished or missing?
+                </h5>
+                <p>
+                    Often times if a broadcast is not uploaded or is shorter then it should be it is because during
+                    the
+                    recording process we may have lost internet connection, this is something we cannot predict or
+                    do
+                    much
+                    about, thats just how it is.
+                </p>
+                <h5>How long does it take to upload archives?</h5>
+                <p>
+                    Broadcasts should be succesfully uploaded within 5 minutes since its been on the air. This
+                    greatly
+                    depends on the length on the broadcast. Sometimes, when a broadcast has been split up into
+                    multiple
+                    parts or
+                    failed to upload due to losing internet connection we may have to manually upload it which
+                    can take
+                    some
+                    time.
+                </p>
+    </div>
+    <nav>
+        <button data-ui="#faq-dialog" class="transparent link">Close</button>
+    </nav>
+</dialog>
+<div class="overlay blur"></div>
+<dialog id="download-dialog">
+    <h3 class="center-align">Apps</h3>
+    <button class="row responsive small-round"
+        onclick="location.href='https://github.com/TheCodingJsoftware/HBNI-Audio-Stream-Listener/releases';">
+        <i>desktop_windows</i>
+        <span>Desktop</span>
+    </button>
+    <button class="row responsive small-round"
+        onclick="location.href='https://apps.apple.com/ca/app/hbni-audio-streaming/id1611672333';">
+        <i>ios</i>
+        <span>Apple</span>
+    </button>
+    <button class="row responsive small-round"
+        onclick="location.href='https://play.google.com/store/apps/details?id=com.thecodingjsoftware.hutteritechurch';">
+        <i>android</i>
+        <span>Android</span>
+    </button>
+    <button class="row responsive small-round"
+        onclick="location.href='https://github.com/TheCodingJsoftware/HBNI-Audio-Archive';">
+        <i>code</i>
+        <span>Source Code</span>
+    </button>
+</dialog>
+<div class="overlay blur"></div>
+<div class="overlay blur"></div>
+<dialog id="info-dialog">
+    <div class="row max center-align">
+        <img class="responsive circle border" src="/static/icon.png" style="height: auto; max-width: 150px;">
+    </div
+    <div class="padding">
+        <h5 class="small center-align">HBNI Audio Archive</h5>
+        <p class="center-align">
+            Browse and listen to archived<br>
+            broadcasts from the HBNI Audio<br>
+            Streaming Service.
+        </p>
+        <br>
+        <p class="center-align">Developed with <i>favorite</i> by <a class="link" href="https://thecodingjsoftware.github.io/">TheCodingJ's</a></p>
+    </div>
+    <br>
+    <article class="border" style="margin-top: auto;">
+        <p class="center-align">
+            For questions, comments, suggestions,
+            or concerns about this service please
+            email: <a class="link" href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>.
+        </p>
+    </article>
+</dialog>
+
+<body class="dark">
     <nav class="left drawer l">
         <header>
             <nav>
@@ -78,10 +282,6 @@
             <i>help</i>
             <span>FAQ</span>
         </a>
-        <a href="javascript:void(0)" onclick="ui('#contact-dialog');">
-            <i>person</i>
-            <span>Contact</span>
-        </a>
     </nav>
     <nav class="left m">
         <header>
@@ -96,10 +296,6 @@
         <a href="javascript:void(0)" onclick="ui('#faq-dialog');">
             <i>help</i>
             <span>FAQ</span>
-        </a>
-        <a href="javascript:void(0)" onclick="ui('#contact-dialog');">
-            <i>person</i>
-            <span>Contact</span>
         </a>
         <button class="transparent link">
             <i>apps</i>
@@ -134,9 +330,6 @@
         <a href="javascript:void(0)" onclick="ui('#download-dialog');">
             <i>apps</i>
         </a>
-        <a href="javascript:void(0)" onclick="ui('#contact-dialog');">
-            <i>person</i>
-        </a>
     </nav>
     <main class="responsive">
         <br>
@@ -146,8 +339,8 @@
             <label>Search</label>
         </div>
         <div>
-            <div class="tabs scroll">
-                {% for groupName in downloadableRecordings %}
+            <div class="tabs scroll left-align">
+            {% for groupName in downloadableRecordings %}
                 <a data-ui="#{{ groupName.replace(' ', '_') }}" {% if loop.first %}class="active" {% endif %}>
                     <i>
                         {% if "Days" in groupName or "Today" in groupName or "Yesterday" in groupName %}
@@ -160,7 +353,7 @@
                     </i>
                     <span>{{groupName}}</span>
                 </a>
-                {% endfor %}
+            {% endfor %}
             </div>
             {% for groupName in downloadableRecordings %}
             <div class="page {% if loop.first %}active{% endif %}" id="{{ groupName.replace(' ', '_') }}">
@@ -256,200 +449,6 @@
         </article>
         {% endif %}
     </main>
-    <div class="overlay blur"></div>
-    <dialog id="faq-dialog">
-        <h3 class="center-align">Frequently Asked Questions</h3>
-        <div>
-            <h5> How do I play archives without downloading them? </h5>
-            <h6> Apple </h6>
-            <p>
-                1. Install <a class="link" href="https://apps.apple.com/us/app/mega/id706857885">Mega</a> or <a
-                    class="link" href="https://apps.apple.com/ca/app/google-drive/id507874739">GoogleDrive</a> on your
-                phone.
-                (You
-                may or
-                may not have to create an account)
-                2. Go to the <a class="link" href="http://audioarchives.hbni.net">HBNI archive</a> and press any archive
-                you
-                want to
-                listen to.
-                3. You will be redirected to the <a href="https://apps.apple.com/us/app/mega/id706857885">Mega</a>
-                or <a class="link" href="https://apps.apple.com/ca/app/google-drive/id507874739">GoogleDrive</a> app.
-                4. You can directly play the broadcast that way without downloading it to your device.
-            </p>
-            <h6> Android </h6>
-            <p>
-                1. Install <a class="link"
-                    href="https://play.google.com/store/apps/details?id=mega.privacy.android.app&hl=en_US&gl=US">Mega</a>
-                or
-                <a class="link"
-                    href="https://play.google.com/store/apps/details?id=com.google.android.apps.docs">GoogleDrive</a>
-                on
-                your
-                phone. (You may or may not have to create an account)
-                2. Go to the <a class="link" href="http://audioarchives.hbni.net">HBNI archive</a> and press any archive
-                you
-                want to
-                listen to.
-                3. You will be redirected to the <a class="link"
-                    href="https://play.google.com/store/apps/details?id=mega.privacy.android.app&hl=en_US&gl=US">Mega</a>
-                or
-                <a class="link"
-                    href="https://play.google.com/store/apps/details?id=com.google.android.apps.docs">GoogleDrive</a>
-                app.
-                4. You can directly play the broadcast that way without downloading it to your device.
-            </p>
-            <h6> Windows (Computer) </h6>
-            <p>
-                Just press on any archive on the <a class="link" href="http://audioarchives.hbni.net">HBNI archive</a>,
-                you
-                will be redirected to <a class="link" href="https://mega.nz">mega.nz</a> or <a class="link"
-                    href="https://drive.google.com">GoogleDrive</a>, from there you can just press play.
-            </p>
-            <h5> Where are the archives stored? </h5>
-            <h6>
-                2022-07-12 to 2023-07-21</h4>
-                <p>
-                    The archives (as of 2022-07-12 to 2023-07-21) are stored on a file hosting website called <a
-                        class="link" href="https://mega.nz">mega.nz</a>.
-                    The folder where all archives are stored online is <a class="link"
-                        href="https://mega.nz/folder/CxF1AQwS#rucPTrUDuhHE5I76NtpkLA">here</a>.
-                </p>
-                <h6>2023-07-21 to 2023-07-29</h6>
-                <p>
-                    The archives (as of 2023-07-21 to 2023-07-29) are stored on a file hosting website called <a
-                        class="link" href="https://drive.google.com">GoogleDrive</a>.
-                    The folder where all archives are stored online is <a class="link"
-                        href="https://drive.google.com/drive/u/0/folders/1ceDO2zOx8pdEzQDRa-aHXVXhXO-QT-cq">here</a>.
-                </p>
-                <h6>2023-07-29 to today</h6>
-                <p>
-                    The archives (as of 2023-07-29 to today) are stored on our own servers in Pineland Colony.
-                </p>
-                <p>
-                    All data on each broadcast (date, length, host, description, etc...) can be found <a class="link"
-                        href="http://audioarchives.hbni.net/download_links.json">here</a>.
-                    <p style="padding-left: 30px;"> This data is what the archive refers from, whatever changes in this
-                        file,
-                        changes on the <a class="link" href="http://audioarchives.hbni.net">HBNI archive</a>.
-                    </p>
-                    <h5> Why are you using both Mega and GoogleDrive? </h5>
-                    <p>
-                        <a class="link" href="https://mega.nz">mega.nz</a> was easier and quicker to get started with
-                        back in 2022.
-                        However, I have ran out of storage space on my account and needed to
-                        switch
-                        over
-                        to <a class="link" href="https://drive.google.com">GoogleDrive</a> which HBNI supported.
-                    </p>
-                    <h5> Why not migrate the entire database over to GoogleDrive?</h5>
-                    <p>
-                        <a class="link" href="https://mega.nz">mega.nz</a> does not offer a easy way to migrate a
-                        database. As time went
-                        on
-                        <a class="link" href="https://mega.nz">mega.nz</a> methods of uploading files has changed and
-                        and the data that
-                        is
-                        required to migrate them is inconsistent, making it really difficult to port over. Some
-                        broadcasts
-                        would
-                        be
-                        lost in the process which is not ideal.
-                    </p>
-                    <h5> Why stop using GoogleDrive? </h5>
-                    <p>
-                        Google does not allow the creation of a permanent access token to your GoogleDrive, I would have
-                        to
-                        manually refresh
-                        the token every week or so to keep the system working, which is not ideal.
-                    </p>
-                    <h5> I want to remove a broadcast on the archive. </h5>
-                    <p>
-                        Please email me the exact details at: <a class="link"
-                            href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>
-                    </p>
-                    <h5> I don't want any of my broadcasts on the archive and never be recorded. </h5>
-                    <p>
-                        Please email me at: <a class="link"
-                            href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>
-                        **NOTE** The <a class="link"
-                            href="https://github.com/TheCodingJsoftware/HBNI-Audio-Stream-Recorder">HBNI
-                            recorder</a> records all broadcasts by default, if you wish to be exempt from these
-                        conditions,
-                        the
-                        recorder has list
-                        of hosts will never be recorded. Just make sure when you start a broadcast, use the same host
-                        name
-                        each
-                        time.
-                    </p>
-                    <h5> Why is the broadcast not finished or missing?
-                    </h5>
-                    <p>
-                        Often times if a broadcast is not uploaded or is shorter then it should be it is because during
-                        the
-                        recording process we may have lost internet connection, this is something we cannot predict or
-                        do
-                        much
-                        about, thats just how it is.
-                    </p>
-                    <h5>How long does it take to upload archives?</h5>
-                    <p>
-                        Broadcasts should be succesfully uploaded within 5 minutes since its been on the air. This
-                        greatly
-                        depends on the length on the broadcast. Sometimes, when a broadcast has been split up into
-                        multiple
-                        parts or
-                        failed to upload due to losing internet connection we may have to manually upload it which
-                        can take
-                        some
-                        time.
-                    </p>
-        </div>
-        <nav>
-            <button data-ui="#faq-dialog" class="transparent link">Close</button>
-        </nav>
-    </dialog>
-    <div class="overlay blur"></div>
-    <dialog id="download-dialog">
-        <h3 class="center-align">Apps</h3>
-        <button class="row responsive small-round"
-            onclick="location.href='https://github.com/TheCodingJsoftware/HBNI-Audio-Stream-Listener/releases';">
-            <i>desktop_windows</i>
-            <span>Desktop</span>
-        </button>
-        <button class="row responsive small-round"
-            onclick="location.href='https://apps.apple.com/ca/app/hbni-audio-streaming/id1611672333';">
-            <i>ios</i>
-            <span>Apple</span>
-        </button>
-        <button class="row responsive small-round"
-            onclick="location.href='https://play.google.com/store/apps/details?id=com.thecodingjsoftware.hutteritechurch';">
-            <i>android</i>
-            <span>Android</span>
-        </button>
-        <button class="row responsive small-round"
-            onclick="location.href='https://github.com/TheCodingJsoftware/HBNI-Audio-Archive';">
-            <i>code</i>
-            <span>Source Code</span>
-        </button>
-    </dialog>
-    <div class="overlay blur"></div>
-    <dialog id="contact-dialog">
-        <h3 class="center-align">Contact</h3>
-        <p>For questions, comments, or concerns about this serivce please email: <a class="link"
-                href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a></p>
-    </dialog>
-    <div class="overlay blur"></div>
-    <dialog id="info-dialog">
-        <img class="responsive small" src="/static/icon.png" style="height: auto;">
-        <div class="padding">
-            <h6 class="center-align">HBNI Audio Archive</h6>
-            <p class="center-align">Developed by the <a class="link" href="https://thecodingjsoftware.github.io">
-                    TheCodingJ's </a></p>
-            <p class="center-align">© 2022 TheCodingJ'software</p>
-        </div>
-    </dialog>
 </body>
 <script>
     const theme = async (from) => {
@@ -457,7 +456,7 @@
     };
 
     const mode = () => {
-        let currentMode = localStorage.getItem("mode") || "light";
+        let currentMode = localStorage.getItem("mode") || "dark";
         let newMode = currentMode === "dark" ? "light" : "dark";
         localStorage.setItem("mode", newMode); // Save mode to localStorage
         ui("mode", newMode);
