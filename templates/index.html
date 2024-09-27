@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="google" content="notranslate">
-    <link href="https://cdn.jsdelivr.net/npm/beercss@3.6.13/dist/cdn/beer.min.css" rel="stylesheet">
-    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.6.13/dist/cdn/beer.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/beercss@3.7.8/dist/cdn/beer.min.css" rel="stylesheet">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.7.8/dist/cdn/beer.min.js"></script>
     <script type="module"
         src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js">
     </script>
@@ -28,11 +28,21 @@
 </head>
 
 <style>
+    ::selection {
+        color: var(--on-primary);
+        background-color: var(--primary);
+    }
+
     .hidden {
         display: none !important;
     }
+    article {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
 </style>
-<header class="fixed primary" id="main-header" style="display: none;">
+<header class="fixed primary" id="main-header">
     <nav>
         <button class="circle transparent" onclick="ui('#info-dialog');">
             <img src="/static/icon.png" class="responsive">
@@ -216,13 +226,7 @@
         <i>android</i>
         <span>Android</span>
     </button>
-    <button class="row responsive small-round"
-        onclick="location.href='https://github.com/TheCodingJsoftware/HBNI-Audio-Archive';">
-        <i>code</i>
-        <span>Source Code</span>
-    </button>
 </dialog>
-<div class="overlay blur"></div>
 <div class="overlay blur"></div>
 <dialog id="info-dialog">
     <div class="row max center-align">
@@ -249,81 +253,7 @@
 </dialog>
 
 <body class="dark">
-    <nav class="left drawer l">
-        <header>
-            <nav>
-                <button class="circle transparent" onclick="ui('#info-dialog');">
-                    <img src="/static/icon.png" class="responsive">
-                </button>
-                <h6>HBNI Audio Archive</h6>
-            </nav>
-        </header>
-        <a href="javascript:void(0)" onclick="mode()" id="toggle-theme">
-            <i>dark_mode</i>
-            <span>Theme</span>
-        </a>
-        <a href="https://github.com/TheCodingJsoftware/HBNI-Audio-Stream-Listener/releases">
-            <i>desktop_windows</i>
-            <span>Download for Windows</span>
-        </a>
-        <a href="https://apps.apple.com/ca/app/hbni-audio-streaming/id1611672333">
-            <i>ios</i>
-            <span>Download for Apple</span>
-        </a>
-        <a href="https://play.google.com/store/apps/details?id=com.thecodingjsoftware.hutteritechurch">
-            <i>android</i>
-            <span>Download for Android</span>
-        </a>
-        <a href="https://github.com/TheCodingJsoftware/HBNI-Audio-Archive">
-            <i>code</i>
-            <span>Github</span>
-        </a>
-        <a href="javascript:void(0)" onclick="ui('#faq-dialog');">
-            <i>help</i>
-            <span>FAQ</span>
-        </a>
-    </nav>
-    <nav class="left m">
-        <header>
-            <button class="circle transparent" onclick="ui('#info-dialog');">
-                <img src="/static/icon.png" class="responsive">
-            </button>
-        </header>
-        <a href="javascript:void(0)" onclick="mode()" id="toggle-theme">
-            <i>dark_mode</i>
-            <span>Theme</span>
-        </a>
-        <a href="javascript:void(0)" onclick="ui('#faq-dialog');">
-            <i>help</i>
-            <span>FAQ</span>
-        </a>
-        <button class="transparent link">
-            <i>apps</i>
-            <menu class="no-wrap">
-                <a class="row" href="https://github.com/TheCodingJsoftware/HBNI-Audio-Stream-Listener/releases">
-                    <i>desktop_windows</i>
-                    <span>Windows</span>
-                </a>
-                <a class="row" href="https://apps.apple.com/ca/app/hbni-audio-streaming/id1611672333">
-                    <i>ios</i>
-                    <span>Apple</span>
-                </a>
-                <a class="row"
-                    href="https://play.google.com/store/apps/details?id=com.thecodingjsoftware.hutteritechurch">
-                    <i>android</i>
-                    <span>Android</span>
-                </a>
-                <a class="row" href="https://github.com/TheCodingJsoftware/HBNI-Audio-Archive">
-                    <i>code</i>
-                    <div class="max">
-                        <div>Code</div>
-                        <label>Github</label>
-                    </div>
-                </a>
-            </menu>
-        </button>
-    </nav>
-    <nav class="bottom s" id="bottom-nav" style="max-height: 50px;">
+    <nav class="bottom" id="bottom-nav" style="max-height: 50px;">
         <a href="javascript:void(0)" onclick="ui('#faq-dialog');">
             <i>help</i>
         </a>
@@ -338,6 +268,7 @@
             <input type="text" id="search">
             <label>Search</label>
         </div>
+        <div class="no-results" style="display: none;">No recordings found</div>
         <div>
             <div class="tabs scroll left-align">
             {% for groupName in downloadableRecordings %}
@@ -357,54 +288,42 @@
             </div>
             {% for groupName in downloadableRecordings %}
             <div class="page {% if loop.first %}active{% endif %}" id="{{ groupName.replace(' ', '_') }}">
-                <article class="large scroll border small-round no-padding no-margin no-elevate" id="contents">
-                    <div class="no-results" style="display: none;">No items found</div>
+                <article class="scroll border small-round no-padding no-margin no-elevate no-space grid" id="contents">
                     {% for itemName, itemData in downloadableRecordings[groupName].items() %}
-                    <div id="article-version" class="hidden" data-name="{{ itemName }}">
-                        <article class="small-round no-elevate small-margin">
-                            <div class="row">
-                                <div class="max">
-                                    <h5>{{ itemData["host"].replace("/", "").title() }}</h5>
-                                    <div>{{ itemData["description"]}} </div>
-                                    <div>{{ itemData["date"].replace("_", ":") }}</div>
-                                </div>
-                            </div>
-                            <nav>
-                                <button class="small-round" target="_blank" onclick="location.href='{{ itemData['downloadLink'] }}';">
-                                    <i>{% if "play_recording" in itemData['downloadLink'] %}play_arrow{% elif "mega" in itemData['downloadLink'] or "google" in itemData['downloadLink'] %}globe{% else %}download{% endif %}</i>
-                                    <span>{% if "play_recording" in itemData['downloadLink'] %}Play{% else %}Download{% endif %}</span>
-                                </button>
-                                <div>{{ itemData["length"]}} min</div>
-                                {% if "Days" in groupName or "Yesterday" in groupName or "Today" in groupName %}
-                                <div class="badge none">New</div>
-                                {% endif %}
-                                {% if "mega" in itemData['downloadLink'] %}
-                                <div class="badge none"><i>cloud</i></div>
-                                {% elif "google" in itemData['downloadLink'] %}
-                                <div class="badge none"><i>add_to_drive</i></div>
-                                {% endif %}
-                            </nav>
-                        </article>
-                    </div>
-                    <div id="link-version" class="hidden" data-name="{{ itemName }}">
-                        <a class="row padding surface-container" href="{{itemData["downloadLink"]}}">
-                            <i>{% if "play_recording" in itemData['downloadLink'] %}play_arrow{% elif "mega" in itemData['downloadLink'] or "google" in itemData['downloadLink'] %}globe{% else %}download{% endif %}</i>
+                    <article data-name="{{ itemName }}" class="small-round small-margin s12 m6 l4" id="article-version">
+                        <div class="row">
                             <div class="max">
-                                <h6 class="small">{{ itemData["host"].replace("/","").title() }}</h6>
-                                <div>{{itemData["description"]}} - {{ itemData["date"].replace("_", ":") }} -
-                                    {{ itemData["length"] }} minutes </div>
+                                <h6>{{ itemData["description"]}}</h6>
+                                <div><i>artist</i> {{ itemData["host"].replace("/", "").title() }}</div>
+                                <div><i>event</i> {{ itemData["date"].replace("_", ":") }}</div>
+                                <div><i>schedule</i> {{ itemData["formatted_length"]}}</div>
                             </div>
+                        </div>
+                        <nav class="row">
+                            <button class="small-round" target="_blank" onclick="handleButtonClick('{{ itemName }}', '{{ itemData["download_link"] }}');">
+                                <i>{% if "play_recording" in itemData['download_link'] %}play_arrow{% elif "mega" in itemData['download_link'] or "google" in itemData['download_link'] %}globe{% else %}download{% endif %}</i>
+                                <span>{% if "play_recording" in itemData['download_link'] %}Play{% else %}Download{% endif %}</span>
+                            </button>
+                            <div class="max"></div>
                             {% if "Days" in groupName or "Yesterday" in groupName or "Today" in groupName %}
                             <div class="badge none">New</div>
                             {% endif %}
-                            {% if "mega" in itemData['downloadLink'] %}
+                            {% if "mega" in itemData['download_link'] %}
                             <div class="badge none"><i>cloud</i></div>
-                            {% elif "google" in itemData['downloadLink'] %}
+                            {% elif "google" in itemData['download_link'] %}
                             <div class="badge none"><i>add_to_drive</i></div>
                             {% endif %}
-                        </a>
-                        <div class="divider"></div>
-                    </div>
+                            <button class="chip circle link no-padding tiny-margin no-border">
+                                <i>info</i>
+                                <div class="tooltip max left">
+                                    <p class="no-wrap">Click Count: {{itemData["click_count"]}}</p>
+                                    <p class="no-wrap">Latest Click: {{itemData["latest_click"]}}</p>
+                                    <p class="no-wrap">Visit Count: {{itemData["visit_count"]}}</p>
+                                    <p class="no-wrap">Latest Visit: {{itemData["latest_visit"]}}</p>
+                                </div>
+                            </button>
+                        </nav>
+                    </article>
                     {% endfor %}
                 </article>
             </div>
@@ -451,10 +370,6 @@
     </main>
 </body>
 <script>
-    const theme = async (from) => {
-        await ui("theme", from);
-    };
-
     const mode = () => {
         let currentMode = localStorage.getItem("mode") || "dark";
         let newMode = currentMode === "dark" ? "light" : "dark";
@@ -480,74 +395,27 @@
         });
     };
 
-    // Check the mode on startup and apply it
-    window.addEventListener('load', () => {
-        let savedMode = localStorage.getItem("mode") || "light";
-        ui("mode", savedMode);
-        updateIcon(savedMode);
-        updateImageSource();
-        document.documentElement.classList.toggle("dark", savedMode === "dark");
-    });
-
-    function checkWidth() {
-        var width = window.innerWidth;
-        var articleVersions = document.querySelectorAll('#article-version');
-        var linkVersions = document.querySelectorAll('#link-version');
-
-        articleVersions.forEach(function (articleVersion) {
-            if (width < 500) {
-                articleVersion.classList.remove('hidden');
-            } else {
-                articleVersion.classList.add('hidden');
-            }
-        });
-
-        linkVersions.forEach(function (linkVersion) {
-            if (width < 500) {
-                linkVersion.classList.add('hidden');
-            } else {
-                linkVersion.classList.remove('hidden');
-            }
-        });
-        searchAndFilter();
-    }
-
     function searchAndFilter() {
         const searchInput = document.getElementById('search');
-        var width = window.innerWidth;
         const query = searchInput.value.toLowerCase();
         const articles = document.querySelectorAll('#contents');
+        let foundArticle = false;
 
         articles.forEach(function (article) {
             const articleVersions = article.querySelectorAll('#article-version');
-            const linkVersions = article.querySelectorAll('#link-version');
-            let foundArticle = false;
-            let foundLink = false;
-            if (width < 500) {
-                articleVersions.forEach(function (articleVersion) {
-                    const name = articleVersion.getAttribute('data-name').toLowerCase();
-                    if (name.includes(query)) {
-                        articleVersion.style.display = 'block';
-                        foundArticle = true;
-                    } else {
-                        articleVersion.style.display = 'none';
-                    }
-                });
+            articleVersions.forEach(function (articleVersion) {
+                const name = articleVersion.getAttribute('data-name').toLowerCase();
+                if (name.includes(query)) {
+                    articleVersion.style.display = 'block';
+                    foundArticle = true;
+                } else {
+                    articleVersion.style.display = 'none';
+                }
+            });
 
-            } else {
-                linkVersions.forEach(function (linkVersion) {
-                    const name = linkVersion.getAttribute('data-name').toLowerCase();
-                    if (name.includes(query)) {
-                        linkVersion.style.display = 'block';
-                        foundLink = true;
-                    } else {
-                        linkVersion.style.display = 'none';
-                    }
-                });
-            }
 
-            const noResults = article.querySelector('.no-results');
-            if (foundArticle || foundLink) {
+            const noResults = document.querySelector('.no-results');
+            if (foundArticle) {
                 noResults.style.display = 'none';
             } else {
                 noResults.style.display = 'block';
@@ -555,6 +423,11 @@
         });
     }
     document.addEventListener('DOMContentLoaded', function () {
+        let savedMode = localStorage.getItem("mode") || "light";
+        ui("mode", savedMode);
+        updateIcon(savedMode);
+        updateImageSource();
+        document.documentElement.classList.toggle("dark", savedMode === "dark");
         const searchInput = document.getElementById('search');
 
         const header = document.getElementById('main-header');
@@ -571,10 +444,26 @@
         });
 
         observer.observe(bottomNav);
-        checkWidth();
         searchInput.addEventListener('input', searchAndFilter);
-        window.addEventListener('resize', checkWidth);
     });
+
+    function handleButtonClick(itemName, downloadLink) {
+        fetch('/button_pressed', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ itemName: itemName }),
+            mode: 'no-cors'
+        })
+        .then(response => response.json())
+        .then(data => {
+            window.location.href = downloadLink;  // Redirect to download link
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
 </script>
 
 </html>

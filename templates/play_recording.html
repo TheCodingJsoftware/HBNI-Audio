@@ -6,31 +6,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <meta name="google" content="notranslate" />
-    <link href="https://cdn.jsdelivr.net/npm/beercss@3.6.13/dist/cdn/beer.min.css" rel="stylesheet" />
-    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.6.13/dist/cdn/beer.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/beercss@3.7.8/dist/cdn/beer.min.css" rel="stylesheet" />
+    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.7.8/dist/cdn/beer.min.js"></script>
     <script type="module"
         src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js">
     </script>
     <link href="/static/theme.css" rel="stylesheet" />
-
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css" rel="stylesheet">
     <link rel="icon" href="/static/icon.png" />
     <title>{{ title }}</title>
     <meta property="og:title" content="HBNI Audio Archive - {{title}}" />
     <meta property="og:url" content="https://audioarchives.hbni.net" />
     <meta property="og:image" content="https://audioarchives.hbni.net/static/hbnilogo.png" />
     <meta property="og:description" content="{{file_name}}" />
-
-    <script>
-        (function () {
-            let savedMode = localStorage.getItem("mode") || "light";
-            if (savedMode === "dark") {
-                document.documentElement.classList.add("dark");
-            }
-        })();
-    </script>
 </head>
 
-<body class="light">
+<style>
+    ::selection {
+        color: var(--on-primary);
+        background-color: var(--primary);
+    }
+</style>
+
+<body class="dark">
     <header class="fixed primary" id="header">
         <nav>
             <button class="circle transparent" onclick="location.href='/';">
@@ -42,15 +40,34 @@
             </button>
         </nav>
     </header>
+    <div class="overlay blur"></div>
+    <dialog class="left" id="info-dialog">
+        <nav class="right-align">
+            <button class="circle transparent" onclick="ui('#info-dialog');">
+                <i>close</i>
+            </button>
+        </nav>
+        <p>Latest Visit: {{latest_visit}}</p>
+        <p>Click Count: {{click_count}}</p>
+        <p>Latest Visit: {{latest_click}}</p>
+        <p>Visit Count: {{visit_count}}</p>
+    </dialog>
     <main class="responsive">
         <div class="center-align middle-align">
             <article class="no-padding small-round" id="main-article">
                 <div class="center-align" style="background-color: var(--primary)">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                        style="max-height: 100px; width: auto">
-                        <path
-                            d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z" />
-                    </svg>
+                    <h1 class="extra" id="music-note">♫</h1>
+                </div>
+                <div class="left-align">
+                    <button class="chip circle link no-padding tiny-margin no-border" onclick="ui('#info-dialog');">
+                        <i>info</i>
+                        <div class="tooltip max right">
+                            <p>Click Count: {{click_count}}</p>
+                            <p>Latest Click: {{latest_click}}</p>
+                            <p>Visit Count: {{visit_count}}</p>
+                            <p>Latest Visit: {{latest_visit}}</p>
+                        </div>
+                    </button>
                 </div>
                 <div class="padding">
                     <h5>{{title}}</h5>
@@ -83,7 +100,7 @@
                         <div class="grid max">
                             <div class="s6">
                                 <button class="small-round responsive extra" id="download-button"
-                                    data-url="{{ url_for('static', filename='/Recordings/' + file_name) }}">
+                                    data-url="{{ url_for('/Recordings/' + file_name) }}">
                                     <i>download</i>
                                     <span>Download</span>
                                 </button>
@@ -101,12 +118,16 @@
             </article>
         </div>
         <audio class="audio" id="audio">
-            <source src="{{ url_for('static', filename='/Recordings/' + file_name) }}" type="audio/mpeg" />
+            <source src="{{ url_for('/Recordings/' + file_name) }}" type="audio/mpeg" />
         </audio>
     </main>
 </body>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        let savedMode = localStorage.getItem("mode") || "light";
+        ui("mode", savedMode);
+        updateIcon(savedMode);
         const downloadButton = document.getElementById("download-button");
 
         downloadButton.addEventListener("click", function () {
@@ -123,7 +144,6 @@
         localStorage.setItem("mode", newMode); // Save mode to localStorage
         ui("mode", newMode);
         updateIcon(newMode);
-        document.documentElement.classList.toggle("dark", newMode === "dark");
     };
 
     const updateIcon = (mode) => {
@@ -131,19 +151,9 @@
         iconElements.forEach((iconElement) => {
             iconElement.textContent = mode === "dark" ? "light_mode" : "dark_mode";
         });
+        const musicNote = document.querySelector("#music-note");
+        musicNote.style.color = "var(--on-primary)";
     };
-
-    window.addEventListener("load", () => {
-        let savedMode = localStorage.getItem("mode") || "light";
-        ui("mode", savedMode);
-        updateIcon(savedMode);
-        document.documentElement.classList.toggle("dark", savedMode === "dark");
-    });
-
-    window.addEventListener("load", () => {
-        let savedMode = getCookie("mode") || "light";
-        ui("mode", savedMode);
-    });
 
     function sharePage() {
         if (navigator.share) {
