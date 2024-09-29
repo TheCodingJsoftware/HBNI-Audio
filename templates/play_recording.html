@@ -22,9 +22,37 @@
 </head>
 
 <style>
+    html,
+    body,
+    div,
+    article,
+    p,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    ul,
+    li,
+    span,
+    a,
+    button,
+    input,
+    textarea,
+    select,
+    details,
+    summary,
+    footer,
+    nav {
+        transition: background-color 0.3s ease-in-out, color 0.1s ease;
+    }
     ::selection {
         color: var(--on-primary);
         background-color: var(--primary);
+    }
+    #music-note {
+        color: var(--primary);
     }
 </style>
 
@@ -47,78 +75,64 @@
                 <i>close</i>
             </button>
         </nav>
-        <p>Latest Visit: {{latest_visit}}</p>
-        <p>Click Count: {{click_count}}</p>
-        <p>Latest Visit: {{latest_click}}</p>
         <p>Visit Count: {{visit_count}}</p>
+        <p>Latest Visit: {{latest_visit}}</p>
     </dialog>
-    <main class="responsive">
-        <div class="center-align middle-align">
-            <article class="no-padding small-round" id="main-article">
-                <div class="center-align" style="background-color: var(--primary)">
-                    <h1 class="extra" id="music-note">♫</h1>
+    <main class="responsive center-align middle-align">
+        <article class="no-padding medium-width" id="main-article">
+            <div class="center-align" style="background-color: var(--primary)">
+                <h1 class="extra" id="music-note">♫</h1>
+            </div>
+            <div class="left-align">
+                <button class="chip circle link no-padding tiny-margin no-border" onclick="ui('#info-dialog');">
+                    <i>info</i>
+                </button>
+            </div>
+            <div class="padding">
+                <div class="center-align">{{file_name.replace("_", ":").replace(".mp3", "")}}</div>
+                <div class="left-align"><i>artist</i> {{title}}</div>
+                <div class="row max">
+                    <label class="checkbox icon">
+                        <input type="checkbox" id="play-button" />
+                        <span>
+                            <i>play_arrow</i>
+                            <i>pause</i>
+                        </span>
+                    </label>
+                    <label class="slider">
+                        <input type="range" max="100" value="0" id="timeline" />
+                        <span> </span>
+                    </label>
+                    <label class="checkbox icon">
+                        <input type="checkbox" id="sound-button" />
+                        <span>
+                            <i>volume_up</i>
+                            <i>volume_off</i>
+                        </span>
+                    </label>
                 </div>
-                <div class="left-align">
-                    <button class="chip circle link no-padding tiny-margin no-border" onclick="ui('#info-dialog');">
-                        <i>info</i>
-                        <div class="tooltip max right">
-                            <p>Click Count: {{click_count}}</p>
-                            <p>Latest Click: {{latest_click}}</p>
-                            <p>Visit Count: {{visit_count}}</p>
-                            <p>Latest Visit: {{latest_visit}}</p>
-                        </div>
-                    </button>
+                <div class="center-align middle-align">
+                    <span id="current-time">00:00</span>/
+                    <span id="total-time">00:00</span>
                 </div>
-                <div class="padding">
-                    <h5>{{title}}</h5>
-                    <p>{{file_name.replace("_", ":").replace(".mp3", "")}}</p>
-                    <div class="row max">
-                        <label class="checkbox icon">
-                            <input type="checkbox" id="play-button" />
-                            <span>
-                                <i>play_arrow</i>
-                                <i>pause</i>
-                            </span>
-                        </label>
-                        <label class="slider">
-                            <input type="range" max="100" value="0" id="timeline" />
-                            <span> </span>
-                        </label>
-                        <label class="checkbox icon">
-                            <input type="checkbox" id="sound-button" />
-                            <span>
-                                <i>volume_up</i>
-                                <i>volume_off</i>
-                            </span>
-                        </label>
+                <nav>
+                    <div class="grid max">
+                        <button class="small-round responsive s6 m6 l6 " id="download-button"
+                            data-url="{{ url_for(file_name) }}">
+                            <i>download</i>
+                            <span>Download</span>
+                        </button>
+                        <button class="small-round responsive s6 m6 l6 " onclick="sharePage()">
+                            <i>share</i>
+                            <span>Share</span>
+                        </button>
                     </div>
-                    <div class="center-align middle-align">
-                        <span id="current-time">00:00</span>/
-                        <span id="total-time">00:00</span>
-                    </div>
-                    <nav>
-                        <div class="grid max">
-                            <div class="s6">
-                                <button class="small-round responsive extra" id="download-button"
-                                    data-url="{{ url_for('/Recordings/' + file_name) }}">
-                                    <i>download</i>
-                                    <span>Download</span>
-                                </button>
-                            </div>
-                            <div class="s6">
-                                <button class="small-round responsive extra" onclick="sharePage()">
-                                    <i>share</i>
-                                    <span>Share</span>
-                                </button>
-                            </div>
-                        </div>
-                    </nav>
-                </div>
-                <canvas id="canvas" style="width: 100%; height: 100px"></canvas>
-            </article>
-        </div>
+                </nav>
+            </div>
+            <canvas id="canvas" style="width: 100%; height: 100px"></canvas>
+        </article>
         <audio class="audio" id="audio">
-            <source src="{{ url_for('/Recordings/' + file_name) }}" type="audio/mpeg" />
+            <source src="{{ url_for(file_name) }}" type="audio/mpeg" />
         </audio>
     </main>
 </body>

@@ -17,17 +17,34 @@
     <meta property="og:url" content="https://audioarchives.hbni.net" />
     <meta property="og:image" content="https://audioarchives.hbni.net/static/icon.png" />
     <meta property="og:description" content="Download or relisten to previously broadcasted streams." />
-    <script>
-        (function () {
-            let savedMode = localStorage.getItem("mode") || "light";
-            if (savedMode === "dark") {
-                document.documentElement.classList.add("dark");
-            }
-        })();
-    </script>
 </head>
 
 <style>
+    html,
+    body,
+    div,
+    article,
+    p,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    ul,
+    li,
+    span,
+    a,
+    button,
+    input,
+    textarea,
+    select,
+    details,
+    summary,
+    footer,
+    nav {
+        transition: background-color 0.3s ease-in-out, color 0.1s ease;
+    }
     ::selection {
         color: var(--on-primary);
         background-color: var(--primary);
@@ -56,7 +73,12 @@
 
 <div class="overlay blur"></div>
 <dialog id="faq-dialog">
-    <h3 class="center-align">Frequently Asked Questions</h3>
+    <div class="right-align">
+        <button class="transparent circle" onclick="ui('#faq-dialog');">
+            <i>close</i>
+        </button>
+    </div>
+    <h3 class="center-align padding-bottom">Frequently Asked Questions</h3>
     <div>
         <h5> How do I play archives without downloading them? </h5>
         <h6> Apple </h6>
@@ -204,9 +226,6 @@
                     time.
                 </p>
     </div>
-    <nav>
-        <button data-ui="#faq-dialog" class="transparent link">Close</button>
-    </nav>
 </dialog>
 <div class="overlay blur"></div>
 <dialog id="download-dialog">
@@ -229,14 +248,19 @@
 </dialog>
 <div class="overlay blur"></div>
 <dialog id="info-dialog">
+    <div class="right-align">
+        <button class="transparent circle" onclick="ui('#info-dialog');">
+            <i>close</i>
+        </button>
+    </div>
     <div class="row max center-align">
         <img class="responsive circle border" src="/static/icon.png" style="height: auto; max-width: 150px;">
     </div
     <div class="padding">
         <h5 class="small center-align">HBNI Audio Archive</h5>
-        <p class="center-align">
-            Browse and listen to archived<br>
-            broadcasts from the HBNI Audio<br>
+        <p class="center-align medium-width">
+            Browse and listen to archived
+            broadcasts from the HBNI Audio
             Streaming Service.
         </p>
         <br>
@@ -244,7 +268,7 @@
     </div>
     <br>
     <article class="border" style="margin-top: auto;">
-        <p class="center-align">
+        <p class="center-align medium-width">
             For questions, comments, suggestions,
             or concerns about this service please
             email: <a class="link" href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>.
@@ -293,14 +317,25 @@
                     <article data-name="{{ itemName }}" class="small-round small-margin s12 m6 l4" id="article-version">
                         <div class="row">
                             <div class="max">
-                                <h6>{{ itemData["description"]}}</h6>
+                                <h6 class="bottom-margin">{{ itemData["description"]}}</h6>
                                 <div><i>artist</i> {{ itemData["host"].replace("/", "").title() }}</div>
                                 <div><i>event</i> {{ itemData["date"].replace("_", ":") }}</div>
                                 <div><i>schedule</i> {{ itemData["formatted_length"]}}</div>
+                                <div class="row no-margin" style="max-height: 24.3px;">
+                                    <div class="max"><i>web_traffic</i> {{ itemData["visit_count"]}} visits</div>
+                                    <button class="chip circle link no-padding no-margin no-border">
+                                        <i>info</i>
+                                        <div class="tooltip max left">
+                                            <span class="small-width">Visit Count: {{itemData["visit_count"]}}</span>
+                                            <br>
+                                            <span class="small-width">Latest Visit: {{itemData["latest_visit"]}}</span>
+                                        </div>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <nav class="row">
-                            <button class="small-round" target="_blank" onclick="handleButtonClick('{{ itemName }}', '{{ itemData["download_link"] }}');">
+                            <button class="small-round" target="_blank" onclick="window.location.href='{{ itemData["download_link"] }}';">
                                 <i>{% if "play_recording" in itemData['download_link'] %}play_arrow{% elif "mega" in itemData['download_link'] or "google" in itemData['download_link'] %}globe{% else %}download{% endif %}</i>
                                 <span>{% if "play_recording" in itemData['download_link'] %}Play{% else %}Download{% endif %}</span>
                             </button>
@@ -313,15 +348,6 @@
                             {% elif "google" in itemData['download_link'] %}
                             <div class="badge none"><i>add_to_drive</i></div>
                             {% endif %}
-                            <button class="chip circle link no-padding tiny-margin no-border">
-                                <i>info</i>
-                                <div class="tooltip max left">
-                                    <p class="no-wrap">Click Count: {{itemData["click_count"]}}</p>
-                                    <p class="no-wrap">Latest Click: {{itemData["latest_click"]}}</p>
-                                    <p class="no-wrap">Visit Count: {{itemData["visit_count"]}}</p>
-                                    <p class="no-wrap">Latest Visit: {{itemData["latest_visit"]}}</p>
-                                </div>
-                            </button>
                         </nav>
                     </article>
                     {% endfor %}
@@ -330,42 +356,30 @@
             {% endfor %}
         </div>
         {% if recording_status %}
-        <h4 class="center-align">Currently Recording</h4>
-        <div class="tabs scroll">
-            {% for host in recording_status %}
-            <a data-ui="#{{host.replace("/", "").title()}}" {% if loop.first %}class="active" {% endif %}>
-                <i>radio_button_checked</i>
-                <span>{{host.replace("/", "").title()}}</span>
-            </a>
+        <h4 class="center-align bottom-padding"> Currently Recording</h4>
+        <div class="border small-round small-padding grid">
+            {% for host, host_data in recording_status.items() %}
+            <article class="no-padding s12 m6 l4" id="recording-card">
+                <img class="responsive small top-round" src="/static/hbnilogo.png" style="height: auto; max-height: 200px; max-width: 400px;" id="recording-card-image">
+                <div class="padding">
+                    <progress></progress>
+                    <h6>{{ host_data["description"] }}</h6>
+                    <div><i>artist</i> {{host.replace("/", "").title()}}</div>
+                    <div><i>event</i> {{ host_data["starting_time"] }}</div>
+                    <div><i>schedule</i> {{ host_data["length"] }}</div>
+                    <nav>
+                        <button class="small-round" target="_blank"
+                            onclick="location.href='{{ host_data["link"] }}';">
+                            <i>record_voice_over</i>
+                            <span>Listen</span>
+                        </button>
+                        <div class="max"></div>
+                        <div class="badge none">New</div>
+                    </nav>
+                </div>
+            </article>
             {% endfor %}
         </div>
-        <article class="no-border no-padding no-margin no-elevate">
-            {% for host, host_data in recording_status.items() %}
-            <div class="page {% if loop.first %}active{% endif %}" id="{{ host.replace("/", "").title() }}">
-                <article class="no-padding no-elevate">
-                    <div class="center-align">
-                        <img class="responsive small top-round" src="/static/hbnilogo.png" id="recording-card-image"
-                            style="height: auto; max-height: 200px; max-width: 400px;">
-                    </div>
-                    <div class="padding">
-                        <progress></progress>
-                        <h5>{{host.replace("/", "").title()}}</h5>
-                        <h6>{{ host_data["description"] }}</h6>
-                        <p>Started: {{ host_data["starting_time"] }}</p>
-                        <p>Length: {{ host_data["length"] }}</p>
-                        <nav>
-                            <button class="small-round" target="_blank"
-                                onclick="location.href='{{ host_data["link"] }}';">
-                                <i>record_voice_over</i>
-                                <span>Listen</span>
-                            </button>
-                            <div class="badge none">New</div>
-                        </nav>
-                    </div>
-                </article>
-            </div>
-            {% endfor %}
-        </article>
         {% endif %}
     </main>
 </body>
@@ -426,7 +440,6 @@
         let savedMode = localStorage.getItem("mode") || "light";
         ui("mode", savedMode);
         updateIcon(savedMode);
-        updateImageSource();
         document.documentElement.classList.toggle("dark", savedMode === "dark");
         const searchInput = document.getElementById('search');
 
@@ -445,25 +458,8 @@
 
         observer.observe(bottomNav);
         searchInput.addEventListener('input', searchAndFilter);
+        updateImageSource();
     });
-
-    function handleButtonClick(itemName, downloadLink) {
-        fetch('/button_pressed', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ itemName: itemName }),
-            mode: 'no-cors'
-        })
-        .then(response => response.json())
-        .then(data => {
-            window.location.href = downloadLink;  // Redirect to download link
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    }
 </script>
 
 </html>

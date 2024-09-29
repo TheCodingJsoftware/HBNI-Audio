@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listen Live</title>
+</head>
+<body>
+    <h1>Listen to Live Audio</h1>
+    <audio id="remoteAudio" controls autoplay></audio>
+
+    <script>
+        const remoteAudio = document.getElementById('remoteAudio');
+        const mountName = window.location.pathname.split('/').pop(); // extract mount name from URL
+
+        const socket = new WebSocket(`ws://10.0.1.254:5053/listen_ws/${mountName}`);
+
+        socket.onopen = () => {
+            console.log(`Listening to ${mountName} live stream.`);
+        };
+
+        socket.onmessage = (event) => {
+            const audioBlob = new Blob([event.data], { type: 'audio/webm' });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            remoteAudio.src = audioUrl;
+            remoteAudio.play();
+        };
+
+        socket.onerror = (error) => {
+            console.error('WebSocket Error:', error);
+        };
+
+        socket.onclose = () => {
+            console.log('Live stream ended.');
+        };
+    </script>
+</body>
+</html>
