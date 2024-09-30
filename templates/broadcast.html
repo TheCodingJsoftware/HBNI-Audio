@@ -3,109 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Start Live Broadcast</title>
+    <title>Broadcast Page</title>
 </head>
 <body>
-    <h1>Start Live Audio Broadcast</h1>
-
-    <!-- Broadcasting form -->
+    <h1>Start Broadcasting</h1>
     <form id="broadcastForm">
-        <label for="mountName">Mount Name (Optional):</label>
-        <input type="text" id="mountName" placeholder="Enter a mount name (optional)">
+        <label for="mountName">Mount Name:</label>
+        <input type="text" id="mountName" placeholder="Enter a mount name" required>
         <br><br>
         <label for="description">Description:</label>
-        <input type="text" id="description" placeholder="Enter a description" required>
+        <input type="text" id="description" placeholder="Enter description" required>
         <br><br>
-        <button type="submit" id="startButton">Start Broadcasting</button>
-        <button type="button" id="stopButton" disabled>Stop Broadcasting</button>
+        <button type="submit">Start Broadcast</button>
     </form>
 
-    <!-- Audio element to play the local audio stream -->
-    <audio id="localAudio" controls autoplay></audio>
     <p id="status"></p>
+    <audio id="localAudio" controls autoplay></audio>
 
     <script>
         const form = document.getElementById('broadcastForm');
-        const statusText = document.getElementById('status');
         const localAudio = document.getElementById('localAudio');
-        const startButton = document.getElementById('startButton');
-        const stopButton = document.getElementById('stopButton');
-        let mediaRecorder;
-        let socket;
+        const statusText = document.getElementById('status');
 
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
 
-            const mountName = document.getElementById('mountName').value || 'default'; // Use 'default' if no mount name is provided
+            const mountName = document.getElementById('mountName').value;
             const description = document.getElementById('description').value;
 
-            try {
-                // Request microphone access
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                localAudio.srcObject = stream; // Play the local audio on the page
+            const socket = new WebSocket('ws://localhost:5053/broadcast_ws');
 
-                // Open WebSocket connection to the broadcast server
-                socket = new WebSocket(`ws://10.0.1.254:5053/broadcast_ws`);
+            socket.onopen = () => {
+                statusText.innerText = 'Broadcasting live...';
+                socket.send(JSON.stringify({ mountName, description }));
 
-                socket.onopen = () => {
-                    console.log('Connected to the server for broadcasting.');
-                    statusText.innerText = 'Broadcasting live...';
-
-                    // Disable the start button and enable the stop button
-                    startButton.disabled = true;
-                    stopButton.disabled = false;
-
-                    // Send initial metadata (description, mount name)
-                    socket.send(JSON.stringify({ mountName, description }));
-
-                    // Create a MediaRecorder to capture audio and send it to the server
-                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+                    localAudio.srcObject = stream;
+                    const mediaRecorder = new MediaRecorder(stream);
                     mediaRecorder.ondataavailable = (event) => {
                         if (event.data.size > 0) {
-                            socket.send(event.data); // Send audio chunks over WebSocket
+                            socket.send(event.data);
                         }
                     };
-                    mediaRecorder.start(100); // Send audio chunks every 100ms
-                };
+                    mediaRecorder.start(100);
+                });
+            };
 
-                socket.onerror = (error) => {
-                    console.error('WebSocket Error:', error);
-                    statusText.innerText = 'Error broadcasting.';
-                };
-
-                socket.onclose = () => {
-                    console.log('Broadcasting stopped.');
-                    statusText.innerText = 'Broadcast stopped.';
-                    // Reset button states
-                    startButton.disabled = false;
-                    stopButton.disabled = true;
-                };
-
-            } catch (error) {
-                if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-                    statusText.innerText = 'Microphone access is required to start broadcasting. Please allow microphone access in your browser settings.';
-                    alert("Microphone permission is required for broadcasting. Please enable it in your browser settings.");
-                } else {
-                    console.error('Error accessing audio stream:', error);
-                    statusText.innerText = 'Could not start audio broadcast. Make sure microphone access is allowed.';
-                }
-            }
-        });
-
-        // Stop broadcasting when the stop button is clicked
-        stopButton.addEventListener('click', () => {
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop(); // Stop the media recorder
+            socket.onclose = () => {
                 statusText.innerText = 'Broadcast stopped.';
-            }
+            };
 
-            if (socket && socket.readyState === WebSocket.OPEN) {
-                socket.close(); // Close the WebSocket connection
-            }
-
-            // Reset button states
-            startButton.disabled = false;
-            stopButton.disabled = true;
+            socket.onerror = (error) => {
+                statusText.innerText = 'Error in broadcasting.';
+                console.error('WebSocket Error:', error);
+            };
         });
     </script>
 </body>

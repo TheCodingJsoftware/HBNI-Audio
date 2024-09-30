@@ -3,36 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Listen Live</title>
+    <title>Listen to Broadcasts</title>
 </head>
 <body>
-    <h1>Listen to Live Audio</h1>
+    <h1>Listen to Live Broadcasts</h1>
+
+    <div id="broadcasts">
+        <p>Loading active broadcasts...</p>
+    </div>
+
     <audio id="remoteAudio" controls autoplay></audio>
 
     <script>
+        const broadcastsDiv = document.getElementById('broadcasts');
         const remoteAudio = document.getElementById('remoteAudio');
-        const mountName = window.location.pathname.split('/').pop(); // extract mount name from URL
+        let mediaSource, sourceBuffer, queue = [];
 
-        const socket = new WebSocket(`ws://10.0.1.254:5053/listen_ws/${mountName}`);
+        // Fetch active broadcasts
+        fetch('/active_broadcasts')
+            .then(response => response.json())
+            .then(data => {
+                broadcastsDiv.innerHTML = '';
+                if (Object.keys(data).length === 0) {
+                    broadcastsDiv.innerHTML = '<p>No active broadcasts at the moment.</p>';
+                    return;
+                }
 
-        socket.onopen = () => {
-            console.log(`Listening to ${mountName} live stream.`);
-        };
+                for (const [mountName, broadcast] of Object.entries(data)) {
+                    const button = document.createElement('button');
+                    button.innerText = `${mountName}: ${broadcast.description} (Started at ${broadcast.start_time})`;
+                    button.onclick = () => listenToBroadcast(mountName);
+                    broadcastsDiv.appendChild(button);
+                    broadcastsDiv.appendChild(document.createElement('br'));
+                }
+            });
 
-        socket.onmessage = (event) => {
-            const audioBlob = new Blob([event.data], { type: 'audio/webm' });
-            const audioUrl = URL.createObjectURL(audioBlob);
-            remoteAudio.src = audioUrl;
-            remoteAudio.play();
-        };
+        function listenToBroadcast(mountName) {
+            const socket = new WebSocket(`ws://10.0.1.254:5053/listen_ws/${mountName}`);
+            socket.binaryType = 'arraybuffer';
 
-        socket.onerror = (error) => {
-            console.error('WebSocket Error:', error);
-        };
+            // Initialize MediaSource for appending audio data
+            mediaSource = new MediaSource();
+            remoteAudio.src = URL.createObjectURL(mediaSource);
 
-        socket.onclose = () => {
-            console.log('Live stream ended.');
-        };
+            mediaSource.addEventListener('sourceopen', () => {
+                // Add SourceBuffer for audio (adjust the MIME type to match your audio stream format)
+                try {
+                    sourceBuffer = mediaSource.addSourceBuffer('audio/webm; codecs="opus"');
+                    sourceBuffer.addEventListener('updateend', processQueue);
+
+                    // Now that the MediaSource is open, start processing the WebSocket data
+                    while (queue.length > 0) {
+                        processQueue();  // Process any data queued while waiting for MediaSource
+                    }
+                } catch (e) {
+                    console.error('Error adding SourceBuffer:', e);
+                }
+            });
+
+            // Queue incoming data if the buffer is not ready yet
+            socket.onmessage = (event) => {
+                queue.push(event.data);  // Add the data to the queue
+                processQueue();          // Try to process the queue
+            };
+
+            socket.onerror = (error) => {
+                console.error('WebSocket Error:', error);
+            };
+
+            socket.onclose = () => {
+                console.log('WebSocket connection closed');
+            };
+        }
+
+        function processQueue() {
+            // Ensure the SourceBuffer is available, not updating, and the MediaSource is still open
+            if (sourceBuffer && !sourceBuffer.updating && queue.length > 0 && mediaSource.readyState === "open") {
+                try {
+                    // Append the first item from the queue
+                    sourceBuffer.appendBuffer(queue.shift());
+                } catch (e) {
+                    console.error('Failed to append buffer:', e);
+                    // If the buffer is in an invalid state, stop processing
+                    queue = []; // Clear the queue to avoid further issues
+                }
+            }
+        }
     </script>
 </body>
 </html>

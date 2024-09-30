@@ -12,6 +12,9 @@ import tornado.httpserver
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
+import tornado.escape
+import os
+import ffmpeg
 from dotenv import load_dotenv
 from tornado.web import Application, RequestHandler, url
 
@@ -232,6 +235,33 @@ class PlayRecordingHandler(RequestHandler):
         )
         self.write(rendered_template)
 
+class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
+    def open(self):
+        self.broadcast_name = None
+        self.description = None
+        self.start_time = datetime.now()
+
+    def on_message(self, message):
+        if isinstance(message, str):
+            metadata = tornado.escape.json_decode(message)
+            self.broadcast_name = metadata.get("mountName", "default")
+            self.description = metadata.get("description", "")
+
+            live_broadcasts[self.broadcast_name] = {
+                "description": self.description,
+                "start_time": self.start_time.strftime("%Y-%m-%d %H:%M:%S"),
+            }
+        else:
+            # Broadcast the audio data to listeners
+            for listener in listeners.get(self.broadcast_name, []):
+                if listener.open:  # Use listener.open to check if connection is still open
+                    listener.write_message(message, binary=True)
+
+    def on_close(self):
+        if self.broadcast_name in live_broadcasts:
+            del live_broadcasts[self.broadcast_name]
+        if self.broadcast_name in listeners:
+            del listeners[self.broadcast_name]
 
 class BroadcastHandler(RequestHandler):
     def get(self):
@@ -243,71 +273,21 @@ class BroadcastHandler(RequestHandler):
 
 
 class ListenHandler(RequestHandler):
-    def get(self, broadcast_name):
+    def get(self):
         template = env.get_template("listen.html")
         rendered_template = template.render()
         self.write(rendered_template)
 
-
-class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
-    def open(self):
-        self.mount_name = 'default'  # default mount if none is provided
-        self.description = ''
-        self.file = None  # File to save the broadcast audio
-
-        # Create the file path for saving the broadcast (e.g., "/app/static/Recordings/live_broadcast.mp3")
-        self.file_path = os.path.join(os.getenv("STATIC_RECORDINGS_PATH", ""), f"{self.mount_name}.mp3")
-
-        if not os.path.exists(os.path.dirname(self.file_path)):
-            with open(self.file_path, 'wb') as f:
-                f.write(b'')
-
-        self.file = open(self.file_path, 'wb')
-
-        listeners[self.mount_name] = listeners.get(self.mount_name, [])
-        print(f"Broadcast started on mount: {self.mount_name}, saving to {self.file_path}")
-
-    def on_message(self, message):
-        if isinstance(message, str):  # First message should be metadata
-            metadata = json.loads(message)
-            self.mount_name = metadata.get('mountName', 'default')
-            self.description = metadata.get('description', '')
-            listeners[self.mount_name] = listeners.get(self.mount_name, [])
-            print(f"Mount Name: {self.mount_name}, Description: {self.description}")
-        else:  # Audio data
-            # Broadcast the audio data to all listeners of this mount
-            for listener in listeners.get(self.mount_name, []):
-                if listener.ws_connection and listener.ws_connection.is_open():
-                    listener.write_message(message, binary=True)
-
-            # Write the audio data to the file
-            if self.file:
-                self.file.write(message)
-
-    def on_close(self):
-        print(f"Broadcast ended on mount: {self.mount_name}")
-
-        # Close the file when the broadcast ends
-        if self.file:
-            self.file.close()
-
-        if self.mount_name in listeners:
-            del listeners[self.mount_name]
-
-
 class ListenWSHandler(tornado.websocket.WebSocketHandler):
     def open(self, mount_name):
-        print(f"New listener joined mount: {mount_name}")
         self.mount_name = mount_name
         listeners[mount_name] = listeners.get(mount_name, [])
         listeners[mount_name].append(self)
+        print(f"Listener connected to mount: {mount_name}")
 
     def on_close(self):
         listeners[self.mount_name].remove(self)
-        if not listeners[self.mount_name]:
-            del listeners[self.mount_name]
-        print(f"Listener left mount: {self.mount_name}")
-
+        print(f"Listener disconnected from mount: {self.mount_name}")
 
 class DownloadLinksJSONHandler(RequestHandler):
     async def get(self):
@@ -335,6 +315,10 @@ class DownloadLinksJSONHandler(RequestHandler):
         self.set_header("Content-Type", "application/json")
         self.write(json.dumps(json_response, indent=4))
 
+class ActiveBroadcastsJSONHandler(RequestHandler):
+    def get(self):
+        self.set_header("Content-Type", "application/json")
+        self.write(json.dumps(live_broadcasts, indent=4))
 
 class RecordingStatusJSONHandler(RequestHandler):
     def get(self):
@@ -354,10 +338,11 @@ def make_app():
         [
             url(r"/", MainHandler),
             url(r"/play_recording/(.*)", PlayRecordingHandler),
-            url(r"/broadcast", BroadcastHandler),
             url(r"/broadcast_ws", BroadcastWSHandler),
-            url(r"/listen/(.*)", ListenWSHandler),
             url(r"/listen_ws/(.*)", ListenWSHandler),
+            url(r"/active_broadcasts", ActiveBroadcastsJSONHandler),
+            url(r"/broadcast", BroadcastHandler),
+            url(r"/listen", ListenHandler),
             url(r"/download_links.json", DownloadLinksJSONHandler),
             url(r"/app/static/Recordings/(.*)", tornado.web.StaticFileHandler, {
                 'path': os.getenv("STATIC_RECORDINGS_PATH", "/app/static/Recordings")
