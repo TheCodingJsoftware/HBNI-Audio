@@ -18,5 +18,6 @@ ENV POSTGRES_HOST="172.17.0.1"
 ENV POSTGRES_PORT="5434"
 ENV STATIC_RECORDINGS_PATH="/app/static/Recordings"
 ENV STATIC_PATH="/app/static"
+ENV TZ="Canada/Manitoba"
 
 CMD python main.py

@@ -2,93 +2,104 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Listen to Broadcasts</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="google" content="notranslate">
+    <link href="https://cdn.jsdelivr.net/npm/beercss@3.7.12/dist/cdn/beer.min.css" rel="stylesheet" />
+    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.7.12/dist/cdn/beer.min.js"></script>
+    <script type="module"
+        src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js">
+    </script>
+    <link href="/static/theme.css" rel="stylesheet">
+    <link rel="icon" href="/static/icon.png">
+    <title>HBNI Audio Archive</title>
+    <meta property="og:title" content="HBNI Audio Archive" />
+    <meta property="og:url" content="https://audioarchives.hbni.net" />
+    <meta property="og:image" content="https://audioarchives.hbni.net/static/icon.png" />
+    <meta property="og:description" content="Download or relisten to previously broadcasted streams." />
 </head>
+
+<header class="fixed primary" id="main-header">
+    <nav>
+        <button class="circle transparent" onclick="ui('#info-dialog');">
+            <img src="/static/icon.png" class="responsive">
+        </button>
+        <h5 class="max center-align small">HBNI Audio Listeners Page</h5>
+        <button class="circle transparent" onclick="mode()" id="toggle-theme">
+            <i>dark_mode</i>
+        </button>
+    </nav>
+</header>
+
 <body>
-    <h1>Listen to Live Broadcasts</h1>
-
-    <div id="broadcasts">
-        <p>Loading active broadcasts...</p>
-    </div>
-
-    <audio id="remoteAudio" controls autoplay></audio>
-
+    <h1>Listen to Broadcast</h1>
+    {% if broadcast_status %}
+        <p>Admin Contact: {{ broadcast_status['admin'] }}</p>
+        <p>Broadcast Location: {{ broadcast_status['location'] }}</p>
+        <p>Server Name: {{ broadcast_status['server_name'] }}</p>
+        <p>Server Description: {{ broadcast_status['server_description'] }}</p>
+        <p>Genre: {{ broadcast_status['genre'] }}</p>
+        <p>Current Listeners: {{ broadcast_status['listeners'] }}</p>
+        <p>Listener Peak: {{ broadcast_status['listener_peak'] }}</p>
+        <p>Stream Start Time: {{ broadcast_status['stream_start'] }}</p>
+        <audio controls autoplay>
+            <source src="http://hbniaudio.hbni.net:8000/{{ broadcast_status['host'] }}" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        <a href="http://hbniaudio.hbni.net:8000/{{ broadcast_status['host'] }}" target="_blank">Direct Link</a>
+    {% else %}
+        <p>Broadcast status is not available at the moment.</p>
+    {% endif %}
     <script>
-        const broadcastsDiv = document.getElementById('broadcasts');
-        const remoteAudio = document.getElementById('remoteAudio');
-        let mediaSource, sourceBuffer, queue = [];
+    const mode = () => {
+        let currentMode = localStorage.getItem("mode") || "dark";
+        let newMode = currentMode === "dark" ? "light" : "dark";
+        localStorage.setItem("mode", newMode); // Save mode to localStorage
+        ui("mode", newMode);
+        updateIcon(newMode);
+        updateImageSource();
+        document.documentElement.classList.toggle("dark", newMode === "dark");
+    };
 
-        // Fetch active broadcasts
-        fetch('/active_broadcasts')
-            .then(response => response.json())
-            .then(data => {
-                broadcastsDiv.innerHTML = '';
-                if (Object.keys(data).length === 0) {
-                    broadcastsDiv.innerHTML = '<p>No active broadcasts at the moment.</p>';
-                    return;
-                }
+    function updateImageSource() {
+        const mode = localStorage.getItem('mode') || 'light';
+        const images = document.querySelectorAll('img[id^="recording-card-image"]');
+        images.forEach(image => {
+            image.src = mode === 'dark' ? '/static/hbni_logo_dark.png' : '/static/hbnilogo.png';
+        });
+    }
 
-                for (const [mountName, broadcast] of Object.entries(data)) {
-                    const button = document.createElement('button');
-                    button.innerText = `${mountName}: ${broadcast.description} (Started at ${broadcast.start_time})`;
-                    button.onclick = () => listenToBroadcast(mountName);
-                    broadcastsDiv.appendChild(button);
-                    broadcastsDiv.appendChild(document.createElement('br'));
-                }
-            });
+    const updateIcon = (mode) => {
+        const iconElements = document.querySelectorAll('#toggle-theme i');
+        iconElements.forEach(iconElement => {
+            iconElement.textContent = mode === "dark" ? "light_mode" : "dark_mode";
+        });
+    };
 
-        function listenToBroadcast(mountName) {
-            const socket = new WebSocket(`ws://10.0.1.254:5053/listen_ws/${mountName}`);
-            socket.binaryType = 'arraybuffer';
+    document.addEventListener('DOMContentLoaded', function () {
+        let savedMode = localStorage.getItem("mode") || "light";
+        ui("mode", savedMode);
+        updateIcon(savedMode);
+        document.documentElement.classList.toggle("dark", savedMode === "dark");
+        const searchInput = document.getElementById('search');
 
-            // Initialize MediaSource for appending audio data
-            mediaSource = new MediaSource();
-            remoteAudio.src = URL.createObjectURL(mediaSource);
+        const header = document.getElementById('main-header');
+        const bottomNav = document.getElementById('bottom-nav');
 
-            mediaSource.addEventListener('sourceopen', () => {
-                // Add SourceBuffer for audio (adjust the MIME type to match your audio stream format)
-                try {
-                    sourceBuffer = mediaSource.addSourceBuffer('audio/webm; codecs="opus"');
-                    sourceBuffer.addEventListener('updateend', processQueue);
-
-                    // Now that the MediaSource is open, start processing the WebSocket data
-                    while (queue.length > 0) {
-                        processQueue();  // Process any data queued while waiting for MediaSource
-                    }
-                } catch (e) {
-                    console.error('Error adding SourceBuffer:', e);
+        const observer = new IntersectionObserver(function (entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    header.style.display = 'block';
+                } else {
+                    header.style.display = 'none';
                 }
             });
+        });
 
-            // Queue incoming data if the buffer is not ready yet
-            socket.onmessage = (event) => {
-                queue.push(event.data);  // Add the data to the queue
-                processQueue();          // Try to process the queue
-            };
-
-            socket.onerror = (error) => {
-                console.error('WebSocket Error:', error);
-            };
-
-            socket.onclose = () => {
-                console.log('WebSocket connection closed');
-            };
-        }
-
-        function processQueue() {
-            // Ensure the SourceBuffer is available, not updating, and the MediaSource is still open
-            if (sourceBuffer && !sourceBuffer.updating && queue.length > 0 && mediaSource.readyState === "open") {
-                try {
-                    // Append the first item from the queue
-                    sourceBuffer.appendBuffer(queue.shift());
-                } catch (e) {
-                    console.error('Failed to append buffer:', e);
-                    // If the buffer is in an invalid state, stop processing
-                    queue = []; // Clear the queue to avoid further issues
-                }
-            }
-        }
+        observer.observe(bottomNav);
+        searchInput.addEventListener('input', searchAndFilter);
+        updateImageSource();
+    });
     </script>
 </body>
 </html>
