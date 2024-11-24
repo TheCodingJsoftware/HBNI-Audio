@@ -357,7 +357,7 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
 
 class BroadcastHandler(RequestHandler):
     def get(self):
-        template = env.get_template("broadcast.html")
+        template = env.get_template("broadcasting_page.html")
         rendered_template = template.render(
             broadcast_name="",
         )
@@ -402,7 +402,7 @@ class ListenHandler(RequestHandler):
         }
 
         # Render the template with the extracted data
-        template = env.get_template("listen.html")
+        template = env.get_template("listeners_page.html")
         rendered_template = template.render(
             broadcast_status=broadcast_data
         )
