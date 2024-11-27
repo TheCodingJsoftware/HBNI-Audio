@@ -4,8 +4,9 @@ import requests
 import os
 import subprocess
 import traceback
-from datetime import datetime
+from datetime import datetime, timedelta
 import shutil
+import jwt #PyJWT
 
 import asyncpg
 import jinja2
@@ -25,6 +26,17 @@ load_dotenv()
 
 loader = jinja2.FileSystemLoader("templates")
 env = jinja2.Environment(loader=loader)
+
+class Broadcast:
+    def __init__(self, host: str, description: str, password: str, is_private: bool, start_time: datetime):
+        self.host = host
+        self.description = description
+        self.password = password
+        self.is_private = is_private
+        self.start_time = start_time
+
+
+active_broadcasts: dict[str, Broadcast] = {}
 
 
 async def get_db_connection():
@@ -238,6 +250,35 @@ class PlayRecordingHandler(RequestHandler):
 
 
 
+class ValidatePasswordHandler(RequestHandler):
+    async def post(self):
+        try:
+            data: dict[str, str] = tornado.escape.json_decode(self.request.body)
+            password = data.get("password")
+
+            correct_password = os.getenv("HBNI_STREAMING_PASSWORD")
+
+            if password == correct_password:
+                # Generate a token valid for a limited time
+                token = jwt.encode(
+                    {
+                        "exp": datetime.now() + timedelta(hours=1),
+                        "iat": datetime.now(),
+                        "scope": "broadcast"
+                    },
+                    os.getenv("SECRET_KEY"),
+                    algorithm="HS256"
+                )
+                self.write({"success": True, "token": token})
+            else:
+                self.set_status(401)
+                self.write({"success": False, "error": "Invalid password"})
+        except Exception as e:
+            print(e)
+            self.set_status(500)
+            self.write({"success": False, "error": str(e)})
+
+
 class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
     def open(self):
         self.host: str = ""
@@ -257,6 +298,9 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                 self.host = metadata.get("host", "unknown").lower().strip().replace(" ", "_").replace("/", "")
                 self.description = metadata.get("description", "Unspecified Description")
                 self.password = metadata.get("password", "")
+                if self.password != os.getenv("HBNI_STREAMING_PASSWORD"):
+                    self.write_message("Invalid password.")
+                    return
                 self.is_private = metadata.get("isPrivate", False)
                 self.starting_time = datetime.now()
 
@@ -353,6 +397,8 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                     self.starting_time.strftime("%B %d %A %Y %I_%M %p"),
                     total_minutes
                 )
+            else:
+                shutil.move(self.output_filename, f"tests\\{new_output_filename}")
 
 
 class BroadcastHandler(RequestHandler):
@@ -365,7 +411,7 @@ class BroadcastHandler(RequestHandler):
 
 
 class ListenHandler(RequestHandler):
-    def get(self):
+    async def get(self):
         # URL for fetching the JSON data
         status_url = "http://hbniaudio.hbni.net:8000/status-json.xsl"
 
@@ -407,6 +453,53 @@ class ListenHandler(RequestHandler):
             broadcast_status=broadcast_data
         )
         self.write(rendered_template)
+
+
+class SpecificListenerHandler(RequestHandler):
+    async def get(self, listener_name):
+        # URL for fetching the JSON data
+        status_url = "http://hbniaudio.hbni.net:8000/status-json.xsl"
+
+        # Attempt to get the JSON data from the URL
+        try:
+            response = requests.get(status_url)
+            if response.status_code == 200:
+                json_data: dict[str, Union[str, dict[str, Union[str, int]]]] = response.json()
+            else:
+                self.set_status(500)
+                self.write("Failed to retrieve broadcast status.")
+                return
+        except requests.exceptions.RequestException as e:
+            self.set_status(500)
+            self.write(f"Error while fetching JSON data: {str(e)}")
+            return
+
+        # Extract relevant data for rendering
+        icestats = json_data.get("icestats", {})
+        source = icestats.get("source", {})
+
+        # Prepare data for template rendering
+        broadcast_data = {
+            "admin": icestats.get("admin", "N/A"),
+            "location": icestats.get("location", "N/A"),
+            "server_name": source.get("server_name", "Unspecified name"),
+            "server_description": source.get("server_description", "Unspecified description"),
+            "genre": source.get("genre", "N/A"),
+            "listeners": source.get("listeners", 0),
+            "host": source.get("listenurl", "/").split("/")[-1],
+            "listener_peak": source.get("listener_peak", 0),
+            "listen_url": source.get("listenurl", "#"),
+            "stream_start": source.get("stream_start", "N/A")
+        }
+
+        # Render the template with the extracted data
+        template = env.get_template("listeners_page.html")
+        rendered_template = template.render(
+            broadcast_status=broadcast_data,
+            listener_name=listener_name
+        )
+        self.write(rendered_template)
+
 
 
 class DownloadLinksJSONHandler(RequestHandler):
@@ -456,7 +549,9 @@ def make_app():
             url(r"/play_recording/(.*)", PlayRecordingHandler),
             url(r"/broadcast_ws", BroadcastWSHandler),
             url(r"/broadcasting_page", BroadcastHandler),
+            url(r"/validate-password", ValidatePasswordHandler),
             url(r"/listeners_page", ListenHandler),
+            url(r"/listeners_page/(.*)", SpecificListenerHandler),
             url(r"/download_links.json", DownloadLinksJSONHandler),
             url(r"/app/static/Recordings/(.*)", tornado.web.StaticFileHandler, {
                 'path': os.getenv("STATIC_RECORDINGS_PATH", "/app/static/Recordings")

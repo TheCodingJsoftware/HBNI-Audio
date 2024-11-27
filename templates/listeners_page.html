@@ -13,9 +13,9 @@
         </script>
     <link href="/static/theme.css" rel="stylesheet">
     <link rel="icon" href="/static/icon.png">
-    <title>HBNI Audio Archive</title>
-    <meta property="og:title" content="HBNI Audio Archive" />
-    <meta property="og:url" content="https://audioarchives.hbni.net" />
+    <title>HBNI Audio Listeners Page</title>
+    <meta property="og:title" content="HBNI Audio Listeners Page" />
+    <meta property="og:url" content="https://audioarchives.hbni.net/listeners_page" />
     <meta property="og:image" content="https://audioarchives.hbni.net/static/icon.png" />
     <meta property="og:description" content="Download or relisten to previously broadcasted streams." />
 </head>
@@ -32,25 +32,22 @@
     </nav>
 </header>
 
-<body>
-    <h1>Listen to Broadcast</h1>
-    {% if broadcast_status %}
-    <p>Admin Contact: {{ broadcast_status['admin'] }}</p>
-    <p>Broadcast Location: {{ broadcast_status['location'] }}</p>
-    <p>Server Name: {{ broadcast_status['server_name'] }}</p>
-    <p>Server Description: {{ broadcast_status['server_description'] }}</p>
-    <p>Genre: {{ broadcast_status['genre'] }}</p>
-    <p>Current Listeners: {{ broadcast_status['listeners'] }}</p>
-    <p>Listener Peak: {{ broadcast_status['listener_peak'] }}</p>
-    <p>Stream Start Time: {{ broadcast_status['stream_start'] }}</p>
-    <audio controls autoplay>
-        <source src="http://hbniaudio.hbni.net:8000/{{ broadcast_status['host'] }}" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
-    <a href="http://hbniaudio.hbni.net:8000/{{ broadcast_status['host'] }}" target="_blank">Direct Link</a>
-    {% else %}
-    <p>Broadcast status is not available at the moment.</p>
-    {% endif %}
+<body class="dark">
+    <main class="responsive">
+        <h1>Listen to Broadcast</h1>
+        {% if broadcast_status and broadcast_status['host'].title() %}
+        <article>
+            <h4>{{ broadcast_status['host'] }}</h4>
+            <audio controls autoplay>
+                <source src="http://hbniaudio.hbni.net:8000/{{ broadcast_status['host'] }}" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+        </article>
+        <a class="link" href="http://hbniaudio.hbni.net:8000/{{ broadcast_status['host'] }}" target="_blank">Direct Link</a>
+        {% else %}
+        <p>Broadcast status is not available at the moment.</p>
+        {% endif %}
+    </main>
     <script>
         const mode = () => {
             let currentMode = localStorage.getItem("mode") || "dark";
