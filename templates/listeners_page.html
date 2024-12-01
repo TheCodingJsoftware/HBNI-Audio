@@ -34,19 +34,64 @@
 
 <body class="dark">
     <main class="responsive">
-        <h1>Listen to Broadcast</h1>
-        {% if broadcast_status and broadcast_status['host'].title() %}
-        <article>
-            <h4>{{ broadcast_status['host'] }}</h4>
-            <audio controls autoplay>
-                <source src="http://hbniaudio.hbni.net:8000/{{ broadcast_status['host'] }}" type="audio/mpeg">
-                Your browser does not support the audio element.
-            </audio>
-        </article>
-        <a class="link" href="http://hbniaudio.hbni.net:8000/{{ broadcast_status['host'] }}" target="_blank">Direct Link</a>
-        {% else %}
-        <p>Broadcast status is not available at the moment.</p>
+        {% if schedule %}
+        <h3 class="center-align">Scheduled Broadcasts</h3>
+        <hr>
+        <div class="small-padding grid" id="schedulded-broadcasts-container">
+            {% for scheduled_date, scheduled_broadcast in schedule.items() %}
+            <article class="s12 m12 l6">
+                <div class="row no-space">
+                    <h6 class="bottom-margin max">{{ scheduled_broadcast["description"] }}</h6>
+                    <button class="transparent small-round circle link" onclick="shareUpcomingBroadcast('{{ scheduled_broadcast["host"].title() }} schedulded a broadcast with the description, {{ scheduled_broadcast["description"] }} and is schedulded to start at {{ scheduled_broadcast["start_time"] }}.')">
+                        <i>share</i>
+                    </button>
+                    <button class="transparent small-round circle link" onclick="copyUpcomingBroadcastToClipboard('{{ scheduled_broadcast["host"].title() }} schedulded a broadcast with the description, {{ scheduled_broadcast["description"] }} and is schedulded to start at {{ scheduled_broadcast["start_time"] }}.')">
+                        <i>content_copy</i>
+                    </button>
+                </div>
+                <div><i>artist</i> {{ scheduled_broadcast["host"].replace("/", "").title() }}</div>
+                <div><i>event</i> {{ scheduled_broadcast["start_time"]}}</div>
+                <blockquote class="no-line">
+                    {{ scheduled_broadcast["host"].title() }} schedulded a broadcast with the description, "{{ scheduled_broadcast["description"] }}" and is schedulded to start at {{ scheduled_broadcast["start_time"] }}.
+                </blockquote>
+            </article>
+            {% endfor %}
+        </div>
         {% endif %}
+        <h3 class="center-align">Active Broadcasts</h3>
+        <hr>
+        <div class="small-padding grid" id="broadcasts-container">
+            {% if broadcast_status and broadcast_status['host'].title() %}
+            <article class="s12 m12 l6" id="{{ broadcast_status['host'] }}">
+                <div class="row no-space top-align">
+                    <h6 class="bottom-margin max">{{ broadcast_status["server_description"]}}</h6>
+                    <a class="transparent small-round circle link wave" href="http://hbniaudio.hbni.net:8000/{{ broadcast_status['host'] }}" target="_blank">
+                        <i>open_in_new</i>
+                        <span>Direct Link</span>
+                    </a>
+                    <button class="transparent small-round circle link" onclick="shareUpcomingBroadcast('{{ broadcast_status["server_description"] }}')">
+                        <i>share</i>
+                    </button>
+                    <button class="transparent small-round circle link" onclick="copyUpcomingBroadcastToClipboard('{{ broadcast_status["server_description"] }}')">
+                        <i>content_copy</i>
+                    </button>
+                </div>
+                <div><i>artist</i> {{ broadcast_status["host"].replace("/", "").title() }}</div>
+                <div><i>event</i> {{ broadcast_status["stream_start"].replace("_", ":") }}</div>
+                <div><i>hearing</i> Current Listeners: {{ broadcast_status['listeners'] }}</div>
+                <div><i>trending_up</i> Listener Peak: {{ broadcast_status['listener_peak'] }}</div>
+                <div class="top-margin center-align middle-align">
+                    <audio controls autoplay class="s12 m8 l8" title="{{ broadcast_status['server_description'] }}">
+                        <source src="http://hbniaudio.hbni.net:8000/{{ broadcast_status['host'] }}" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+            </article>
+            {% else %}
+            <p>Broadcast status is not available at the moment.</p>
+            {% endif %}
+        </div>
+        <div class="snackbar green" id="copied-to-clipboard">Copied to Clipboard</div>
     </main>
     <script>
         const mode = () => {
@@ -74,28 +119,45 @@
             });
         };
 
+        function shareUpcomingBroadcast(text) {
+            // Check if the Web Share API is available
+            if (navigator.share) {
+                const url = window.location.origin + "/listeners_page";
+                const shareData = {
+                    title: "HBNI Audio Listeners Page",
+                    text: text,
+                    url: url
+                };
+
+                navigator.share(shareData)
+                    .then(() => console.log("Shared successfully!"))
+                    .catch((error) => {
+                        console.error("Error sharing:", error);
+                        alert("Could not share the broadcast.");
+                    });
+            } else {
+                // Fallback to clipboard if Web Share API is not supported
+                navigator.clipboard.writeText(`${text} - Visit here: ${window.location.origin}/listeners_page`)
+                    .then(() => {
+                        const snackbar = document.getElementById("copied-to-clipboard");
+                        snackbar.classList.add("show");
+                        setTimeout(() => snackbar.classList.remove("show"), 3000);
+                    })
+                    .catch((error) => console.error("Error copying to clipboard:", error));
+                    ui("#copied-to-clipboard");
+            }
+        }
+
+        function copyUpcomingBroadcastToClipboard(text) {
+            navigator.clipboard.writeText(`${text} - Visit here: ${window.location.origin}/listeners_page`);
+            ui("#copied-to-clipboard");
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             let savedMode = localStorage.getItem("mode") || "light";
             ui("mode", savedMode);
             updateIcon(savedMode);
             document.documentElement.classList.toggle("dark", savedMode === "dark");
-            const searchInput = document.getElementById('search');
-
-            const header = document.getElementById('main-header');
-            const bottomNav = document.getElementById('bottom-nav');
-
-            const observer = new IntersectionObserver(function (entries) {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        header.style.display = 'block';
-                    } else {
-                        header.style.display = 'none';
-                    }
-                });
-            });
-
-            observer.observe(bottomNav);
-            searchInput.addEventListener('input', searchAndFilter);
             updateImageSource();
         });
     </script>

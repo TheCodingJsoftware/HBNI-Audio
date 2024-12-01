@@ -39,6 +39,7 @@ class Broadcast:
 active_broadcasts: dict[str, Broadcast] = {}
 
 
+
 async def get_db_connection():
     return await asyncpg.connect(
         host=os.environ.get("POSTGRES_HOST"),
@@ -249,7 +250,6 @@ class PlayRecordingHandler(RequestHandler):
         self.write(rendered_template)
 
 
-
 class ValidatePasswordHandler(RequestHandler):
     async def post(self):
         try:
@@ -275,6 +275,69 @@ class ValidatePasswordHandler(RequestHandler):
                 self.write({"success": False, "error": "Invalid password"})
         except Exception as e:
             print(e)
+            self.set_status(500)
+            self.write({"success": False, "error": str(e)})
+
+
+def cleanup_old_schedules():
+    try:
+        if not os.path.exists("schedule.json"):
+            return
+
+        # Load the existing schedule
+        with open("schedule.json", "r") as f:
+            schedule: dict[str, dict[str, str]] = json.load(f)
+
+        # Get current time
+        now = datetime.now()
+
+        # Remove old schedules
+        updated_schedule = {
+            key: value for key, value in schedule.items()
+            if datetime.fromisoformat(value["start_time"]) > now
+        }
+
+        # Save the updated schedule
+        with open("schedule.json", "w") as f:
+            json.dump(updated_schedule, f, indent=4)
+
+        print("Old schedules cleaned up successfully.")
+    except Exception as e:
+        print(f"Error during schedule cleanup: {e}")
+
+
+class ScheduleBroadcastHandler(RequestHandler):
+    async def post(self):
+        try:
+            data: dict[str, str] = tornado.escape.json_decode(self.request.body)
+            host = data.get("host")
+            description = data.get("description")
+            start_time = data.get("startTime")
+
+            if not host or not description or not start_time:
+                self.set_status(400)
+                self.write({"success": False, "error": "Missing required fields"})
+                return
+
+            if not os.path.exists("schedule.json"):
+                with open("schedule.json", "w") as f:
+                    json.dump({}, f)
+
+            with open("schedule.json", "r") as f:
+                schedule = json.load(f)
+
+            schedule[datetime.now().isoformat()] = {
+                "host": host,
+                "description": description,
+                "start_time": start_time
+            }
+
+            with open("schedule.json", "w") as f:
+                json.dump(schedule, f, indent=4)
+
+            self.set_status(200)
+            self.write({"success": True})
+        except Exception as e:
             self.set_status(500)
             self.write({"success": False, "error": str(e)})
 
@@ -420,6 +483,8 @@ class ListenHandler(RequestHandler):
             response = requests.get(status_url)
             if response.status_code == 200:
                 json_data: dict[str, Union[str, dict[str, Union[str, int]]]] = response.json()
+                with open("example2.json", "r") as f:
+                    json_data = json.load(f)
             else:
                 self.set_status(500)
                 self.write("Failed to retrieve broadcast status.")
@@ -429,50 +494,8 @@ class ListenHandler(RequestHandler):
             self.write(f"Error while fetching JSON data: {str(e)}")
             return
 
-        # Extract relevant data for rendering
-        icestats = json_data.get("icestats", {})
-        source = icestats.get("source", {})
-
-        # Prepare data for template rendering
-        broadcast_data = {
-            "admin": icestats.get("admin", "N/A"),
-            "location": icestats.get("location", "N/A"),
-            "server_name": source.get("server_name", "Unspecified name"),
-            "server_description": source.get("server_description", "Unspecified description"),
-            "genre": source.get("genre", "N/A"),
-            "listeners": source.get("listeners", 0),
-            "host": source.get("listenurl", "/").split("/")[-1],
-            "listener_peak": source.get("listener_peak", 0),
-            "listen_url": source.get("listenurl", "#"),
-            "stream_start": source.get("stream_start", "N/A")
-        }
-
-        # Render the template with the extracted data
-        template = env.get_template("listeners_page.html")
-        rendered_template = template.render(
-            broadcast_status=broadcast_data
-        )
-        self.write(rendered_template)
-
-
-class SpecificListenerHandler(RequestHandler):
-    async def get(self, listener_name):
-        # URL for fetching the JSON data
-        status_url = "http://hbniaudio.hbni.net:8000/status-json.xsl"
-
-        # Attempt to get the JSON data from the URL
-        try:
-            response = requests.get(status_url)
-            if response.status_code == 200:
-                json_data: dict[str, Union[str, dict[str, Union[str, int]]]] = response.json()
-            else:
-                self.set_status(500)
-                self.write("Failed to retrieve broadcast status.")
-                return
-        except requests.exceptions.RequestException as e:
-            self.set_status(500)
-            self.write(f"Error while fetching JSON data: {str(e)}")
-            return
+        with open("schedule.json", "r") as f:
+            schedule = json.load(f)
 
         # Extract relevant data for rendering
         icestats = json_data.get("icestats", {})
@@ -496,10 +519,9 @@ class SpecificListenerHandler(RequestHandler):
         template = env.get_template("listeners_page.html")
         rendered_template = template.render(
             broadcast_status=broadcast_data,
-            listener_name=listener_name
+            schedule=schedule
         )
         self.write(rendered_template)
-
 
 
 class DownloadLinksJSONHandler(RequestHandler):
@@ -548,10 +570,10 @@ def make_app():
             url(r"/", MainHandler),
             url(r"/play_recording/(.*)", PlayRecordingHandler),
             url(r"/broadcast_ws", BroadcastWSHandler),
+            url(r"/schedule_broadcast", ScheduleBroadcastHandler),
             url(r"/broadcasting_page", BroadcastHandler),
             url(r"/validate-password", ValidatePasswordHandler),
             url(r"/listeners_page", ListenHandler),
-            url(r"/listeners_page/(.*)", SpecificListenerHandler),
             url(r"/download_links.json", DownloadLinksJSONHandler),
             url(r"/app/static/Recordings/(.*)", tornado.web.StaticFileHandler, {
                 'path': os.getenv("STATIC_RECORDINGS_PATH", "/app/static/Recordings")
@@ -565,4 +587,7 @@ def make_app():
 if __name__ == "__main__":
     app = tornado.httpserver.HTTPServer(make_app())
     app.listen(int(os.getenv("PORT", default=5053)))
+
+    tornado.ioloop.PeriodicCallback(cleanup_old_schedules, 5 * 60 * 1000).start()
+
     tornado.ioloop.IOLoop.instance().start()

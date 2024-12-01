@@ -10,6 +10,8 @@
     <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.7.12/dist/cdn/beer.min.js"></script>
     <script type="module"
         src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <link href="/static/theme.css" rel="stylesheet">
     <link rel="icon" href="/static/icon.png">
     <title>HBNI Audio Broadcasting</title>
@@ -38,7 +40,6 @@
                     <div class="field label border">
                         <input type="text" id="host" name="host" oninput="validateInput()">
                         <label>Colony Name</label>
-                        <span class="helper no-line">Use colony name, example: pineland</span>
                     </div>
                     <div class="field border label textarea">
                         <textarea type="text" id="description" name="description" required="required"></textarea>
@@ -52,7 +53,7 @@
                             <a class="link" href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>
                             if you need the password</span>
                     </div>
-                    <label class="checkbox">
+                    <label class="top-margin checkbox">
                         <input type="checkbox" id="isPrivate" name="isPrivate">
                         <span>Private Broadcast</span>
                     </label>
@@ -68,15 +69,23 @@
                 </nav>
             </div>
             <div class="grid padding">
+                <div class="grid max s12 center-align">
+                    <button id="scheduleBroadcast" class="small-round s12" onclick="ui('#schedule-dialog');">
+                        <i>schedule</i>
+                        <span>Schedule Broadcast</span>
+                    </button>
+                </div>
                 <div class="grid max s12 m8 l8">
-                    <button id="startBroadcast" class="small-round extra s12" disabled>
-                        <i>play_arrow</i>
-                        <span>Start Broadcast</span>
-                    </button>
-                    <button id="stopBroadcast" class="small-round extra s12" disabled>
-                        <i>stop</i>
-                        <span>Stop Broadcast</span>
-                    </button>
+                    <div class="grid max s12  center-align">
+                        <button id="startBroadcast" class="small-round extra s12" disabled>
+                            <i>play_circle</i>
+                            <span>Start Broadcast</span>
+                        </button>
+                        <button id="stopBroadcast" class="small-round extra s12" disabled>
+                            <i>stop_circle</i>
+                            <span>End Broadcast</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="middle-align center-align s12 m4 l4">
                     <button id="muteToggle" class="circle extra" style="height: 100px; width: 100px; border-radius: 50%;" disabled>
@@ -95,10 +104,41 @@
     </footer>
     <div class="snackbar error" id="incorrect-password">Incorrect Password</div>
     <div class="snackbar green" id="correct-password">Password Validated</div>
+    <div class="snackbar error" id="schedule-error">Error Submitting Schedule</div>
+    <div class="snackbar green" id="schedule-success">Schedule Submitted</div>
     <div class="snackbar" id="broadcast-started">
         <div class="max">Broadcast Started</div>
         <a class="inverse-link" href="/listeners_page" target="_blank">View</a>
     </div>
+    <div class="overlay blur"></div>
+    <dialog id="schedule-dialog" >
+        <h3 class="center-align">Schedule Broadcast</h3>
+        <div class="grid">
+            <div class="field label prefix border s12">
+                <i>artist</i>
+                <input type="text" id="schedule-host" name="schedule-host">
+                <label>Colony Name</label>
+            </div>
+            <div class="field border label textarea s12 bottom-margin">
+                <textarea type="text" id="schedule-description" name="schedule-description" required="required"></textarea>
+                <label>Description</label>
+                <span class="helper no-line">Explain what the broadcast is about</span>
+            </div>
+            <div class="field label prefix border s12">
+                <i>event</i>
+                <input type="date" id="date-time-picker" name="date">
+                <label>Date</label>
+            </div>
+            <button class="small-round s6" onclick="submitSchedule()">
+                <i>send</i>
+                <span>Submit</span>
+            </button>
+            <button class="small-round s6" onclick="ui('#schedule-dialog');">
+                <i>close</i>
+                <span>Cancel</span>
+            </button>
+        </div>
+    </dialog>
     <script>
         let mediaRecorder;
         let ws;
@@ -117,6 +157,7 @@
             const hostValue = hostInput.value.toLowerCase().replace(/ /g, '_').replace(/\d/g, '');
             hostInput.value = hostValue;
         }
+
         const mode = () => {
             let currentMode = localStorage.getItem("mode") || "dark";
             let newMode = currentMode === "dark" ? "light" : "dark";
@@ -144,13 +185,42 @@
             });
         }
 
+        async function submitSchedule() {
+            const host = document.getElementById("schedule-host").value;
+            const description = document.getElementById("schedule-description").value;
+            const startTime = document.getElementById("date-time-picker").value;
+
+            if (!host || !description || !startTime) {
+                alert("Please provide all the required fields.");
+                return;
+            }
+
+            // Send the data to the server
+            const response = await fetch("/schedule_broadcast", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ host, description, startTime })
+            });
+
+            if (response.ok) {
+                ui("#schedule-dialog");
+                ui("#schedule-success");
+            } else {
+                ui("#schedule-error");
+            }
+        }
+
         const updateIcon = (mode) => {
             const iconElements = document.querySelectorAll('#toggle-theme i');
             iconElements.forEach(iconElement => {
                 iconElement.textContent = mode === "dark" ? "light_mode" : "dark_mode";
             });
         };
+
         document.getElementById("startBroadcast").disabled = true;
+
         async function checkPassword() {
             const password = document.getElementById("password").value;
             console.log(password);
@@ -178,6 +248,7 @@
                 console.error("Error validating password:", error);
             }
         }
+
         document.getElementById("password").addEventListener("input", async () => {
             clearTimeout(timeout);
             timeout = setTimeout(checkPassword, 3000);
@@ -204,6 +275,7 @@
                 document.getElementById("startBroadcast").disabled = false;
             }
         });
+
         document.getElementById('startBroadcast').addEventListener('click', async () => {
             try {
                 const host = document.getElementById('host').value;
@@ -452,6 +524,13 @@
                 checkPassword();
             }
             updateImageSource();
+            flatpickr("#date-time-picker", {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                altInput: true,
+                altFormat: "F j, Y H:i",
+                defaultDate: new Date(),
+            });
         });
     </script>
 </body>
