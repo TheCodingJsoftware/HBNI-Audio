@@ -483,8 +483,8 @@ class ListenHandler(RequestHandler):
             response = requests.get(status_url)
             if response.status_code == 200:
                 json_data: dict[str, Union[str, dict[str, Union[str, int]]]] = response.json()
-                with open("example2.json", "r") as f:
-                    json_data = json.load(f)
+                # with open("example2.json", "r") as f:
+                #     json_data = json.load(f)
             else:
                 self.set_status(500)
                 self.write("Failed to retrieve broadcast status.")
