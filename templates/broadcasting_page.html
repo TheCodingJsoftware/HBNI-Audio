@@ -75,8 +75,8 @@
         </nav>
     </header>
     <main class="responsive center-align middle-align">
-        <article class="large-width" id="main-article">
-            <form id="metadataForm">
+        <article class="large-width no-padding" id="main-article">
+            <form class="padding" id="metadataForm">
                 <div class="field label border">
                     <input type="text" id="host" name="host" oninput="validateInput()">
                     <label>Colony Name</label>
@@ -94,7 +94,7 @@
                         if you need the password. The password is required to start or schedule a broadcast.
                     </span>
                 </div>
-                <label class="top-margin top-padding checkbox" style="display: none !important;">
+                <label class="top-margin top-padding checkbox">
                     <input type="checkbox" id="isPrivate" name="isPrivate">
                     <span>Private Broadcast</span>
                 </label>
@@ -102,18 +102,19 @@
             <nav class="center-align padding">
                 <i>volume_down</i>
                 <label class="small-width slider">
-                    <input type="range" id="volumeControl" min="0" max="2" step="0.1" value="1" disabled="disabled">
+                    <input type="range" id="volumeControl" min="0" max="15" step="0.1" value="1" disabled="disabled">
                     <span></span>
                     <div class="tooltip"></div>
                 </label>
                 <i>volume_up</i>
             </nav>
             <div class="grid padding">
-                <div class="grid max s12 center-align">
-                    <button id="scheduleBroadcast" class="small-round s12" onclick="ui('#schedule-dialog');" disabled>
+                <div class="row max s12 center-align">
+                    <button id="scheduleBroadcast" class="small-round max" onclick="ui('#schedule-dialog');" disabled>
                         <i>schedule</i>
                         <span>Schedule Broadcast</span>
                     </button>
+                    <button class="link transparent circle" onclick="share()" id="share-button"><i>share</i></button>
                 </div>
                 <div class="grid max s12 m8 l8">
                     <div class="grid max s12  center-align">
@@ -146,7 +147,6 @@
     <div class="snackbar" id="broadcast-started">
         <div class="max">Broadcast Started</div>
         <a class="inverse-link" href="/listeners_page" target="_blank">View</a>
-        <button class="inverse-link transparent circle" onclick="share()" id="share-button"><i>share</i></button>
     </div>
     <div class="overlay blur"></div>
     <dialog id="schedule-dialog" >
@@ -207,7 +207,14 @@
         };
 
         function share() {
-            const url = window.location.origin + "/listeners_page";
+            const isPrivate = document.getElementById('isPrivate').checked;
+            let url = "";
+            if (isPrivate) {
+                const host = document.getElementById('host').value;
+                url = "http://hbniaudio.hbni.net:8000/" + host;
+            } else {
+                url = window.location.origin + "/listeners_page";
+            }
             navigator.share({
                 title: "HBNI Audio Listeners Page",
                 text: "Listen to this broadcast on the HBNI Audio Listeners page!",
@@ -377,7 +384,6 @@
                     document.getElementById('password').disabled = true;
                     document.getElementById('muteToggle').disabled = false;
                     document.getElementById('volumeControl').disabled = false;
-                    document.getElementById('share-button').style.display = 'inline-flex';
 
                     const options = { mimeType: 'audio/webm;codecs=opus' };
 
@@ -419,7 +425,6 @@
                     document.getElementById('password').disabled = false;
                     document.getElementById('muteToggle').disabled = true;
                     document.getElementById('volumeControl').disabled = true;
-                    document.getElementById('share-button').style.display = 'none';
 
                     // Stop the audio stream
                     stream.getTracks().forEach(track => track.stop());
@@ -560,7 +565,6 @@
                     }
                 });
             });
-            document.getElementById('share-button').style.display = 'none';
             if (document.getElementById('password').value !== "") {
                 checkPassword();
             }

@@ -313,7 +313,7 @@ def cleanup_old_schedules():
         with open("schedule.json", "w") as f:
             json.dump(updated_schedule, f, indent=4)
 
-        print("Old schedules cleaned up successfully.")
+        # print("Old schedules cleaned up successfully.")
     except Exception as e:
         print(f"Error during schedule cleanup: {e}")
 
