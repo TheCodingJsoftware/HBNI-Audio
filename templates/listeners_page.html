@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="google" content="notranslate">
-    <link href="https://cdn.jsdelivr.net/npm/beercss@3.7.12/dist/cdn/beer.min.css" rel="stylesheet" />
-    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.7.12/dist/cdn/beer.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/beercss@3.7.14/dist/cdn/beer.min.css" rel="stylesheet" />
+    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.7.14/dist/cdn/beer.min.js"></script>
     <script type="module"
         src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js">
         </script>
@@ -20,12 +20,53 @@
     <meta property="og:description" content="Download or relisten to previously broadcasted streams." />
 </head>
 
+<style>
+    html,
+    body,
+    div,
+    article,
+    p,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    ul,
+    li,
+    span,
+    a,
+    button,
+    input,
+    textarea,
+    select,
+    details,
+    summary,
+    footer,
+    nav {
+        transition: background-color 0.3s ease-in-out, color 0.1s ease;
+    }
+    ::selection {
+        color: var(--on-primary);
+        background-color: var(--primary);
+    }
+
+    .hidden {
+        display: none !important;
+    }
+    article {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+</style>
+
 <header class="fixed primary" id="main-header">
     <nav>
-        <button class="circle transparent" onclick="ui('#info-dialog');">
-            <img src="/static/icon.png" class="responsive">
+        <button class="circle transparent" onclick="window.location.href='/';">
+            <i>arrow_back</i>
         </button>
-        <h5 class="max center-align small">HBNI Audio Listeners Page</h5>
+        <h5 class="max center-align small">Listeners Page</h5>
         <button class="circle transparent" onclick="mode()" id="toggle-theme">
             <i>dark_mode</i>
         </button>
@@ -58,39 +99,41 @@
             {% endfor %}
         </div>
         {% endif %}
+        {% if broadcast_status %}
         <h3 class="center-align">Active Broadcasts</h3>
         <hr>
         <div class="small-padding grid" id="broadcasts-container">
-            {% if broadcast_status and broadcast_status['host'].title() %}
-            <article class="s12 m12 l6" id="{{ broadcast_status['host'] }}">
+        {% for broadcast in broadcast_status %}
+            <article class="s12 m6 l6" id="{{ broadcast['host'] }}">
                 <div class="row no-space top-align">
-                    <h6 class="bottom-margin max">{{ broadcast_status["server_description"]}}</h6>
-                    <a class="transparent small-round circle link wave" href="http://hbniaudio.hbni.net:8000/{{ broadcast_status['host'] }}" target="_blank">
+                    <h6 class="bottom-margin max">{{ broadcast["server_description"]}}</h6>
+                    <a class="transparent small-round circle link wave" href="http://hbniaudio.hbni.net:8000/{{ broadcast['host'] }}" target="_blank">
                         <i>open_in_new</i>
                         <span>Direct Link</span>
                     </a>
-                    <button class="transparent small-round circle link" onclick="shareUpcomingBroadcast('{{ broadcast_status["server_description"] }}')">
+                    <button class="transparent small-round circle link" onclick="shareUpcomingBroadcast('{{ broadcast["server_description"] }}')">
                         <i>share</i>
                     </button>
-                    <button class="transparent small-round circle link" onclick="copyUpcomingBroadcastToClipboard('{{ broadcast_status["server_description"] }}')">
+                    <button class="transparent small-round circle link" onclick="copyUpcomingBroadcastToClipboard('{{ broadcast["server_description"] }}')">
                         <i>content_copy</i>
                     </button>
                 </div>
-                <div><i>artist</i> {{ broadcast_status["host"].replace("/", "").title() }}</div>
-                <div><i>event</i> {{ broadcast_status["stream_start"].replace("_", ":") }}</div>
-                <div><i>hearing</i> Current Listeners: {{ broadcast_status['listeners'] }}</div>
-                <div><i>trending_up</i> Listener Peak: {{ broadcast_status['listener_peak'] }}</div>
+                <div><i>artist</i> {{ broadcast["host"].replace("/", "").title() }}</div>
+                <div><i>event</i> {{ broadcast["stream_start"].replace("_", ":") }}</div>
+                <div><i>hearing</i> Current Listeners: {{ broadcast['listeners'] }}</div>
+                <div><i>trending_up</i> Listener Peak: {{ broadcast['listener_peak'] }}</div>
                 <div class="top-margin center-align middle-align">
-                    <audio controls autoplay class="s12 m8 l8" title="{{ broadcast_status['server_description'] }}">
-                        <source src="http://hbniaudio.hbni.net:8000/{{ broadcast_status['host'] }}" type="audio/mpeg">
+                    <audio controls autoplay class="s12 m8 l8" title="{{ broadcast['server_description'] }}">
+                        <source src="http://hbniaudio.hbni.net:8000/{{ broadcast['host'] }}" type="audio/mpeg">
                         Your browser does not support the audio element.
                     </audio>
                 </div>
             </article>
-            {% else %}
-            <p>Broadcast status is not available at the moment.</p>
-            {% endif %}
+        {% endfor %}
         </div>
+        {% else %}
+        <h6 class="center-align middle-align extra-padding extra-margin">No broadcasts currently online.</h6>
+        {% endif %}
         <div class="snackbar green" id="copied-to-clipboard">Copied to Clipboard</div>
     </main>
     <script>

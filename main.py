@@ -6,7 +6,7 @@ import subprocess
 import traceback
 from datetime import datetime, timedelta
 import shutil
-import jwt #PyJWT
+import jwt  # PyJWT
 
 import asyncpg
 import jinja2
@@ -27,8 +27,16 @@ load_dotenv()
 loader = jinja2.FileSystemLoader("templates")
 env = jinja2.Environment(loader=loader)
 
+
 class Broadcast:
-    def __init__(self, host: str, description: str, password: str, is_private: bool, start_time: datetime):
+    def __init__(
+        self,
+        host: str,
+        description: str,
+        password: str,
+        is_private: bool,
+        start_time: datetime,
+    ):
         self.host = host
         self.description = description
         self.password = password
@@ -37,7 +45,6 @@ class Broadcast:
 
 
 active_broadcasts: dict[str, Broadcast] = {}
-
 
 
 async def get_db_connection():
@@ -186,7 +193,9 @@ class MainHandler(RequestHandler):
                 with open(f"{path}/recording_status.json", "r", encoding="utf-8") as f:
                     recording_status = json.load(f)
             except Exception:
-                recording_status = {"ERROR": "Could not load recording status JSON file."}
+                recording_status = {
+                    "ERROR": "Could not load recording status JSON file."
+                }
 
             template = env.get_template("index.html")
             rendered_template = template.render(
@@ -201,7 +210,9 @@ class MainHandler(RequestHandler):
 
 
 def url_for_static(filename):
-    static_recordings_path = os.getenv("STATIC_RECORDINGS_PATH", "/app/static/Recordings")
+    static_recordings_path = os.getenv(
+        "STATIC_RECORDINGS_PATH", "/app/static/Recordings"
+    )
     return f"{static_recordings_path}/{filename}"
 
 
@@ -264,10 +275,10 @@ class ValidatePasswordHandler(RequestHandler):
                     {
                         "exp": datetime.now() + timedelta(hours=1),
                         "iat": datetime.now(),
-                        "scope": "broadcast"
+                        "scope": "broadcast",
                     },
                     os.getenv("SECRET_KEY"),
-                    algorithm="HS256"
+                    algorithm="HS256",
                 )
                 self.write({"success": True, "token": token})
             else:
@@ -293,7 +304,8 @@ def cleanup_old_schedules():
 
         # Remove old schedules
         updated_schedule = {
-            key: value for key, value in schedule.items()
+            key: value
+            for key, value in schedule.items()
             if datetime.fromisoformat(value["start_time"]) > now
         }
 
@@ -329,7 +341,7 @@ class ScheduleBroadcastHandler(RequestHandler):
             schedule[datetime.now().isoformat()] = {
                 "host": host,
                 "description": description,
-                "start_time": start_time
+                "start_time": start_time,
             }
 
             with open("schedule.json", "w") as f:
@@ -358,8 +370,16 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
         if isinstance(message, str):
             try:
                 metadata: dict[str, str] = json.loads(message)
-                self.host = metadata.get("host", "unknown").lower().strip().replace(" ", "_").replace("/", "")
-                self.description = metadata.get("description", "Unspecified Description")
+                self.host = (
+                    metadata.get("host", "unknown")
+                    .lower()
+                    .strip()
+                    .replace(" ", "_")
+                    .replace("/", "")
+                )
+                self.description = metadata.get(
+                    "description", "Unspecified Description"
+                )
                 self.password = metadata.get("password", "")
                 if self.password != os.getenv("HBNI_STREAMING_PASSWORD"):
                     self.write_message("Invalid password.")
@@ -371,34 +391,43 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
 
                 self.ffmpeg_process = subprocess.Popen(
                     [
-                        'ffmpeg',
-                        '-re',
-                        '-i', '-',
-                        '-c:a', 'libmp3lame',  # Use MP3 codec
-                        '-b:a', '128k',         # Audio bitrate
-                        '-content_type', 'audio/mpeg',
-                        '-y',  # Overwrite output file if it already exists
-
+                        "ffmpeg",
+                        "-re",
+                        "-i",
+                        "-",
+                        "-c:a",
+                        "libmp3lame",  # Use MP3 codec
+                        "-b:a",
+                        "128k",  # Audio bitrate
+                        "-content_type",
+                        "audio/mpeg",
+                        "-y",  # Overwrite output file if it already exists
                         # Add metadata for the Icecast stream
-                        '-metadata', f'title={self.description}',
-                        '-metadata', f'artist={self.host}',
-                        '-metadata', 'genre=various',
-                        '-metadata', f'comment={self.description}',
-
+                        "-metadata",
+                        f"title={self.description}",
+                        "-metadata",
+                        f"artist={self.host}",
+                        "-metadata",
+                        "genre=various",
+                        "-metadata",
+                        f"comment={self.description}",
                         # Output 1: Icecast stream
-                        '-f', 'mp3',
-                        f'icecast://source:{self.password}@hbniaudio.hbni.net:8000/{self.host}',
-
+                        "-f",
+                        "mp3",
+                        f"icecast://source:{self.password}@hbniaudio.hbni.net:8000/{self.host}",
                         # Output 2: Local MP3 file to save the broadcast
-                        '-f', 'wav',
-                        self.output_filename
+                        "-f",
+                        "wav",
+                        self.output_filename,
                     ],
-                    stdin=subprocess.PIPE  # We want to send binary audio data
+                    stdin=subprocess.PIPE,  # We want to send binary audio data
                 )
 
                 # Check if the process started successfully
                 if self.ffmpeg_process.poll() is None:
-                    print(f"FFmpeg process started successfully for {self.output_filename}")
+                    print(
+                        f"FFmpeg process started successfully for {self.output_filename}"
+                    )
                 else:
                     print(f"FFmpeg process failed to start for {self.output_filename}")
 
@@ -448,20 +477,34 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
             else:
                 formated_length = f"{hours:02d}h {minutes:02d}m {seconds:02d}s"
 
-            new_output_filename = self.output_filename.replace("BROADCAST_LENGTH", formated_length)
-            static_recordings_path = os.getenv("STATIC_RECORDINGS_PATH", "/app/static/Recordings").replace("\\", "/").replace("//", "/").replace("//", "\\\\").replace("/", "\\")
+            new_output_filename = self.output_filename.replace(
+                "BROADCAST_LENGTH", formated_length
+            )
+            static_recordings_path = (
+                os.getenv("STATIC_RECORDINGS_PATH", "/app/static/Recordings")
+                .replace("\\", "/")
+                .replace("//", "/")
+                .replace("//", "\\\\")
+                .replace("/", "\\")
+            )
             if total_minutes > 10.0:
-                shutil.move(self.output_filename, f"{static_recordings_path}\\{new_output_filename}")
+                shutil.move(
+                    self.output_filename,
+                    f"{static_recordings_path}\\{new_output_filename}",
+                )
                 synology_uploader.upload(
                     new_output_filename,
                     f"{static_recordings_path}\\{new_output_filename}",
                     self.host,
                     self.description,
                     self.starting_time.strftime("%B %d %A %Y %I_%M %p"),
-                    total_minutes
+                    total_minutes,
                 )
             else:
-                shutil.move(self.output_filename, f"tests\\{new_output_filename}")
+                shutil.move(
+                    self.output_filename,
+                    f"{static_recordings_path}\\Tests\\{new_output_filename}",
+                )
 
 
 class BroadcastHandler(RequestHandler):
@@ -482,9 +525,9 @@ class ListenHandler(RequestHandler):
         try:
             response = requests.get(status_url)
             if response.status_code == 200:
-                json_data: dict[str, Union[str, dict[str, Union[str, int]]]] = response.json()
-                # with open("example2.json", "r") as f:
-                #     json_data = json.load(f)
+                json_data: dict[str, Union[str, dict[str, Union[str, int]]]] = (
+                    response.json()
+                )
             else:
                 self.set_status(500)
                 self.write("Failed to retrieve broadcast status.")
@@ -499,27 +542,55 @@ class ListenHandler(RequestHandler):
 
         # Extract relevant data for rendering
         icestats = json_data.get("icestats", {})
-        source = icestats.get("source", {})
+        sources: Union[dict[str, Union[str, int]], list[dict[str, Union[str, int]]]] = (
+            icestats.get("source", {})
+        )
+        broadcast_data: list[dict[str, Union[str, int]]] = []
 
         # Prepare data for template rendering
-        broadcast_data = {
-            "admin": icestats.get("admin", "N/A"),
-            "location": icestats.get("location", "N/A"),
-            "server_name": source.get("server_name", "Unspecified name"),
-            "server_description": source.get("server_description", "Unspecified description"),
-            "genre": source.get("genre", "N/A"),
-            "listeners": source.get("listeners", 0),
-            "host": source.get("listenurl", "/").split("/")[-1],
-            "listener_peak": source.get("listener_peak", 0),
-            "listen_url": source.get("listenurl", "#"),
-            "stream_start": source.get("stream_start", "N/A")
-        }
+        if sources:
+            if isinstance(sources, dict):  # Only one broadcast is currently online
+                broadcast_data.append(
+                    {
+                        "admin": icestats.get("admin", "N/A"),
+                        "location": icestats.get("location", "N/A"),
+                        "server_name": sources.get("server_name", "Unspecified name"),
+                        "server_description": sources.get(
+                            "server_description", "Unspecified description"
+                        ),
+                        "genre": sources.get("genre", "N/A"),
+                        "listeners": sources.get("listeners", 0),
+                        "host": sources.get("listenurl", "/").split("/")[-1],
+                        "listener_peak": sources.get("listener_peak", 0),
+                        "listen_url": sources.get("listenurl", "#"),
+                        "stream_start": sources.get("stream_start", "N/A"),
+                    }
+                )
+            elif isinstance(sources, list):  # Multiple broadcasts are currently online
+                for source in sources:
+                    broadcast_data.append(
+                        {
+                            "admin": icestats.get("admin", "N/A"),
+                            "location": icestats.get("location", "N/A"),
+                            "server_name": source.get(
+                                "server_name", "Unspecified name"
+                            ),
+                            "server_description": source.get(
+                                "server_description", "Unspecified description"
+                            ),
+                            "genre": source.get("genre", "N/A"),
+                            "listeners": source.get("listeners", 0),
+                            "host": source.get("listenurl", "/").split("/")[-1],
+                            "listener_peak": source.get("listener_peak", 0),
+                            "listen_url": source.get("listenurl", "#"),
+                            "stream_start": source.get("stream_start", "N/A"),
+                        }
+                    )
 
         # Render the template with the extracted data
         template = env.get_template("listeners_page.html")
         rendered_template = template.render(
-            broadcast_status=broadcast_data,
-            schedule=schedule
+            broadcast_status=broadcast_data, schedule=schedule
         )
         self.write(rendered_template)
 
@@ -530,13 +601,13 @@ class DownloadLinksJSONHandler(RequestHandler):
 
         json_response = {}
         for row in audio_data:
-            file_name = row['filename']
-            file_description = row['description']
-            file_date = row['date']
-            file_length = row['length']
-            host = row['host']
-            file_id = row['id']
-            download_link = row['download_link']
+            file_name = row["filename"]
+            file_description = row["description"]
+            file_date = row["date"]
+            file_length = row["length"]
+            host = row["host"]
+            file_id = row["id"]
+            download_link = row["download_link"]
 
             json_response[file_name] = {
                 "date": file_date,
@@ -544,7 +615,7 @@ class DownloadLinksJSONHandler(RequestHandler):
                 "downloadLink": download_link,
                 "length": file_length,
                 "host": host,
-                "id": file_id
+                "id": file_id,
             }
 
         self.set_header("Content-Type", "application/json")
@@ -575,12 +646,16 @@ def make_app():
             url(r"/validate-password", ValidatePasswordHandler),
             url(r"/listeners_page", ListenHandler),
             url(r"/download_links.json", DownloadLinksJSONHandler),
-            url(r"/app/static/Recordings/(.*)", tornado.web.StaticFileHandler, {
-                'path': os.getenv("STATIC_RECORDINGS_PATH", "/app/static/Recordings")
-            }),
+            url(
+                r"/app/static/Recordings/(.*)",
+                tornado.web.StaticFileHandler,
+                {"path": os.getenv("STATIC_RECORDINGS_PATH", "/app/static/Recordings")},
+            ),
             url(r"/recording_status.json", RecordingStatusJSONHandler),
         ],
-        static_path=os.path.join(os.path.dirname(__file__), "static"),  # Path inside container
+        static_path=os.path.join(
+            os.path.dirname(__file__), "static"
+        ),  # Path inside container
     )
 
 

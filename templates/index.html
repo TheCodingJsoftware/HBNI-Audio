@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="google" content="notranslate">
-    <link href="https://cdn.jsdelivr.net/npm/beercss@3.7.12/dist/cdn/beer.min.css" rel="stylesheet" />
-    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.7.12/dist/cdn/beer.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/beercss@3.7.14/dist/cdn/beer.min.css" rel="stylesheet" />
+    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.7.14/dist/cdn/beer.min.js"></script>
     <script type="module"
         src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js">
     </script>
@@ -278,14 +278,6 @@
 </dialog>
 
 <body class="dark">
-    <nav class="bottom" id="bottom-nav" style="max-height: 50px;">
-        <a href="javascript:void(0)" onclick="ui('#faq-dialog');">
-            <i>help</i>
-        </a>
-        <a href="javascript:void(0)" onclick="ui('#download-dialog');">
-            <i>apps</i>
-        </a>
-    </nav>
     <main class="responsive">
         <br>
         <div class="field label prefix border">
@@ -383,6 +375,44 @@
         </div>
         {% endif %}
     </main>
+    <footer class="fixed bottom surface-container m l" id="bottom-nav">
+        <div class="row center-align">
+            <button class="transparent vertical tiny" onclick="ui('#faq-dialog');">
+                <i>help</i>
+                <span>FAQ</span>
+            </button>
+            <button class="transparent vertical tiny" onclick="ui('#download-dialog');">
+                <i>apps</i>
+                <span>Download</span>
+            </button>
+            <button class="transparent vertical tiny" onclick="window.location.href='/broadcasting_page';">
+                <i>adaptive_audio_mic</i>
+                <span>Broadcasting Page</span>
+            </button>
+            <button class="transparent vertical tiny" onclick="window.location.href='/listeners_page';">
+                <i>media_output</i>
+                <span>Listeners Page</span>
+            </button>
+        </div>
+    </footer>
+    <nav class="bottom surface-container s" id="bottom-nav" style="max-height: 50px !important;">
+        <button class="transparent circle tiny" onclick="ui('#faq-dialog');">
+            <i>help</i>
+            <div class="tooltip top">FAQ</div>
+        </button>
+        <button class="transparent circle tiny" onclick="ui('#download-dialog');">
+            <i>apps</i>
+            <div class="tooltip top">Download</div>
+        </button>
+        <button class="transparent circle tiny" onclick="window.location.href='/broadcasting_page';">
+            <i>adaptive_audio_mic</i>
+            <div class="tooltip top">Broadcasting Page</div>
+        </button>
+        <button class="transparent circle tiny" onclick="window.location.href='/listeners_page';">
+            <i>media_output</i>
+            <div class="tooltip top">Listeners Page</div>
+        </button>
+    </nav>
 </body>
 <script>
     const mode = () => {
