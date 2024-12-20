@@ -1,339 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <title>{{file_name}}</title>
+  <head>
+    <title>{{ file_name }}</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <meta name="google" content="notranslate" />
     <link href="https://cdn.jsdelivr.net/npm/beercss@3.7.14/dist/cdn/beer.min.css" rel="stylesheet" />
     <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.7.14/dist/cdn/beer.min.js"></script>
-    <script type="module"
-        src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js">
-    </script>
-    <link href="/static/theme.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css" rel="stylesheet">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/theme.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css" rel="stylesheet" />
     <link rel="icon" href="/static/icon.png" />
     <title>{{ title }}</title>
-    <meta property="og:title" content="HBNI Audio Archive - {{title}}" />
+    <meta property="og:title" content="HBNI Audio Archive - {{ title }}" />
     <meta property="og:url" content="https://audioarchives.hbni.net" />
     <meta property="og:image" content="https://audioarchives.hbni.net/static/hbnilogo.png" />
-    <meta property="og:description" content="{{file_name}}" />
-</head>
+    <meta property="og:description" content="{{ file_name }}" />
+  </head>
 
-<style>
-    html,
-    body,
-    div,
-    article,
-    p,
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6,
-    ul,
-    li,
-    span,
-    a,
-    button,
-    input,
-    textarea,
-    select,
-    details,
-    summary,
-    footer,
-    nav {
-        transition: background-color 0.3s ease-in-out, color 0.1s ease;
-    }
-    ::selection {
-        color: var(--on-primary);
-        background-color: var(--primary);
-    }
-    #music-note {
-        color: var(--primary);
-    }
-</style>
-
-<body class="dark">
+  <body class="dark">
     <header class="fixed primary" id="header">
-        <nav>
-            <button class="circle transparent" onclick="location.href='/';">
-                <i>arrow_back</i>
-            </button>
-            <h5 class="max">{{title}}</h5>
-            <button class="circle transparent" onclick="mode()" id="toggle-theme">
-                <i>dark_mode</i>
-            </button>
-        </nav>
+      <nav>
+        <button class="circle transparent" onclick="location.href='/';"><i>arrow_back</i></button>
+        <h5 class="max">{{ title }}</h5>
+        <button class="circle transparent" onclick="mode()" id="toggle-theme"><i>dark_mode</i></button>
+      </nav>
     </header>
     <div class="overlay blur"></div>
     <dialog class="left" id="info-dialog">
-        <nav class="right-align">
-            <button class="circle transparent" onclick="ui('#info-dialog');">
-                <i>close</i>
-            </button>
-        </nav>
-        <p>Visit Count: {{visit_count}}</p>
-        <p>Latest Visit: {{latest_visit}}</p>
+      <nav class="right-align">
+        <button class="circle transparent" onclick="ui('#info-dialog');"><i>close</i></button>
+      </nav>
+      <p>Visit Count: {{ visit_count }}</p>
+      <p>Latest Visit: {{ latest_visit }}</p>
     </dialog>
     <main class="responsive center-align middle-align">
-        <article class="no-padding medium-width" id="main-article">
-            <div class="center-align" style="background-color: var(--primary)">
-                <h1 class="extra" id="music-note">♫</h1>
+      <article class="no-padding medium-width" id="main-article">
+        <div class="center-align" style="background-color: var(--primary)">
+          <h1 class="extra music-note">♫</h1>
+        </div>
+        <div class="left-align">
+          <button class="chip circle link no-padding tiny-margin no-border" onclick="ui('#info-dialog');"><i>info</i></button>
+        </div>
+        <div class="padding">
+          <div class="center-align">{{ file_name.replace('_', ':').replace('.mp3', '') }}</div>
+          <div class="left-align">
+            <i>artist</i> {{ title }}
+          </div>
+          <div class="row max">
+            <label class="checkbox icon">
+              <input type="checkbox" id="play-button" />
+              <span>
+                <i>play_arrow</i>
+                <i>pause</i>
+              </span>
+            </label>
+            <label class="slider">
+              <input type="range" max="100" value="0" id="timeline" />
+              <span></span>
+            </label>
+            <label class="checkbox icon">
+              <input type="checkbox" id="sound-button" />
+              <span>
+                <i>volume_up</i>
+                <i>volume_off</i>
+              </span>
+            </label>
+          </div>
+          <div class="center-align middle-align">
+            <span id="current-time">00:00</span>/
+            <span id="total-time">00:00</span>
+          </div>
+          <nav>
+            <div class="grid max">
+              <button class="small-round responsive s6 m6 l6" id="download-button" data-url="{{ url_for(file_name) }}">
+                <i>download</i>
+                <span>Download</span>
+              </button>
+              <button class="small-round responsive s6 m6 l6" onclick="sharePage()">
+                <i>share</i>
+                <span>Share</span>
+              </button>
             </div>
-            <div class="left-align">
-                <button class="chip circle link no-padding tiny-margin no-border" onclick="ui('#info-dialog');">
-                    <i>info</i>
-                </button>
-            </div>
-            <div class="padding">
-                <div class="center-align">{{file_name.replace("_", ":").replace(".mp3", "")}}</div>
-                <div class="left-align"><i>artist</i> {{title}}</div>
-                <div class="row max">
-                    <label class="checkbox icon">
-                        <input type="checkbox" id="play-button" />
-                        <span>
-                            <i>play_arrow</i>
-                            <i>pause</i>
-                        </span>
-                    </label>
-                    <label class="slider">
-                        <input type="range" max="100" value="0" id="timeline" />
-                        <span> </span>
-                    </label>
-                    <label class="checkbox icon">
-                        <input type="checkbox" id="sound-button" />
-                        <span>
-                            <i>volume_up</i>
-                            <i>volume_off</i>
-                        </span>
-                    </label>
-                </div>
-                <div class="center-align middle-align">
-                    <span id="current-time">00:00</span>/
-                    <span id="total-time">00:00</span>
-                </div>
-                <nav>
-                    <div class="grid max">
-                        <button class="small-round responsive s6 m6 l6 " id="download-button"
-                            data-url="{{ url_for(file_name) }}">
-                            <i>download</i>
-                            <span>Download</span>
-                        </button>
-                        <button class="small-round responsive s6 m6 l6 " onclick="sharePage()">
-                            <i>share</i>
-                            <span>Share</span>
-                        </button>
-                    </div>
-                </nav>
-            </div>
-            <canvas id="canvas" style="width: 100%; height: 100px"></canvas>
-        </article>
-        <audio class="audio" id="audio">
-            <source src="{{ url_for(file_name) }}" type="audio/mpeg" />
-        </audio>
+          </nav>
+        </div>
+        <canvas id="canvas" style="width: 100%; height: 100px"></canvas>
+      </article>
+      <audio class="audio" id="audio">
+        <source src="{{ url_for(file_name) }}" type="audio/mpeg" />
+      </audio>
     </main>
-</body>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        let savedMode = localStorage.getItem("mode") || "light";
-        ui("mode", savedMode);
-        updateIcon(savedMode);
-        const downloadButton = document.getElementById("download-button");
-
-        downloadButton.addEventListener("click", function () {
-            const url = this.getAttribute("data-url");
-            const link = document.createElement("a");
-            link.href = url;
-            link.setAttribute("download", "");
-            link.click();
-        });
-    });
-    const mode = () => {
-        let currentMode = localStorage.getItem("mode") || "light";
-        let newMode = currentMode === "dark" ? "light" : "dark";
-        localStorage.setItem("mode", newMode); // Save mode to localStorage
-        ui("mode", newMode);
-        updateIcon(newMode);
-    };
-
-    const updateIcon = (mode) => {
-        const iconElements = document.querySelectorAll("#toggle-theme i");
-        iconElements.forEach((iconElement) => {
-            iconElement.textContent = mode === "dark" ? "light_mode" : "dark_mode";
-        });
-        const musicNote = document.querySelector("#music-note");
-        musicNote.style.color = "var(--on-primary)";
-    };
-
-    function sharePage() {
-        if (navigator.share) {
-            navigator
-                .share({
-                    title: document.title,
-                    url: window.location.href,
-                })
-                .then(() => {
-                    console.log("Thanks for sharing!");
-                })
-                .catch(console.error);
-        } else {
-            alert("Share not supported on this browser, do it the old way.");
-        }
-    }
-    const playerButton = document.querySelector("#play-button"),
-        audio = document.querySelector("audio"),
-        timeline = document.querySelector("#timeline"),
-        soundButton = document.querySelector("#sound-button"),
-        currentTimeDisplay = document.getElementById("current-time"),
-        totalTimeDisplay = document.getElementById("total-time"),
-        playIcon = `play_arrow`,
-        pauseIcon = `stop`,
-        volumeOn = `volume_up`,
-        muteIcon = `volume_off`;
-
-    function updateTime() {
-        var audio = document.querySelector("audio");
-        let currentMinutes = Math.floor(audio.currentTime / 60);
-        let currentSeconds = Math.floor(audio.currentTime - currentMinutes * 60);
-        let durationMinutes = Math.floor(audio.duration / 60);
-        let durationSeconds = Math.floor(audio.duration - durationMinutes * 60);
-
-        currentMinutes =
-            currentMinutes < 10 ? "0" + currentMinutes : currentMinutes;
-        currentSeconds =
-            currentSeconds < 10 ? "0" + currentSeconds : currentSeconds;
-        durationMinutes =
-            durationMinutes < 10 ? "0" + durationMinutes : durationMinutes;
-        durationSeconds =
-            durationSeconds < 10 ? "0" + durationSeconds : durationSeconds;
-
-        currentTimeDisplay.textContent = `${currentMinutes}:${currentSeconds}`;
-        totalTimeDisplay.textContent = `${durationMinutes}:${durationSeconds}`;
-
-        timeline.value = (audio.currentTime / audio.duration) * 100;
-    }
-
-    audio.addEventListener("timeupdate", updateTime);
-
-    function toggleAudio() {
-        var audio = document.querySelector("audio");
-        var canvas = document.querySelector("canvas");
-        var ctx = canvas.getContext("2d");
-
-        var soundButton = document.querySelector("#sound-button");
-
-        soundButton.addEventListener("click", toggleSound);
-
-        if (audio.paused) {
-            audio.play();
-        } else {
-            audio.pause();
-        }
-        if (!audioContext) {
-            audioContext = new(window.AudioContext || window.webkitAudioContext)();
-            var src = audioContext.createMediaElementSource(audio); // Fixed variable name here
-
-            var analyser = audioContext.createAnalyser();
-
-            src.connect(analyser);
-            analyser.connect(audioContext.destination);
-
-            var fftSize = 256; // Default value for mobile
-
-            // Check if the device is a PC (assuming PC if screen width > 768px)
-            if (window.innerWidth > 800) {
-                fftSize = 512; // Change to 2048 for PC
-            }
-            analyser.fftSize = fftSize;
-            var bufferLength = analyser.frequencyBinCount;
-
-            var dataArray = new Uint8Array(bufferLength);
-
-            // Get the device pixel ratio
-            var devicePixelRatio = window.devicePixelRatio || 1;
-
-            // Adjust canvas dimensions based on device pixel ratio
-            var canvasWidth = canvas.clientWidth * devicePixelRatio;
-            var canvasHeight = canvas.clientHeight * devicePixelRatio;
-
-            canvas.width = canvasWidth;
-            canvas.height = canvasHeight;
-
-            var WIDTH = canvas.width;
-            var HEIGHT = canvas.height;
-
-            var barWidth = (WIDTH / bufferLength) * 2.5;
-            var barHeight;
-            var x = 0;
-
-            function renderFrame() {
-                requestAnimationFrame(renderFrame);
-
-                x = 0;
-
-                analyser.getByteFrequencyData(dataArray);
-
-                var articleBackgroundColor = window.getComputedStyle(
-                    document.getElementById("main-article")
-                ).backgroundColor;
-
-                ctx.fillStyle = articleBackgroundColor;
-                ctx.fillRect(0, 0, WIDTH, HEIGHT);
-
-                for (var i = 0; i < bufferLength; i++) {
-                    if (window.innerWidth > 800) {
-                        barHeight = dataArray[i] / 4;
-                        barHeight = Math.min(barHeight, HEIGHT - 10);
-                    } else {
-                        barHeight = dataArray[i] / 2;
-                    }
-
-                    var r = barHeight + 25 * (i / bufferLength);
-                    var g = barHeight + 250 * (i / bufferLength);
-                    var b = barHeight + 50 * (i / bufferLength);
-
-                    var header = document.getElementById("header");
-                    var headerStyle = getComputedStyle(header);
-                    var headerBackgroundColor = headerStyle.backgroundColor;
-                    ctx.fillStyle = headerBackgroundColor;
-                    ctx.fillRect(x, HEIGHT - barHeight, barWidth, barHeight);
-
-                    x += barWidth + 1;
-                }
-            }
-
-            audio.play();
-            renderFrame();
-        }
-    }
-
-    playerButton.addEventListener("click", toggleAudio);
-
-    function changeTimelinePosition() {
-        const percentagePosition = (100 * audio.currentTime) / audio.duration;
-        timeline.value = percentagePosition;
-    }
-
-    audio.ontimeupdate = changeTimelinePosition;
-
-    function audioEnded() {}
-    audio.onended = audioEnded;
-
-    function changeSeek() {
-        const time = (timeline.value * audio.duration) / 100;
-        audio.currentTime = time;
-    }
-
-    timeline.addEventListener("change", changeSeek);
-    var audioContext;
-
-    function toggleSound() {
-        audio.muted = !audio.muted;
-    }
-</script>
-
+    <script type="text/javascript" src="/static/js/play_recording.js"></script>
+  </body>
 </html>

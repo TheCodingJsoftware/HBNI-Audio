@@ -1,583 +1,281 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <meta name="google" content="notranslate" />
+        <link
+            href="https://cdn.jsdelivr.net/npm/beercss@3.7.14/dist/cdn/beer.min.css"
+            rel="stylesheet"
+        />
+        <script
+            type="module"
+            src="https://cdn.jsdelivr.net/npm/beercss@3.7.14/dist/cdn/beer.min.js"
+        ></script>
+        <script
+            type="module"
+            src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"
+        ></script>
+        <link
+            rel="stylesheet"
+            type="text/css"
+            href="https://npmcdn.com/flatpickr/dist/themes/dark.css"
+        />
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <link rel="stylesheet" type="text/css" href="/static/css/theme.css" />
+        <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
+        <link rel="icon" href="/static/icon.png" />
+        <title>HBNI Audio Broadcasting</title>
+        <meta property="og:title" content="HBNI Audio Broadcasting" />
+        <meta
+            property="og:url"
+            content="https://audioarchives.hbni.net/broadcasting_page"
+        />
+        <meta
+            property="og:image"
+            content="https://audioarchives.hbni.net/static/icon.png"
+        />
+        <meta
+            property="og:description"
+            content="Broadcast streams to the HBNI Audio Streaming Service."
+        />
+    </head>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <meta name="google" content="notranslate">
-    <link href="https://cdn.jsdelivr.net/npm/beercss@3.7.14/dist/cdn/beer.min.css" rel="stylesheet" />
-    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.7.14/dist/cdn/beer.min.js"></script>
-    <script type="module"
-        src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <link href="/static/theme.css" rel="stylesheet">
-    <link rel="icon" href="/static/icon.png">
-    <title>HBNI Audio Broadcasting</title>
-    <meta property="og:title" content="HBNI Audio Broadcasting" />
-    <meta property="og:url" content="https://audioarchives.hbni.net/broadcasting_page" />
-    <meta property="og:image" content="https://audioarchives.hbni.net/static/icon.png" />
-    <meta property="og:description" content="Download or relisten to previously broadcasted streams." />
-</head>
-
-<style>
-    html,
-    body,
-    div,
-    article,
-    p,
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6,
-    ul,
-    li,
-    span,
-    a,
-    button,
-    input,
-    textarea,
-    select,
-    details,
-    summary,
-    footer,
-    nav {
-        transition: background-color 0.3s ease-in-out, color 0.1s ease;
-    }
-    ::selection {
-        color: var(--on-primary);
-        background-color: var(--primary);
-    }
-
-    .hidden {
-        display: none !important;
-    }
-    article {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
-</style>
-
-<body class="dark">
-    <header class="fixed primary" id="header">
-        <nav>
-            <button class="circle transparent" onclick="window.location.href='/';">
-                <i>arrow_back</i>
-            </button>
-            <h5 class="max center-align small">Broadcasting Page</h5>
-            <button class="circle transparent" onclick="mode()" id="toggle-theme">
-                <i>dark_mode</i>
-            </button>
-        </nav>
-    </header>
-    <main class="responsive center-align middle-align">
-        <article class="large-width no-padding" id="main-article">
-            <form class="padding" id="metadataForm">
-                <div class="field label border">
-                    <input type="text" id="host" name="host" oninput="validateInput()">
+    <body class="dark">
+        <header class="fixed primary" id="header">
+            <nav>
+                <button
+                    class="circle transparent"
+                    onclick="window.location.href='/';"
+                >
+                    <i>arrow_back</i>
+                </button>
+                <h5 class="max center-align small">Broadcasting Page</h5>
+                <button
+                    class="circle transparent"
+                    onclick="mode()"
+                    id="toggle-theme"
+                >
+                    <i>dark_mode</i>
+                </button>
+            </nav>
+        </header>
+        <main class="responsive">
+          <div class="large-width center" >
+            <article class="no-padding">
+                <details open>
+                  <summary class="small-round padding" style="font-size: 25px;">
+                    Broadcast Details
+                  </summary>
+                  <form class="padding" id="metadataForm">
+                      <div class="field label border">
+                          <input
+                              type="text"
+                              id="host"
+                              name="host"
+                              oninput="validateInput()"
+                          />
+                          <label>Colony Name</label>
+                      </div>
+                      <div class="field border label textarea">
+                          <textarea
+                              type="text"
+                              id="description"
+                              name="description"
+                              required="required"
+                          ></textarea>
+                          <label>Description</label>
+                          <span class="helper no-line left-align"
+                              >Explain what the broadcast is about</span
+                          >
+                      </div>
+                      <div class="field label border">
+                          <input type="password" id="password" name="password" />
+                          <label>Password</label>
+                          <span class="helper no-line left-align">
+                              Contact
+                              <a class="link" href="mailto:jared@pinelandfarms.ca"
+                                  >jared@pinelandfarms.ca</a
+                              >
+                              or
+                              <a
+                                  class="link"
+                                  href="mailto:justin@pinelandfarms.ca"
+                                  >justin@pinelandfarms.ca</a
+                              >
+                              if you need the password. The password is required
+                              to start or schedule a broadcast.
+                          </span>
+                      </div>
+                      <br>
+                      <div class="field middle-align">
+                        <nav>
+                          <div class="max">
+                            <h6>Private Broadcast</h6>
+                            <p class="no-line">Private broadcasts aren't listed on the
+                              <a class="link" target="_blank" href="/listeners_page">listeners' page</a>
+                              or archived but can be shared by the host and saved to your device after ending.</p>
+                          </div>
+                          <label class="switch">
+                            <input type="checkbox" id="isPrivate" name="isPrivate">
+                            <span></span>
+                          </label>
+                        </nav>
+                      </div>
+                  </form>
+                  <div class="row center-align padding">
+                      <button id="scheduleBroadcast" class="small-round max" onclick="ui('#schedule-dialog');" disabled>
+                          <i>schedule</i>
+                          <span>Schedule Broadcast</span>
+                      </button>
+                      <button class="circle" onclick="share()" id="share-button">
+                          <i>share</i>
+                      </button>
+                  </div>
+                </details>
+              </article>
+            <article class="no-padding" id="main-article">
+                <details open>
+                  <summary class="small-round padding" style="font-size: 25px;">
+                    Broadcast Controls
+                  </summary>
+                  <nav class="center-align padding">
+                      <i>volume_down</i>
+                      <label class="small-width slider">
+                          <input
+                              type="range"
+                              id="volumeControl"
+                              min="0"
+                              max="15"
+                              step="0.1"
+                              value="1"
+                              disabled="disabled"
+                          />
+                          <span></span>
+                          <div class="tooltip"></div>
+                      </label>
+                      <i>volume_up</i>
+                  </nav>
+                  <div class="grid padding">
+                      <div class="grid max s12 m8 l8">
+                          <div class="grid max s12 center-align">
+                              <button
+                                  id="startBroadcast"
+                                  class="small-round extra s12"
+                                  disabled
+                              >
+                                  <i>play_circle</i>
+                                  <span>Start Broadcast</span>
+                              </button>
+                              <button
+                                  id="stopBroadcast"
+                                  class="small-round extra s12"
+                                  disabled
+                              >
+                                  <i>stop_circle</i>
+                                  <span>End Broadcast</span>
+                              </button>
+                          </div>
+                      </div>
+                      <div class="s12 m4 l4 middle-align center-align">
+                          <button
+                              id="muteToggle"
+                              class="circle extra"
+                              style="
+                                  height: 128px;
+                                  width: 128px;
+                                  border-radius: 50%;
+                              "
+                              disabled
+                          >
+                              <i class="mic-icon">mic</i>
+                              <i>pen_size_1</i>
+                              <i class="pause-icon">pause</i>
+                          </button>
+                      </div>
+                  </div>
+                  <canvas id="canvas" style="width: 100%; height: 100px"></canvas>
+                </details>
+            </article>
+          </div>
+        </main>
+        <div class="snackbar error" id="incorrect-password">
+            Incorrect Password
+        </div>
+        <div class="snackbar green" id="correct-password">
+            Password Validated
+        </div>
+        <div class="snackbar error" id="schedule-error">
+            Error Submitting Schedule
+        </div>
+        <div class="snackbar" id="schedule-success">
+            <div class="max">Schedule Submitted</div>
+            <a class="inverse-link" href="/listeners_page" target="_blank">View</a>
+        </div>
+        <div class="snackbar" id="broadcast-started">
+            <div class="max">Broadcast Started</div>
+            <a class="inverse-link" href="/listeners_page" target="_blank">View</a>
+        </div>
+        <div class="overlay blur"></div>
+        <dialog id="schedule-dialog">
+            <h5 class="center-align">Schedule Broadcast</h5>
+            <p class="no-line medium-width">
+                Schedule a broadcast to display an event on the
+                <a class="link" target="_blank" href="/listeners_page">listeners' page</a>
+                with details like the colony name, description, and date. It
+                will remain visible until the scheduled date passes, then be
+                automatically removed.
+            </p>
+            <div class="grid">
+                <div class="field label prefix border s12">
+                    <i>artist</i>
+                    <input type="text" id="schedule-host" name="schedule-host" />
                     <label>Colony Name</label>
                 </div>
-                <div class="field border label textarea">
-                    <textarea type="text" id="description" name="description" required="required"></textarea>
+                <div class="field border label textarea s12 bottom-margin">
+                    <textarea
+                        type="text"
+                        id="schedule-description"
+                        name="schedule-description"
+                        required="required"
+                    ></textarea>
                     <label>Description</label>
-                    <span class="helper no-line left-align">Explain what the broadcast is about</span>
+                    <span class="helper no-line">Explain what the broadcast is about</span>
                 </div>
-                <div class="field label border">
-                    <input type="password" id="password" name="password">
-                    <label>Password</label>
-                    <span class="helper no-line left-align">Contact
-                        <a class="link" href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a> or <a class="link" href="mailto:justin@pinelandfarms.ca">justin@pinelandfarms.ca</a>
-                        if you need the password. The password is required to start or schedule a broadcast.
-                    </span>
+                <div class="field label prefix border s12">
+                    <i>event</i>
+                    <input type="date" id="date-time-picker" name="date" />
+                    <label>Date</label>
                 </div>
-                <label class="top-margin top-padding checkbox">
-                    <input type="checkbox" id="isPrivate" name="isPrivate">
-                    <span>Private Broadcast</span>
-                </label>
-            </form>
-            <nav class="center-align padding">
-                <i>volume_down</i>
-                <label class="small-width slider">
-                    <input type="range" id="volumeControl" min="0" max="15" step="0.1" value="1" disabled="disabled">
-                    <span></span>
-                    <div class="tooltip"></div>
-                </label>
-                <i>volume_up</i>
-            </nav>
-            <div class="grid padding">
-                <div class="row max s12 center-align">
-                    <button id="scheduleBroadcast" class="small-round max" onclick="ui('#schedule-dialog');" disabled>
-                        <i>schedule</i>
-                        <span>Schedule Broadcast</span>
-                    </button>
-                    <button class="link transparent circle" onclick="share()" id="share-button"><i>share</i></button>
-                </div>
-                <div class="grid max s12 m8 l8">
-                    <div class="grid max s12  center-align">
-                        <button id="startBroadcast" class="small-round extra s12" disabled>
-                            <i>play_circle</i>
-                            <span>Start Broadcast</span>
-                        </button>
-                        <button id="stopBroadcast" class="small-round extra s12" disabled>
-                            <i>stop_circle</i>
-                            <span>End Broadcast</span>
-                        </button>
-                    </div>
-                </div>
-                <div class="s12 m4 l4 middle-align center-align">
-                    <button id="muteToggle" class="circle extra" style="height: 128px; width: 128px; border-radius: 50%;" disabled>
-                        <i class="mic-icon">mic</i>
-                        <i>pen_size_1</i>
-                        <i class="pause-icon">pause</i>
-                    </button>
-                </div>
+                <button class="small-round s6" onclick="submitSchedule()">
+                    <i>send</i>
+                    <span>Submit</span>
+                </button>
+                <button class="small-round s6" onclick="ui('#schedule-dialog');">
+                    <i>close</i>
+                    <span>Cancel</span>
+                </button>
             </div>
-
-            <canvas id="canvas" style="width: 100%; height: 100px"></canvas>
-        </article>
-    </main>
-    <div class="snackbar error" id="incorrect-password">Incorrect Password</div>
-    <div class="snackbar green" id="correct-password">Password Validated</div>
-    <div class="snackbar error" id="schedule-error">Error Submitting Schedule</div>
-    <div class="snackbar green" id="schedule-success">Schedule Submitted</div>
-    <div class="snackbar" id="broadcast-started">
-        <div class="max">Broadcast Started</div>
-        <a class="inverse-link" href="/listeners_page" target="_blank">View</a>
-    </div>
-    <div class="overlay blur"></div>
-    <dialog id="schedule-dialog" >
-        <h3 class="center-align">Schedule Broadcast</h3>
-        <div class="grid">
-            <div class="field label prefix border s12">
-                <i>artist</i>
-                <input type="text" id="schedule-host" name="schedule-host">
-                <label>Colony Name</label>
-            </div>
-            <div class="field border label textarea s12 bottom-margin">
-                <textarea type="text" id="schedule-description" name="schedule-description" required="required"></textarea>
-                <label>Description</label>
-                <span class="helper no-line">Explain what the broadcast is about</span>
-            </div>
-            <div class="field label prefix border s12">
-                <i>event</i>
-                <input type="date" id="date-time-picker" name="date">
-                <label>Date</label>
-            </div>
-            <button class="small-round s6" onclick="submitSchedule()">
-                <i>send</i>
-                <span>Submit</span>
-            </button>
-            <button class="small-round s6" onclick="ui('#schedule-dialog');">
+        </dialog>
+        <dialog class="bottom" id="save-broadcast-dialog">
+            <h5 class="center-align">Save Broadcast</h5>
+            <p class="center-align">File Name: <code id="broadcast-file-name"></code></p>
+            <p class="center-align">Do you want to save this broadcast? It will be saved to your device.</p>
+            <nav class="center-align">
+              <button class="small-round" id="save-broadcast-btn" >
+                  <i>save</i>
+                  <span>Save</span>
+              </button>
+              <button class="small-round" onclick="ui('#save-broadcast-dialog');">
                 <i>close</i>
                 <span>Cancel</span>
-            </button>
-        </div>
-    </dialog>
-    <script>
-        let mediaRecorder;
-        let ws;
-        let audioContext;
-        let gainNode;
-        let sourceNode;
-        let isMuted = false;
-        let analyser;
-        let dataArray;
-        let canvas;
-        let canvasCtx;
-        let timeout;
-
-        function validateInput() {
-            const hostInput = document.getElementById('host');
-            const hostValue = hostInput.value.toLowerCase().replace(/ /g, '_').replace(/\d/g, '');
-            hostInput.value = hostValue;
-        }
-
-        const mode = () => {
-            let currentMode = localStorage.getItem("mode") || "dark";
-            let newMode = currentMode === "dark" ? "light" : "dark";
-            localStorage.setItem("mode", newMode); // Save mode to localStorage
-            ui("mode", newMode);
-            updateIcon(newMode);
-            updateImageSource();
-            document.documentElement.classList.toggle("dark", newMode === "dark");
-        };
-
-        function share() {
-            const isPrivate = document.getElementById('isPrivate').checked;
-            let url = "";
-            if (isPrivate) {
-                const host = document.getElementById('host').value;
-                url = "http://hbniaudio.hbni.net:8000/" + host;
-            } else {
-                url = window.location.origin + "/listeners_page";
-            }
-            navigator.share({
-                title: "HBNI Audio Listeners Page",
-                text: "Listen to this broadcast on the HBNI Audio Listeners page!",
-                url: url
-            });
-        }
-
-        function updateImageSource() {
-            const mode = localStorage.getItem('mode') || 'light';
-            const images = document.querySelectorAll('img[id^="recording-card-image"]');
-            images.forEach(image => {
-                image.src = mode === 'dark' ? '/static/hbni_logo_dark.png' : '/static/hbnilogo.png';
-            });
-        }
-
-        async function submitSchedule() {
-            const host = document.getElementById("schedule-host").value;
-            const description = document.getElementById("schedule-description").value;
-            const startTime = document.getElementById("date-time-picker").value;
-
-            if (!host || !description || !startTime) {
-                alert("Please provide all the required fields.");
-                return;
-            }
-
-            // Send the data to the server
-            const response = await fetch("/schedule_broadcast", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ host, description, startTime })
-            });
-
-            if (response.ok) {
-                ui("#schedule-dialog");
-                ui("#schedule-success");
-            } else {
-                ui("#schedule-error");
-            }
-        }
-
-        const updateIcon = (mode) => {
-            const iconElements = document.querySelectorAll('#toggle-theme i');
-            iconElements.forEach(iconElement => {
-                iconElement.textContent = mode === "dark" ? "light_mode" : "dark_mode";
-            });
-        };
-
-        document.getElementById("startBroadcast").disabled = true;
-
-        async function checkPassword() {
-            const password = document.getElementById("password").value;
-            console.log(password);
-
-            try {
-                const response = await fetch("/validate-password", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ password })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    localStorage.setItem("broadcastToken", result.token); // Save token securely
-                    document.getElementById("startBroadcast").disabled = false;
-                    document.getElementById("scheduleBroadcast").disabled = false;
-                    ui("#correct-password");
-                } else {
-                    ui("#incorrect-password");
-                    document.getElementById("startBroadcast").disabled = true;
-                    document.getElementById("scheduleBroadcast").disabled = true;
-                }
-            } catch (error) {
-                console.error("Error validating password:", error);
-            }
-        }
-
-        document.getElementById("password").addEventListener("input", async () => {
-            clearTimeout(timeout);
-            timeout = setTimeout(checkPassword, 3000);
-        });
-
-        document.getElementById("host").addEventListener("input", () => {
-            const host = document.getElementById("host").value;
-            const description = document.getElementById("description").value;
-            const password = document.getElementById("password").value;
-            if (!host || !description || !password) {
-                document.getElementById("startBroadcast").disabled = true;
-            } else {
-                document.getElementById("startBroadcast").disabled = false;
-            }
-        });
-
-        document.getElementById("description").addEventListener("input", () => {
-            const host = document.getElementById("description").value;
-            const description = document.getElementById("description").value;
-            const password = document.getElementById("password").value;
-            if (!host || !description || !password) {
-                document.getElementById("startBroadcast").disabled = true;
-            } else {
-                document.getElementById("startBroadcast").disabled = false;
-            }
-        });
-
-        document.getElementById('startBroadcast').addEventListener('click', async () => {
-            try {
-                const host = document.getElementById('host').value;
-                const description = document.getElementById('description').value;
-                const password = document.getElementById('password').value;
-                const isPrivate = document.getElementById('isPrivate').checked;
-
-                if (!host || !description || !password) {
-                    alert("Please provide all the required fields.");
-                    return;
-                }
-
-                // Capture audio
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-                // Initialize audio processing
-                audioContext = new AudioContext();
-                analyser = audioContext.createAnalyser();
-                sourceNode = audioContext.createMediaStreamSource(stream);
-                gainNode = audioContext.createGain();
-                const destinationNode = audioContext.createMediaStreamDestination();
-
-                // Connect the source to gainNode, analyser, and destination
-                sourceNode.connect(gainNode);
-                gainNode.connect(analyser);
-                gainNode.connect(destinationNode);
-
-                // Use the processed stream for MediaRecorder
-                const processedStream = destinationNode.stream;
-
-                // Configure analyser for visualization
-                analyser.fftSize = 256;
-                const bufferLength = analyser.frequencyBinCount;
-                dataArray = new Uint8Array(bufferLength);
-
-                visualize();
-
-                // Initialize secure WebSocket connection to Tornado backend
-                const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-                ws = new WebSocket(`${protocol}://${window.location.host}/broadcast_ws`);
-                ws.binaryType = 'arraybuffer';
-
-                ws.onopen = () => {
-                    // Send metadata to the server
-                    const metadata = {
-                        host: host,
-                        description: description,
-                        password: password,
-                        isPrivate: isPrivate
-                    };
-
-                    ws.send(JSON.stringify(metadata));
-                    ui("#broadcast-started");
-
-                    // Disable inputs after starting
-                    document.getElementById('startBroadcast').disabled = true;
-                    document.getElementById('stopBroadcast').disabled = false;
-                    document.getElementById('isPrivate').disabled = true;
-                    document.getElementById('password').disabled = true;
-                    document.getElementById('muteToggle').disabled = false;
-                    document.getElementById('volumeControl').disabled = false;
-
-                    const options = { mimeType: 'audio/webm;codecs=opus' };
-
-                    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-                        console.error(`MIME type ${options.mimeType} is not supported.`);
-                        alert("The specified audio format is not supported by your browser.");
-                        return;
-                    }
-
-                    mediaRecorder = new MediaRecorder(processedStream, options);
-
-                    mediaRecorder.ondataavailable = (event) => {
-                        if (ws.readyState === WebSocket.OPEN) {
-                            if (!isMuted) {
-                                // Convert Blob to ArrayBuffer and then send
-                                event.data.arrayBuffer().then(buffer => {
-                                    ws.send(new Uint8Array(buffer));
-                                });
-                            } else {
-                                // Send silence if muted
-                                const silenceBuffer = new ArrayBuffer(0);
-                                ws.send(new Uint8Array(silenceBuffer));
-                            }
-                        }
-                    };
-
-                    mediaRecorder.start(250); // Send data every 250ms
-                };
-
-                ws.onerror = (error) => {
-                    console.error("WebSocket error:", error);
-                };
-
-                ws.onclose = () => {
-                    // Enable inputs after stopping
-                    document.getElementById('startBroadcast').disabled = false;
-                    document.getElementById('stopBroadcast').disabled = true;
-                    document.getElementById('isPrivate').disabled = false;
-                    document.getElementById('password').disabled = false;
-                    document.getElementById('muteToggle').disabled = true;
-                    document.getElementById('volumeControl').disabled = true;
-
-                    // Stop the audio stream
-                    stream.getTracks().forEach(track => track.stop());
-                };
-            } catch (error) {
-                alert("Error accessing microphone: " + error.message);
-            }
-        });
-
-        document.getElementById('stopBroadcast').addEventListener('click', () => {
-            if (ws) {
-                ws.close();
-            }
-
-            if (mediaRecorder) {
-                mediaRecorder.stop();
-            }
-            if (audioContext) {
-                audioContext.close();
-            }
-            canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-        });
-
-        document.getElementById('muteToggle').addEventListener('click', () => {
-            if (gainNode) {
-                isMuted = !isMuted;
-
-                if (isMuted) {
-                    // Stop sending audio to the WebSocket and visualizer
-                    // sourceNode.disconnect(analyser);
-                    sourceNode.disconnect(gainNode);
-                    ws.send(JSON.stringify({ type: "mute" })); // Notify server if needed
-                } else {
-                    // Resume sending audio to the WebSocket and visualizer
-                    // sourceNode.connect(analyser);
-                    sourceNode.connect(gainNode);
-                    ws.send(JSON.stringify({ type: "unmute" })); // Notify server if needed
-                }
-
-                gainNode.gain.value = isMuted ? 0 : parseFloat(document.getElementById('volumeControl').value);
-
-                document.getElementById('muteToggle').querySelector('i.mic-icon').innerText = isMuted ? 'mic_off' : 'mic';
-                document.getElementById('muteToggle').querySelector('i.pause-icon').innerText = isMuted ? 'play_arrow' : 'pause';
-            }
-        });
-
-        document.getElementById('volumeControl').addEventListener('input', (event) => {
-            if (gainNode && !isMuted) {
-                gainNode.gain.value = parseFloat(event.target.value);
-            }
-        });
-
-        function visualize() {
-            const WIDTH = canvas.width;
-            const HEIGHT = canvas.height;
-            const barWidth = (WIDTH / dataArray.length) * 2.5;
-
-            function draw() {
-                requestAnimationFrame(draw);
-
-                analyser.getByteFrequencyData(dataArray);
-
-                // Clear the canvas
-                var articleBackgroundColor = window.getComputedStyle(
-                    document.getElementById("main-article")
-                ).backgroundColor;
-
-                canvasCtx.fillStyle = articleBackgroundColor;
-                canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
-
-                let x = 0;
-
-                // Draw the frequency bars
-                for (let i = 0; i < dataArray.length; i++) {
-                    const barHeight = dataArray[i] / 2;
-
-                    // Color logic (gradient based on frequency intensity)
-                    const r = (barHeight + 100) % 255;
-                    const g = (barHeight * 2) % 255;
-                    const b = (barHeight * 3) % 255;
-
-                    var header = document.getElementById("header");
-                    var headerStyle = getComputedStyle(header);
-                    var headerBackgroundColor = headerStyle.backgroundColor;
-                    canvasCtx.fillStyle = headerBackgroundColor;
-                    canvasCtx.fillRect(x, HEIGHT - barHeight, barWidth, barHeight);
-
-                    x += barWidth + 1;
-                }
-            }
-
-            draw();
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const host = localStorage.getItem('host') || "";
-            document.getElementById('host').value = host;
-            document.getElementById('host').addEventListener('input', function () {
-                localStorage.setItem('host', this.value);
-            });
-
-            const description = localStorage.getItem('description') || "";
-            document.getElementById('description').value = description;
-            document.getElementById('description').addEventListener('input', function () {
-                localStorage.setItem('description', this.value);
-            });
-
-            const password = localStorage.getItem('password') || "";
-            document.getElementById('password').value = password;
-            document.getElementById('password').addEventListener('input', function () {
-                localStorage.setItem('password', this.value);
-            });
-
-            // Initialize canvas and audio context
-            canvas = document.getElementById("canvas");
-            canvasCtx = canvas.getContext("2d");
-
-            // Set up the canvas for visualization
-            const dpr = window.devicePixelRatio || 1;
-            canvas.width = canvas.clientWidth * dpr;
-            canvas.height = canvas.clientHeight * dpr;
-            canvasCtx.scale(dpr, dpr);
-
-            let savedMode = localStorage.getItem("mode") || "light";
-            ui("mode", savedMode);
-            updateIcon(savedMode);
-            document.documentElement.classList.toggle("dark", savedMode === "dark");
-            const searchInput = document.getElementById('search');
-
-            const header = document.getElementById('main-header');
-
-            const observer = new IntersectionObserver(function (entries) {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        header.style.display = 'block';
-                    } else {
-                        header.style.display = 'none';
-                    }
-                });
-            });
-            if (document.getElementById('password').value !== "") {
-                checkPassword();
-            }
-            updateImageSource();
-            flatpickr("#date-time-picker", {
-                enableTime: true,
-                dateFormat: "Y-m-d H:i",
-                altInput: true,
-                altFormat: "F j, Y H:i",
-                defaultDate: new Date(),
-            });
-        });
-    </script>
-</body>
-
+              </button>
+            </nav>
+        </dialog>
+        <script
+            type="text/javascript"
+            src="/static/js/broadcasting_page.js"
+        ></script>
+    </body>
 </html>

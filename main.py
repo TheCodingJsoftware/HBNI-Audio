@@ -1,5 +1,5 @@
 import json
-from typing import Union
+from typing import Any, Union
 import requests
 import os
 import subprocess
@@ -428,6 +428,13 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                     print(
                         f"FFmpeg process started successfully for {self.output_filename}"
                     )
+                    active_broadcasts[self.host] = Broadcast(
+                        self.host,
+                        self.description,
+                        self.password,
+                        self.is_private,
+                        datetime.now(),
+                    )
                 else:
                     print(f"FFmpeg process failed to start for {self.output_filename}")
 
@@ -487,7 +494,7 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                 .replace("//", "\\\\")
                 .replace("/", "\\")
             )
-            if total_minutes > 10.0:
+            if total_minutes > 10.0 and not self.is_private:
                 shutil.move(
                     self.output_filename,
                     f"{static_recordings_path}\\{new_output_filename}",
@@ -500,11 +507,11 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                     self.starting_time.strftime("%B %d %A %Y %I_%M %p"),
                     total_minutes,
                 )
-            else:
-                shutil.move(
-                    self.output_filename,
-                    f"{static_recordings_path}\\Tests\\{new_output_filename}",
-                )
+            # else:
+            #     shutil.move(
+            #         self.output_filename,
+            #         f"{static_recordings_path}\\Tests\\{new_output_filename}",
+            #     )
 
 
 class BroadcastHandler(RequestHandler):
@@ -517,7 +524,19 @@ class BroadcastHandler(RequestHandler):
 
 
 class ListenHandler(RequestHandler):
-    async def get(self):
+    def is_broadcast_private(self, host: str) -> bool:
+        if broadcast := active_broadcasts.get(host):
+            return broadcast.is_private
+        return False
+
+    def get_active_broadcast_count(self, broadcast_data) -> int:
+        active_broadcast_count = 0
+        for broadcast in broadcast_data:
+            if not broadcast.get("is_private", False):
+                active_broadcast_count += 1
+        return active_broadcast_count
+
+    async def get_active_hbni_broadcasts(self) -> list[dict[str, Union[str, int]]]:
         # URL for fetching the JSON data
         status_url = "http://hbniaudio.hbni.net:8000/status-json.xsl"
 
@@ -525,31 +544,25 @@ class ListenHandler(RequestHandler):
         try:
             response = requests.get(status_url)
             if response.status_code == 200:
-                json_data: dict[str, Union[str, dict[str, Union[str, int]]]] = (
-                    response.json()
-                )
+                json_data = response.json()
             else:
                 self.set_status(500)
                 self.write("Failed to retrieve broadcast status.")
-                return
+                return []
         except requests.exceptions.RequestException as e:
             self.set_status(500)
             self.write(f"Error while fetching JSON data: {str(e)}")
-            return
-
-        with open("schedule.json", "r") as f:
-            schedule = json.load(f)
+            return []
 
         # Extract relevant data for rendering
         icestats = json_data.get("icestats", {})
-        sources: Union[dict[str, Union[str, int]], list[dict[str, Union[str, int]]]] = (
-            icestats.get("source", {})
-        )
-        broadcast_data: list[dict[str, Union[str, int]]] = []
+        sources = icestats.get("source", {})
+        broadcast_data = []
 
         # Prepare data for template rendering
         if sources:
             if isinstance(sources, dict):  # Only one broadcast is currently online
+                host = sources.get("listenurl", "/").split("/")[-1]
                 broadcast_data.append(
                     {
                         "admin": icestats.get("admin", "N/A"),
@@ -560,14 +573,16 @@ class ListenHandler(RequestHandler):
                         ),
                         "genre": sources.get("genre", "N/A"),
                         "listeners": sources.get("listeners", 0),
-                        "host": sources.get("listenurl", "/").split("/")[-1],
+                        "host": host,
                         "listener_peak": sources.get("listener_peak", 0),
                         "listen_url": sources.get("listenurl", "#"),
                         "stream_start": sources.get("stream_start", "N/A"),
+                        "is_private": self.is_broadcast_private(host),
                     }
                 )
             elif isinstance(sources, list):  # Multiple broadcasts are currently online
                 for source in sources:
+                    host = source.get("listenurl", "/").split("/")[-1]
                     broadcast_data.append(
                         {
                             "admin": icestats.get("admin", "N/A"),
@@ -580,17 +595,27 @@ class ListenHandler(RequestHandler):
                             ),
                             "genre": source.get("genre", "N/A"),
                             "listeners": source.get("listeners", 0),
-                            "host": source.get("listenurl", "/").split("/")[-1],
+                            "host": host,
                             "listener_peak": source.get("listener_peak", 0),
                             "listen_url": source.get("listenurl", "#"),
                             "stream_start": source.get("stream_start", "N/A"),
+                            "is_private": self.is_broadcast_private(host),
                         }
                     )
+        return broadcast_data
 
-        # Render the template with the extracted data
+    async def get(self):
+        broadcast_data = await self.get_active_hbni_broadcasts()
+        broadcast_count = self.get_active_broadcast_count(broadcast_data)
+
+        with open("schedule.json", "r") as f:
+            schedule = json.load(f)
+
         template = env.get_template("listeners_page.html")
         rendered_template = template.render(
-            broadcast_status=broadcast_data, schedule=schedule
+            broadcast_status=broadcast_data,
+            schedule=schedule,
+            broadcast_count=broadcast_count,
         )
         self.write(rendered_template)
 

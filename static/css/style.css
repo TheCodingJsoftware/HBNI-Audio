@@ -1,0 +1,44 @@
+html,
+body,
+div,
+article,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+ul,
+li,
+span,
+a,
+button,
+input,
+textarea,
+select,
+details,
+summary,
+footer,
+nav {
+    transition: background-color 0.3s ease-in-out, color 0.1s ease;
+}
+
+::selection {
+    color: var(--on-primary);
+    background-color: var(--primary);
+}
+
+.hidden {
+    display: none !important;
+}
+
+article {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.music-note {
+    color: var(--primary);
+}

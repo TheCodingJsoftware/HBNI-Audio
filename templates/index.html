@@ -11,7 +11,8 @@
     <script type="module"
         src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js">
     </script>
-    <link href="/static/theme.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/static/css/theme.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
     <link rel="icon" href="/static/icon.png">
     <title>HBNI Audio Archive</title>
     <meta property="og:title" content="HBNI Audio Archive" />
@@ -20,60 +21,7 @@
     <meta property="og:description" content="Download or relisten to previously broadcasted streams." />
 </head>
 
-<style>
-    html,
-    body,
-    div,
-    article,
-    p,
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6,
-    ul,
-    li,
-    span,
-    a,
-    button,
-    input,
-    textarea,
-    select,
-    details,
-    summary,
-    footer,
-    nav {
-        transition: background-color 0.3s ease-in-out, color 0.1s ease;
-    }
-    ::selection {
-        color: var(--on-primary);
-        background-color: var(--primary);
-    }
-
-    .hidden {
-        display: none !important;
-    }
-    article {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
-</style>
-<header class="fixed primary" id="main-header">
-    <nav>
-        <button class="circle transparent" onclick="ui('#info-dialog');">
-            <img src="/static/icon.png" class="responsive">
-        </button>
-        <h5 class="max center-align small">HBNI Audio Archive</h5>
-        <button class="circle transparent" onclick="mode()" id="toggle-theme">
-            <i>dark_mode</i>
-        </button>
-    </nav>
-</header>
-
-<div class="overlay blur"></div>
-<dialog id="faq-dialog">
+<dialog id="faq-dialog" class="max">
     <div class="right-align">
         <button class="transparent circle" onclick="ui('#faq-dialog');">
             <i>close</i>
@@ -128,8 +76,7 @@
                 href="https://drive.google.com">GoogleDrive</a>, from there you can just press play.
         </p>
         <h5> Where are the archives stored? </h5>
-        <h6>
-            2022-07-12 to 2023-07-21</h4>
+        <h6>2022-07-12 to 2023-07-21</h6>
             <p>
                 The archives (as of 2022-07-12 to 2023-07-21) are stored on a file hosting website called <a
                     class="link" href="https://mega.nz">mega.nz</a>.
@@ -227,6 +174,9 @@
                     time.
                 </p>
     </div>
+    <button class="transparent circle" onclick="ui('#faq-dialog');">
+        <span>Close</span>
+    </button>
 </dialog>
 <div class="overlay blur"></div>
 <dialog id="download-dialog">
@@ -256,13 +206,11 @@
     </div>
     <div class="row max center-align">
         <img class="responsive circle border" src="/static/icon.png" style="height: auto; max-width: 150px;">
-    </div
+    </div>
     <div class="padding">
         <h5 class="small center-align">HBNI Audio Archive</h5>
         <p class="center-align medium-width">
-            Browse and listen to archived
-            broadcasts from the HBNI Audio
-            Streaming Service.
+            Browse archived broadcasts, schedule events, broadcast live audio, and view live broadcasts and scheduled events.
         </p>
         <br>
         <p class="center-align">Developed with <i>favorite</i> by <a class="link" href="https://thecodingjsoftware.github.io/">TheCodingJ's</a></p>
@@ -277,6 +225,18 @@
     </article>
 </dialog>
 
+<header class="fixed primary" id="main-header">
+    <nav>
+        <button class="circle transparent" onclick="ui('#info-dialog');">
+            <img src="/static/icon.png" class="responsive">
+        </button>
+        <h5 class="max center-align small">Audio Archive</h5>
+        <button class="circle transparent" onclick="mode()" id="toggle-theme">
+            <i>dark_mode</i>
+        </button>
+    </nav>
+</header>
+
 <body class="dark">
     <main class="responsive">
         <br>
@@ -284,8 +244,9 @@
             <i>search</i>
             <input type="text" id="search">
             <label>Search</label>
+            <div class="helper no-line">Search for a broadcast by date, description, or host</div>
         </div>
-        <div class="no-results" style="display: none;">No recordings found</div>
+        <div class="no-results center-align middle-align" style="display: none;">No recordings found</div>
         <div>
             <div class="tabs scroll left-align">
             {% for groupName in downloadableRecordings %}
@@ -318,10 +279,8 @@
                                     <div class="max"><i>web_traffic</i> {{ itemData["visit_count"]}} visits</div>
                                     <button class="chip circle link no-padding no-margin no-border">
                                         <i>info</i>
-                                        <div class="tooltip max left">
-                                            <span class="small-width">Visit Count: {{itemData["visit_count"]}}</span>
-                                            <br>
-                                            <span class="small-width">Latest Visit: {{itemData["latest_visit"]}}</span>
+                                        <div class="tooltip left">
+                                            <span class="left-align">Latest Visit:<br>{{itemData["latest_visit"]}}</span>
                                         </div>
                                     </button>
                                 </div>
@@ -349,7 +308,7 @@
             {% endfor %}
         </div>
         {% if recording_status %}
-        <h4 class="center-align bottom-padding"> Currently Recording</h4>
+        <h4 class="center-align top-padding">Currently Recording</h4>
         <div class="border small-round small-padding grid">
             {% for host, host_data in recording_status.items() %}
             <article class="no-padding s12 m6 l4" id="recording-card">
@@ -375,27 +334,31 @@
         </div>
         {% endif %}
     </main>
-    <footer class="fixed bottom surface-container m l" id="bottom-nav">
-        <div class="row center-align">
-            <button class="transparent vertical tiny" onclick="ui('#faq-dialog');">
-                <i>help</i>
-                <span>FAQ</span>
-            </button>
-            <button class="transparent vertical tiny" onclick="ui('#download-dialog');">
-                <i>apps</i>
-                <span>Download</span>
-            </button>
-            <button class="transparent vertical tiny" onclick="window.location.href='/broadcasting_page';">
-                <i>adaptive_audio_mic</i>
-                <span>Broadcasting Page</span>
-            </button>
-            <button class="transparent vertical tiny" onclick="window.location.href='/listeners_page';">
-                <i>media_output</i>
-                <span>Listeners Page</span>
-            </button>
-        </div>
-    </footer>
-    <nav class="bottom surface-container s" id="bottom-nav" style="max-height: 50px !important;">
+    <script type="text/javascript" src="/static/js/index.js"></script>
+</body>
+
+<footer class="fixed bottom surface-container m l" id="bottom-nav">
+    <nav class="row center-align">
+        <button class="transparent vertical tiny" onclick="ui('#faq-dialog');">
+            <i>help</i>
+            <span>FAQ</span>
+        </button>
+        <button class="transparent vertical tiny" onclick="ui('#download-dialog');">
+            <i>apps</i>
+            <span>Download</span>
+        </button>
+        <button class="transparent vertical tiny" onclick="window.location.href='/broadcasting_page';">
+            <i>adaptive_audio_mic</i>
+            <span>Broadcasting Page</span>
+        </button>
+        <button class="transparent vertical tiny" onclick="window.location.href='/listeners_page';">
+            <i>media_output</i>
+            <span>Listeners Page</span>
+        </button>
+    </nav>
+</footer>
+<footer class="fixed bottom surface-container s" id="bottom-nav" style="min-block-size: 50px !important;">
+    <nav class="row center-align">
         <button class="transparent circle tiny" onclick="ui('#faq-dialog');">
             <i>help</i>
             <div class="tooltip top">FAQ</div>
@@ -413,84 +376,5 @@
             <div class="tooltip top">Listeners Page</div>
         </button>
     </nav>
-</body>
-<script>
-    const mode = () => {
-        let currentMode = localStorage.getItem("mode") || "dark";
-        let newMode = currentMode === "dark" ? "light" : "dark";
-        localStorage.setItem("mode", newMode); // Save mode to localStorage
-        ui("mode", newMode);
-        updateIcon(newMode);
-        updateImageSource();
-        document.documentElement.classList.toggle("dark", newMode === "dark");
-    };
-
-    function updateImageSource() {
-        const mode = localStorage.getItem('mode') || 'light';
-        const images = document.querySelectorAll('img[id^="recording-card-image"]');
-        images.forEach(image => {
-            image.src = mode === 'dark' ? '/static/hbni_logo_dark.png' : '/static/hbnilogo.png';
-        });
-    }
-
-    const updateIcon = (mode) => {
-        const iconElements = document.querySelectorAll('#toggle-theme i');
-        iconElements.forEach(iconElement => {
-            iconElement.textContent = mode === "dark" ? "light_mode" : "dark_mode";
-        });
-    };
-
-    function searchAndFilter() {
-        const searchInput = document.getElementById('search');
-        const query = searchInput.value.toLowerCase();
-        const articles = document.querySelectorAll('#contents');
-        let foundArticle = false;
-
-        articles.forEach(function (article) {
-            const articleVersions = article.querySelectorAll('#article-version');
-            articleVersions.forEach(function (articleVersion) {
-                const name = articleVersion.getAttribute('data-name').toLowerCase();
-                if (name.includes(query)) {
-                    articleVersion.style.display = 'block';
-                    foundArticle = true;
-                } else {
-                    articleVersion.style.display = 'none';
-                }
-            });
-
-
-            const noResults = document.querySelector('.no-results');
-            if (foundArticle) {
-                noResults.style.display = 'none';
-            } else {
-                noResults.style.display = 'block';
-            }
-        });
-    }
-    document.addEventListener('DOMContentLoaded', function () {
-        let savedMode = localStorage.getItem("mode") || "light";
-        ui("mode", savedMode);
-        updateIcon(savedMode);
-        document.documentElement.classList.toggle("dark", savedMode === "dark");
-        const searchInput = document.getElementById('search');
-
-        const header = document.getElementById('main-header');
-        const bottomNav = document.getElementById('bottom-nav');
-
-        const observer = new IntersectionObserver(function (entries) {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    header.style.display = 'block';
-                } else {
-                    header.style.display = 'none';
-                }
-            });
-        });
-
-        observer.observe(bottomNav);
-        searchInput.addEventListener('input', searchAndFilter);
-        updateImageSource();
-    });
-</script>
-
+</footer>
 </html>
