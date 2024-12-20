@@ -90,46 +90,37 @@
                               >Explain what the broadcast is about</span
                           >
                       </div>
-                      <div class="field label border">
-                          <input type="password" id="password" name="password" />
-                          <label>Password</label>
-                          <span class="helper no-line left-align">
-                              Contact
-                              <a class="link" href="mailto:jared@pinelandfarms.ca"
-                                  >jared@pinelandfarms.ca</a
-                              >
-                              or
-                              <a
-                                  class="link"
-                                  href="mailto:justin@pinelandfarms.ca"
-                                  >justin@pinelandfarms.ca</a
-                              >
-                              if you need the password. The password is required
-                              to start or schedule a broadcast.
-                          </span>
+                      <div class="row">
+                        <div class="field label border max">
+                            <input type="password" id="password" name="password" />
+                            <label>Password</label>
+                        </div>
+                        <button class="circle transparent link" type="button" onclick="ui('#password-dialog');">
+                            <i>help</i>
+                        </button>
                       </div>
-                      <br>
-                      <div class="field middle-align">
+                      <div class="large-space"></div>
+                      <div class="field middle-align no-margin">
                         <nav>
-                          <div class="max">
-                            <h6>Private Broadcast</h6>
-                            <p class="no-line">Private broadcasts aren't listed on the
-                              <a class="link" target="_blank" href="/listeners_page">listeners' page</a>
-                              or archived but can be shared by the host and saved to your device after ending.</p>
-                          </div>
-                          <label class="switch">
-                            <input type="checkbox" id="isPrivate" name="isPrivate">
-                            <span></span>
-                          </label>
-                        </nav>
+                            <div class="max">
+                              <h6>Private Broadcast</h6>
+                              <p class="no-line">Private broadcasts aren't listed on the
+                                <a class="link" target="_blank" href="/listeners_page">listeners' page</a>
+                                or archived but can be shared by the host and saved to your device after ending.</p>
+                            </div>
+                            <label class="switch">
+                              <input type="checkbox" id="isPrivate" name="isPrivate">
+                              <span></span>
+                            </label>
+                          </nav>
                       </div>
                   </form>
                   <div class="row center-align padding">
-                      <button id="scheduleBroadcast" class="small-round max" onclick="ui('#schedule-dialog');" disabled>
+                      <button id="scheduleBroadcast" class="small-round border max" onclick="ui('#schedule-dialog');" disabled>
                           <i>schedule</i>
                           <span>Schedule Broadcast</span>
                       </button>
-                      <button class="circle" onclick="share()" id="share-button">
+                      <button class="circle border" onclick="share()" id="share-button">
                           <i>share</i>
                       </button>
                   </div>
@@ -272,6 +263,21 @@
                 <span>Cancel</span>
               </button>
             </nav>
+        </dialog>
+        <div class="overlay blur"></div>
+        <dialog id="password-dialog">
+            <nav class="right-align">
+                <button class="transparent circle" onclick="ui('#password-dialog');">
+                    <i>close</i>
+                </button>
+            </nav>
+            <p class="medium-width">
+                Contact
+                <a class="link" href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>
+                or
+                <a class="link" href="mailto:justin@pinelandfarms.ca">justin@pinelandfarms.ca</a>
+                if you need the password. The password is required to start or schedule a broadcast.
+            </p>
         </dialog>
         <script
             type="text/javascript"

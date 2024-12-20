@@ -29,9 +29,9 @@ const mode = () => {
 
 function share() {
     const isPrivate = document.getElementById('isPrivate').checked;
+    const host = document.getElementById('host').value;
     let url = "";
     if (isPrivate) {
-        const host = document.getElementById('host').value;
         url = "http://hbniaudio.hbni.net:8000/" + host;
     } else {
         url = window.location.origin + "/listeners_page";
