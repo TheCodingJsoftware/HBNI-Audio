@@ -145,6 +145,13 @@ def get_grouped_data(audio_data):
         diff_days = (today - item_date).days
         item_name = row["filename"].replace("_", ":").replace(".mp3", "")
 
+        if diff_days == 0:
+            itemData["uploaded_days_ago"] = "Today"
+        elif diff_days == 1:
+            itemData["uploaded_days_ago"] = "Yesterday"
+        else:
+            itemData["uploaded_days_ago"] = f"{diff_days} days ago"
+
         if item_date.year == current_year:
             if item_date.month == current_month:
                 if item_week == current_week:
@@ -182,7 +189,28 @@ def get_grouped_data(audio_data):
     return {key: value for key, value in groups.items() if value}
 
 
-class MainHandler(RequestHandler):
+error_messages = {
+    500: "Oooops! Internal Server Error. That is, something went terribly wrong.",
+    404: "Uh-oh! You seem to have ventured into the void. This page doesn't exist!",
+    403: "Hold up! You’re trying to sneak into a restricted area. Access denied!",
+    400: "Yikes! The server couldn't understand your request. Try being clearer!",
+    401: "Hey, who goes there? You need proper credentials to enter!",
+    405: "Oops! You knocked on the wrong door with the wrong key. Method not allowed!",
+    408: "Well, this is awkward. Your request took too long. Let's try again?",
+    502: "Looks like the gateway had a hiccup. It’s not you, it’s us!",
+    503: "We’re taking a quick nap. Please try again later!",
+    418: "I’m a teapot, not a coffee maker! Why would you ask me to do that?",
+}
+
+class BaseHandler(RequestHandler):
+    def write_error(self, status_code: int, stack_trace: str="", **kwargs):
+        error_message = error_messages.get(status_code, "Something went majorly wrong.")
+        template = env.get_template("error.html")
+        rendered_template = template.render(error_code=status_code, error_message=error_message, stack_trace=stack_trace)
+        self.write(rendered_template)
+
+
+class MainHandler(BaseHandler):
     async def get(self):
         try:
             audio_data = await fetch_audio_archives()
@@ -204,9 +232,8 @@ class MainHandler(RequestHandler):
             )
             self.write(rendered_template)
         except Exception as e:
-            traceback.print_exc()
             self.set_status(500)
-            self.write({"error": f"{str(e)} {traceback.print_exc()}"})
+            self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
 
 
 def url_for_static(filename):
@@ -216,7 +243,7 @@ def url_for_static(filename):
     return f"{static_recordings_path}/{filename}"
 
 
-class PlayRecordingHandler(RequestHandler):
+class PlayRecordingHandler(BaseHandler):
     async def get(self, file_name):
         await update_visit(file_name)  # Await the async database update
 
@@ -318,7 +345,7 @@ def cleanup_old_schedules():
         print(f"Error during schedule cleanup: {e}")
 
 
-class ScheduleBroadcastHandler(RequestHandler):
+class ScheduleBroadcastHandler(BaseHandler):
     async def post(self):
         try:
             data: dict[str, str] = tornado.escape.json_decode(self.request.body)
@@ -351,7 +378,7 @@ class ScheduleBroadcastHandler(RequestHandler):
             self.write({"success": True})
         except Exception as e:
             self.set_status(500)
-            self.write({"success": False, "error": str(e)})
+            self.write_error(500, stack_trace=f'{str(e)} {traceback.print_exc()}')
 
 
 class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
@@ -514,16 +541,14 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
             #     )
 
 
-class BroadcastHandler(RequestHandler):
+class BroadcastHandler(BaseHandler):
     def get(self):
         template = env.get_template("broadcasting_page.html")
-        rendered_template = template.render(
-            broadcast_name="",
-        )
+        rendered_template = template.render()
         self.write(rendered_template)
 
 
-class ListenHandler(RequestHandler):
+class ListenHandler(BaseHandler):
     def is_broadcast_private(self, host: str) -> bool:
         if broadcast := active_broadcasts.get(host):
             return broadcast.is_private
@@ -547,11 +572,11 @@ class ListenHandler(RequestHandler):
                 json_data = response.json()
             else:
                 self.set_status(500)
-                self.write("Failed to retrieve broadcast status.")
+                self.write_error(500)
                 return []
         except requests.exceptions.RequestException as e:
             self.set_status(500)
-            self.write(f"Error while fetching JSON data: {str(e)}")
+            self.write_error(500, stack_trace=f"Error while fetching JSON data: {str(e)}")
             return []
 
         # Extract relevant data for rendering
@@ -604,20 +629,32 @@ class ListenHandler(RequestHandler):
                     )
         return broadcast_data
 
-    async def get(self):
-        broadcast_data = await self.get_active_hbni_broadcasts()
-        broadcast_count = self.get_active_broadcast_count(broadcast_data)
-
+    def get_scheduled_broadcast_count(self) -> int:
         with open("schedule.json", "r") as f:
             schedule = json.load(f)
 
-        template = env.get_template("listeners_page.html")
-        rendered_template = template.render(
-            broadcast_status=broadcast_data,
-            schedule=schedule,
-            broadcast_count=broadcast_count,
-        )
-        self.write(rendered_template)
+        return len(schedule)
+
+    async def get(self):
+        try:
+            broadcast_data = await self.get_active_hbni_broadcasts()
+            broadcast_count = self.get_active_broadcast_count(broadcast_data)
+            scheduled_broadcast_count = self.get_scheduled_broadcast_count()
+
+            with open("schedule.json", "r") as f:
+                schedule = json.load(f)
+
+            template = env.get_template("listeners_page.html")
+            rendered_template = template.render(
+                broadcast_status=broadcast_data,
+                schedule=schedule,
+                broadcast_count=broadcast_count,
+                scheduled_broadcast_count=scheduled_broadcast_count,
+            )
+            self.write(rendered_template)
+        except Exception as e:
+            self.set_status(500)
+            self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
 
 
 class DownloadLinksJSONHandler(RequestHandler):
@@ -677,6 +714,7 @@ def make_app():
                 {"path": os.getenv("STATIC_RECORDINGS_PATH", "/app/static/Recordings")},
             ),
             url(r"/recording_status.json", RecordingStatusJSONHandler),
+            url(r"/.*", BaseHandler),
         ],
         static_path=os.path.join(
             os.path.dirname(__file__), "static"

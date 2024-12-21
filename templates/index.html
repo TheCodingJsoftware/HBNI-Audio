@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="google" content="notranslate">
-    <link href="https://cdn.jsdelivr.net/npm/beercss@3.7.14/dist/cdn/beer.min.css" rel="stylesheet" />
-    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.7.14/dist/cdn/beer.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.css" rel="stylesheet" />
+    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.js"></script>
     <script type="module"
         src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js">
     </script>
@@ -23,156 +23,106 @@
 
 <dialog id="faq-dialog" class="max">
     <div class="right-align">
-        <button class="transparent circle" onclick="ui('#faq-dialog');">
+        <button class="transparent circle ripple" onclick="ui('#faq-dialog');">
             <i>close</i>
         </button>
     </div>
     <h3 class="center-align padding-bottom">Frequently Asked Questions</h3>
-    <div>
-        <h5> How do I play archives without downloading them? </h5>
-        <h6> Apple </h6>
+    <div class="large-width center">
+        <hr>
+        <ul>
+            <li><a class="link" href="#play-archives">How do I play archives without downloading them?</a></li>
+            <li><a class="link" href="#where-archives-stored">Where are the archives stored?</a></li>
+            <li><a class="link" href="#using-mega-and-google-drive">Why are you using both Mega and GoogleDrive?</a></li>
+            <li><a class="link" href="#not-migrating-to-google-drive">Why not migrate the entire database over to GoogleDrive?</a></li>
+            <li><a class="link" href="#stop-using-google-drive">Why stop using GoogleDrive?</a></li>
+            <li><a class="link" href="#remove-broadcast">I want to remove a broadcast on the archive.</a></li>
+            <li><a class="link" href="#never-recorded">I don't want any of my broadcasts on the archive and never be recorded.</a></li>
+            <li><a class="link" href="#broadcast-missing">Why is the broadcast not finished or missing?</a></li>
+            <li><a class="link" href="#upload-time">How long does it take to upload archives?</a></li>
+            <li><a class="link" href="#private-broadcasts">How do I make a private broadcast?</a></li>
+        </ul>
+        <hr>
+        <h5 id="play-archives">How do I play archives without downloading them?</h5>
+        <h6>Apple</h6>
         <p>
             1. Install <a class="link" href="https://apps.apple.com/us/app/mega/id706857885">Mega</a> or <a
-                class="link" href="https://apps.apple.com/ca/app/google-drive/id507874739">GoogleDrive</a> on your
-            phone.
-            (You
-            may or
-            may not have to create an account)
-            2. Go to the <a class="link" href="http://audioarchives.hbni.net">HBNI archive</a> and press any archive
-            you
-            want to
-            listen to.
-            3. You will be redirected to the <a href="https://apps.apple.com/us/app/mega/id706857885">Mega</a>
-            or <a class="link" href="https://apps.apple.com/ca/app/google-drive/id507874739">GoogleDrive</a> app.
-            4. You can directly play the broadcast that way without downloading it to your device.
+                class="link" href="https://apps.apple.com/ca/app/google-drive/id507874739">GoogleDrive</a>.
+            2. Go to the <a class="link" href="http://audioarchives.hbni.net">HBNI archive</a> and press any archive you want to listen to.
+            3. You will be redirected to the <a href="https://apps.apple.com/us/app/mega/id706857885">Mega</a> or
+            <a class="link" href="https://apps.apple.com/ca/app/google-drive/id507874739">GoogleDrive</a> app.
+            4. Play the broadcast directly without downloading it.
         </p>
-        <h6> Android </h6>
+        <h6>Android</h6>
         <p>
-            1. Install <a class="link"
+            Similar steps as Apple. Install <a class="link"
                 href="https://play.google.com/store/apps/details?id=mega.privacy.android.app&hl=en_US&gl=US">Mega</a>
-            or
-            <a class="link"
-                href="https://play.google.com/store/apps/details?id=com.google.android.apps.docs">GoogleDrive</a>
-            on
-            your
-            phone. (You may or may not have to create an account)
-            2. Go to the <a class="link" href="http://audioarchives.hbni.net">HBNI archive</a> and press any archive
-            you
-            want to
-            listen to.
-            3. You will be redirected to the <a class="link"
-                href="https://play.google.com/store/apps/details?id=mega.privacy.android.app&hl=en_US&gl=US">Mega</a>
-            or
-            <a class="link"
-                href="https://play.google.com/store/apps/details?id=com.google.android.apps.docs">GoogleDrive</a>
-            app.
-            4. You can directly play the broadcast that way without downloading it to your device.
+            or <a class="link" href="https://play.google.com/store/apps/details?id=com.google.android.apps.docs">GoogleDrive</a>.
+            Use the <a class="link" href="http://audioarchives.hbni.net">HBNI archive</a> to select the broadcast.
         </p>
-        <h6> Windows (Computer) </h6>
+        <h6>Windows (Computer)</h6>
         <p>
-            Just press on any archive on the <a class="link" href="http://audioarchives.hbni.net">HBNI archive</a>,
-            you
-            will be redirected to <a class="link" href="https://mega.nz">mega.nz</a> or <a class="link"
-                href="https://drive.google.com">GoogleDrive</a>, from there you can just press play.
+            Click any archive on the <a class="link" href="http://audioarchives.hbni.net">HBNI archive</a>. It will redirect you to
+            <a class="link" href="https://mega.nz">mega.nz</a> or <a class="link" href="https://drive.google.com">GoogleDrive</a>.
         </p>
-        <h5> Where are the archives stored? </h5>
+
+        <h5 id="where-archives-stored">Where are the archives stored?</h5>
         <h6>2022-07-12 to 2023-07-21</h6>
-            <p>
-                The archives (as of 2022-07-12 to 2023-07-21) are stored on a file hosting website called <a
-                    class="link" href="https://mega.nz">mega.nz</a>.
-                The folder where all archives are stored online is <a class="link"
-                    href="https://mega.nz/folder/CxF1AQwS#rucPTrUDuhHE5I76NtpkLA">here</a>.
-            </p>
-            <h6>2023-07-21 to 2023-07-29</h6>
-            <p>
-                The archives (as of 2023-07-21 to 2023-07-29) are stored on a file hosting website called <a
-                    class="link" href="https://drive.google.com">GoogleDrive</a>.
-                The folder where all archives are stored online is <a class="link"
-                    href="https://drive.google.com/drive/u/0/folders/1ceDO2zOx8pdEzQDRa-aHXVXhXO-QT-cq">here</a>.
-            </p>
-            <h6>2023-07-29 to today</h6>
-            <p>
-                The archives (as of 2023-07-29 to today) are stored on our own servers in Pineland Colony.
-            </p>
-            <p>
-                All data on each broadcast (date, length, host, description, etc...) can be found <a class="link"
-                    href="http://audioarchives.hbni.net/download_links.json">here</a>.
-                <p style="padding-left: 30px;"> This data is what the archive refers from, whatever changes in this
-                    file,
-                    changes on the <a class="link" href="http://audioarchives.hbni.net">HBNI archive</a>.
-                </p>
-                <h5> Why are you using both Mega and GoogleDrive? </h5>
-                <p>
-                    <a class="link" href="https://mega.nz">mega.nz</a> was easier and quicker to get started with
-                    back in 2022.
-                    However, I have ran out of storage space on my account and needed to
-                    switch
-                    over
-                    to <a class="link" href="https://drive.google.com">GoogleDrive</a> which HBNI supported.
-                </p>
-                <h5> Why not migrate the entire database over to GoogleDrive?</h5>
-                <p>
-                    <a class="link" href="https://mega.nz">mega.nz</a> does not offer a easy way to migrate a
-                    database. As time went
-                    on
-                    <a class="link" href="https://mega.nz">mega.nz</a> methods of uploading files has changed and
-                    and the data that
-                    is
-                    required to migrate them is inconsistent, making it really difficult to port over. Some
-                    broadcasts
-                    would
-                    be
-                    lost in the process which is not ideal.
-                </p>
-                <h5> Why stop using GoogleDrive? </h5>
-                <p>
-                    Google does not allow the creation of a permanent access token to your GoogleDrive, I would have
-                    to
-                    manually refresh
-                    the token every week or so to keep the system working, which is not ideal.
-                </p>
-                <h5> I want to remove a broadcast on the archive. </h5>
-                <p>
-                    Please email me the exact details at: <a class="link"
-                        href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>
-                </p>
-                <h5> I don't want any of my broadcasts on the archive and never be recorded. </h5>
-                <p>
-                    Please email me at: <a class="link"
-                        href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>
-                    **NOTE** The <a class="link"
-                        href="https://github.com/TheCodingJsoftware/HBNI-Audio-Stream-Recorder">HBNI
-                        recorder</a> records all broadcasts by default, if you wish to be exempt from these
-                    conditions,
-                    the
-                    recorder has list
-                    of hosts will never be recorded. Just make sure when you start a broadcast, use the same host
-                    name
-                    each
-                    time.
-                </p>
-                <h5> Why is the broadcast not finished or missing?
-                </h5>
-                <p>
-                    Often times if a broadcast is not uploaded or is shorter then it should be it is because during
-                    the
-                    recording process we may have lost internet connection, this is something we cannot predict or
-                    do
-                    much
-                    about, thats just how it is.
-                </p>
-                <h5>How long does it take to upload archives?</h5>
-                <p>
-                    Broadcasts should be succesfully uploaded within 5 minutes since its been on the air. This
-                    greatly
-                    depends on the length on the broadcast. Sometimes, when a broadcast has been split up into
-                    multiple
-                    parts or
-                    failed to upload due to losing internet connection we may have to manually upload it which
-                    can take
-                    some
-                    time.
-                </p>
+        <p>
+            Archives were stored on <a class="link" href="https://mega.nz">mega.nz</a>. Access them
+            <a class="link" href="https://mega.nz/folder/CxF1AQwS#rucPTrUDuhHE5I76NtpkLA">here</a>.
+        </p>
+        <h6>2023-07-21 to 2023-07-29</h6>
+        <p>
+            Archives were stored on <a class="link" href="https://drive.google.com">GoogleDrive</a>. Access them
+            <a class="link" href="https://drive.google.com/drive/u/0/folders/1ceDO2zOx8pdEzQDRa-aHXVXhXO-QT-cq">here</a>.
+        </p>
+        <h6>2023-07-29 to today</h6>
+        <p>
+            Archives are stored on our servers in Pineland Colony. The data is stored on Postgres database. Data for each broadcast can be found <a class="link" href="http://audioarchives.hbni.net/download_links.json">here</a>.
+        </p>
+
+        <h5 id="using-mega-and-google-drive">Why are you using both Mega and GoogleDrive?</h5>
+        <p>
+            Mega was quicker to start with but ran out of storage, leading to a switch to GoogleDrive, which HBNI supported.
+        </p>
+
+        <h5 id="not-migrating-to-google-drive">Why not migrate the entire database over to GoogleDrive?</h5>
+        <p>
+            Mega does not provide an easy way to migrate data. Inconsistent file data and changing upload methods make
+            it impractical without risking data loss.
+        </p>
+
+        <h5 id="stop-using-google-drive">Why stop using GoogleDrive?</h5>
+        <p>
+            Google doesn't allow permanent access tokens, requiring weekly manual token refreshes, which isn't practical.
+        </p>
+
+        <h5 id="remove-broadcast">I want to remove a broadcast on the archive.</h5>
+        <p>
+            Email exact details to <a class="link" href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>.
+        </p>
+
+        <h5 id="never-recorded">I don't want any of my broadcasts on the archive and never be recorded.</h5>
+        <p>
+            Email <a class="link" href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>. The
+            <a class="link" href="https://github.com/TheCodingJsoftware/HBNI-Audio-Stream-Recorder">HBNI recorder</a>
+            can exempt specific hosts from being recorded. Use the same host name each time.
+        </p>
+
+        <h5 id="broadcast-missing">Why is the broadcast not finished or missing?</h5>
+        <p>
+            Internet connection issues during recording can lead to incomplete uploads.
+        </p>
+
+        <h5 id="upload-time">How long does it take to upload archives?</h5>
+        <p>
+            Archives are usually uploaded within 5 minutes, depending on broadcast length. Manual uploads may take longer if there are issues.
+        </p>
+        <h5 id="private-broadcasts">How do I make a private broadcast?</h5>
+        <p>
+            Go to the <a class="link" href="http://audioarchives.hbni.net/broadcasting_page">broadcasting page</a> and check mark the private checkbox. Private broadcasts are not listed on the <a class="link" href="http://audioarchives.hbni.net/listeners_page">listeners page</a> or archived but can be shared by the host and saved to your device after ending.
+        </p>
     </div>
     <button class="transparent circle" onclick="ui('#faq-dialog');">
         <span>Close</span>
@@ -181,18 +131,16 @@
 <div class="overlay blur"></div>
 <dialog id="download-dialog">
     <h3 class="center-align">Apps</h3>
-    <button class="row responsive small-round"
-        onclick="location.href='https://github.com/TheCodingJsoftware/HBNI-Audio-Stream-Listener/releases';">
+    <button class="row responsive small-round ripple" onclick="location.href='https://github.com/TheCodingJsoftware/HBNI-Audio-Stream-Listener/releases';">
         <i>desktop_windows</i>
         <span>Desktop</span>
     </button>
-    <button class="row responsive small-round"
+    <button class="row responsive small-round ripple"
         onclick="location.href='https://apps.apple.com/ca/app/hbni-audio-streaming/id1611672333';">
         <i>ios</i>
         <span>Apple</span>
     </button>
-    <button class="row responsive small-round"
-        onclick="location.href='https://play.google.com/store/apps/details?id=com.thecodingjsoftware.hutteritechurch';">
+    <button class="row responsive small-round ripple" onclick="location.href='https://play.google.com/store/apps/details?id=com.thecodingjsoftware.hutteritechurch';">
         <i>android</i>
         <span>Android</span>
     </button>
@@ -200,7 +148,7 @@
 <div class="overlay blur"></div>
 <dialog id="info-dialog">
     <div class="right-align">
-        <button class="transparent circle" onclick="ui('#info-dialog');">
+        <button class="transparent circle ripple" onclick="ui('#info-dialog');">
             <i>close</i>
         </button>
     </div>
@@ -213,7 +161,7 @@
             Browse archived broadcasts, schedule events, broadcast live audio, and view live broadcasts and scheduled events.
         </p>
         <br>
-        <p class="center-align">Developed with <i>favorite</i> by <a class="link" href="https://thecodingjsoftware.github.io/">TheCodingJ's</a></p>
+        <p class="center-align">Developed with <button class="chip small-round circle no-border transparent no-margin"><i style="color: var(--error)">favorite</i><div class="tooltip top">love</div></button> by <a class="link" href="https://thecodingjsoftware.github.io/">TheCodingJ's</a></p>
     </div>
     <br>
     <article class="border" style="margin-top: auto;">
@@ -227,11 +175,11 @@
 
 <header class="fixed primary" id="main-header">
     <nav>
-        <button class="circle transparent" onclick="ui('#info-dialog');">
+        <button class="circle transparent ripple" onclick="ui('#info-dialog');">
             <img src="/static/icon.png" class="responsive">
         </button>
         <h5 class="max center-align small">Audio Archive</h5>
-        <button class="circle transparent" onclick="mode()" id="toggle-theme">
+        <button class="circle transparent ripple" onclick="mode()" id="toggle-theme">
             <i>dark_mode</i>
         </button>
     </nav>
@@ -250,7 +198,7 @@
         <div>
             <div class="tabs scroll left-align">
             {% for groupName in downloadableRecordings %}
-                <a data-ui="#{{ groupName.replace(' ', '_') }}" {% if loop.first %}class="active" {% endif %}>
+                <a data-ui="#{{ groupName.replace(' ', '_') }}" class="ripple {% if loop.first %}active{% endif %}">
                     <i>
                         {% if "Days" in groupName or "Today" in groupName or "Yesterday" in groupName %}
                         today
@@ -266,44 +214,50 @@
             </div>
             {% for groupName in downloadableRecordings %}
             <div class="page {% if loop.first %}active{% endif %}" id="{{ groupName.replace(' ', '_') }}">
-                <article class="scroll border small-round no-padding no-margin no-elevate no-space grid" id="contents">
+                <div class="scroll border small-round no-space grid" id="contents">
                     {% for itemName, itemData in downloadableRecordings[groupName].items() %}
-                    <article data-name="{{ itemName }}" class="small-round small-margin s12 m6 l4" id="article-version">
-                        <div class="row">
-                            <div class="max">
-                                <h6 class="bottom-margin">{{ itemData["description"]}}</h6>
+                    <article data-name="{{ itemName }}" class="small-round small-margin no-padding s12 m6 l6" id="article-version">
+                        <details open>
+                            <summary class="small-round no-padding none s">
+                                <a class="summary-contents row ripple small-round">
+                                    <span class="max broadcast-title">{{ itemData["host"].replace("/", "").title() }} - {{ itemData["description"]}}</span>
+                                    <span>{{ itemData["uploaded_days_ago"]}}</span>
+                                </a>
+                            </summary>
+                            <div class="padding">
+                                <h6 class="bottom-margin m l">{{ itemData["description"]}}</h6>
                                 <div><i>artist</i> {{ itemData["host"].replace("/", "").title() }}</div>
-                                <div><i>event</i> {{ itemData["date"].replace("_", ":") }}</div>
+                                <div><i>event</i> {{ itemData["date"].replace("_", ":") }} <span class="m l">({{ itemData["uploaded_days_ago"]}})</span></div>
                                 <div><i>schedule</i> {{ itemData["formatted_length"]}}</div>
                                 <div class="row no-margin" style="max-height: 24.3px;">
                                     <div class="max"><i>web_traffic</i> {{ itemData["visit_count"]}} visits</div>
-                                    <button class="chip circle link no-padding no-margin no-border">
+                                    <button class="circle link transparent">
                                         <i>info</i>
                                         <div class="tooltip left">
                                             <span class="left-align">Latest Visit:<br>{{itemData["latest_visit"]}}</span>
                                         </div>
                                     </button>
                                 </div>
+                                <nav class="row">
+                                    <button class="small-round ripple" target="_blank" onclick="window.location.href='{{ itemData["download_link"] }}';">
+                                        <i>{% if "play_recording" in itemData['download_link'] %}play_arrow{% elif "mega" in itemData['download_link'] or "google" in itemData['download_link'] %}globe{% else %}download{% endif %}</i>
+                                        <span>{% if "play_recording" in itemData['download_link'] %}Play{% else %}Download{% endif %}</span>
+                                    </button>
+                                    <div class="max"></div>
+                                    {% if "Days" in groupName or "Yesterday" in groupName or "Today" in groupName %}
+                                    <div class="badge none">New</div>
+                                    {% endif %}
+                                    {% if "mega" in itemData['download_link'] %}
+                                    <div class="badge none"><i>cloud</i></div>
+                                    {% elif "google" in itemData['download_link'] %}
+                                    <div class="badge none"><i>add_to_drive</i></div>
+                                    {% endif %}
+                                </nav>
                             </div>
-                        </div>
-                        <nav class="row">
-                            <button class="small-round" target="_blank" onclick="window.location.href='{{ itemData["download_link"] }}';">
-                                <i>{% if "play_recording" in itemData['download_link'] %}play_arrow{% elif "mega" in itemData['download_link'] or "google" in itemData['download_link'] %}globe{% else %}download{% endif %}</i>
-                                <span>{% if "play_recording" in itemData['download_link'] %}Play{% else %}Download{% endif %}</span>
-                            </button>
-                            <div class="max"></div>
-                            {% if "Days" in groupName or "Yesterday" in groupName or "Today" in groupName %}
-                            <div class="badge none">New</div>
-                            {% endif %}
-                            {% if "mega" in itemData['download_link'] %}
-                            <div class="badge none"><i>cloud</i></div>
-                            {% elif "google" in itemData['download_link'] %}
-                            <div class="badge none"><i>add_to_drive</i></div>
-                            {% endif %}
-                        </nav>
+                        </details>
                     </article>
                     {% endfor %}
-                </article>
+                </div>
             </div>
             {% endfor %}
         </div>
@@ -320,8 +274,7 @@
                     <div><i>event</i> {{ host_data["starting_time"] }}</div>
                     <div><i>schedule</i> {{ host_data["length"] }}</div>
                     <nav>
-                        <button class="small-round" target="_blank"
-                            onclick="location.href='{{ host_data["link"] }}';">
+                        <button class="small-round ripple" target="_blank" onclick="location.href='{{ host_data["link"] }}';">
                             <i>record_voice_over</i>
                             <span>Listen</span>
                         </button>
@@ -339,19 +292,19 @@
 
 <footer class="fixed bottom surface-container m l" id="bottom-nav">
     <nav class="row center-align">
-        <button class="transparent vertical tiny" onclick="ui('#faq-dialog');">
+        <button class="transparent vertical tiny ripple" onclick="ui('#faq-dialog');">
             <i>help</i>
             <span>FAQ</span>
         </button>
-        <button class="transparent vertical tiny" onclick="ui('#download-dialog');">
+        <button class="transparent vertical tiny ripple" onclick="ui('#download-dialog');">
             <i>apps</i>
             <span>Download</span>
         </button>
-        <button class="transparent vertical tiny" onclick="window.location.href='/broadcasting_page';">
+        <button class="transparent vertical tiny ripple" onclick="window.location.href='/broadcasting_page';">
             <i>adaptive_audio_mic</i>
             <span>Broadcasting Page</span>
         </button>
-        <button class="transparent vertical tiny" onclick="window.location.href='/listeners_page';">
+        <button class="transparent vertical tiny ripple" onclick="window.location.href='/listeners_page';">
             <i>media_output</i>
             <span>Listeners Page</span>
         </button>
@@ -359,19 +312,19 @@
 </footer>
 <footer class="fixed bottom surface-container s" id="bottom-nav" style="min-block-size: 50px !important;">
     <nav class="row center-align">
-        <button class="transparent circle tiny" onclick="ui('#faq-dialog');">
+        <button class="transparent circle tiny ripple" onclick="ui('#faq-dialog');">
             <i>help</i>
             <div class="tooltip top">FAQ</div>
         </button>
-        <button class="transparent circle tiny" onclick="ui('#download-dialog');">
+        <button class="transparent circle tiny ripple" onclick="ui('#download-dialog');">
             <i>apps</i>
             <div class="tooltip top">Download</div>
         </button>
-        <button class="transparent circle tiny" onclick="window.location.href='/broadcasting_page';">
+        <button class="transparent circle tiny ripple" onclick="window.location.href='/broadcasting_page';">
             <i>adaptive_audio_mic</i>
             <div class="tooltip top">Broadcasting Page</div>
         </button>
-        <button class="transparent circle tiny" onclick="window.location.href='/listeners_page';">
+        <button class="transparent circle tiny ripple" onclick="window.location.href='/listeners_page';">
             <i>media_output</i>
             <div class="tooltip top">Listeners Page</div>
         </button>

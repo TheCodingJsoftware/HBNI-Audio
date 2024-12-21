@@ -1,97 +1,142 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <meta name="google" content="notranslate" />
-    <link href="https://cdn.jsdelivr.net/npm/beercss@3.7.14/dist/cdn/beer.min.css" rel="stylesheet" />
-    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.7.14/dist/cdn/beer.min.js"></script>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="/static/css/theme.css" />
-    <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
-    <link rel="icon" href="/static/icon.png" />
-    <title>HBNI Audio Listeners Page</title>
-    <meta property="og:title" content="HBNI Audio Listeners Page" />
-    <meta property="og:url" content="https://audioarchives.hbni.net/listeners_page" />
-    <meta property="og:image" content="https://audioarchives.hbni.net/static/icon.png" />
-    <meta property="og:description" content="View active and scheduled broadcasts on the HBNI Audio Streaming Service." />
-  </head>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <meta name="google" content="notranslate" />
+        <link href="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.css" rel="stylesheet" />
+        <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.js"></script>
+        <script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="/static/css/theme.css" />
+        <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
+        <link rel="icon" href="/static/icon.png" />
+        <title>HBNI Audio Listeners Page</title>
+        <meta property="og:title" content="HBNI Audio Listeners Page" />
+        <meta property="og:url" content="https://audioarchives.hbni.net/listeners_page" />
+        <meta property="og:image" content="https://audioarchives.hbni.net/static/icon.png" />
+        <meta property="og:description" content="View active and scheduled broadcasts on the HBNI Audio Streaming Service." />
+    </head>
 
-  <header class="fixed primary" id="main-header">
-    <nav>
-      <button class="circle transparent" onclick="window.location.href='/';"><i>arrow_back</i></button>
-      <h5 class="max center-align small">Listeners Page</h5>
-      <button class="circle transparent" onclick="mode()" id="toggle-theme"><i>dark_mode</i></button>
-    </nav>
-  </header>
+    <header class="fixed primary" id="main-header">
+        <nav>
+            <button class="circle transparent ripple" onclick="window.location.href='/';">
+                <i>arrow_back</i>
+            </button>
+            <h5 class="max center-align small">Listeners Page</h5>
+            <button class="circle transparent ripple" onclick="mode()" id="toggle-theme">
+                <i>dark_mode</i>
+            </button>
+        </nav>
+    </header>
 
-  <body class="dark">
-    <main class="responsive">
-      {% if schedule %}
-        <h3 class="center-align">Scheduled Broadcasts</h3>
-        <hr />
-        <div class="small-padding grid" id="schedulded-broadcasts-container">
-          {% for scheduled_date, scheduled_broadcast in schedule.items() %}
-            <article class="s12 m12 l6">
-              <div class="row no-space">
-                <h6 class="bottom-margin max">{{ scheduled_broadcast.description }}</h6>
-                <button class="transparent small-round circle link" onclick="shareUpcomingBroadcast('{{ scheduled_broadcast.host.title() }} schedulded a broadcast with the description, {{ scheduled_broadcast.description }} and is schedulded to start at {{ scheduled_broadcast.start_time }}.')"><i>share</i></button>
-                <button class="transparent small-round circle link" onclick="copyUpcomingBroadcastToClipboard('{{ scheduled_broadcast.host.title() }} schedulded a broadcast with the description, {{ scheduled_broadcast.description }} and is schedulded to start at {{ scheduled_broadcast.start_time }}.')"><i>content_copy</i></button>
-              </div>
-              <div>
-                <i>artist</i> {{ scheduled_broadcast.host.replace('/', '').title() }}
-              </div>
-              <div>
-                <i>event</i> {{ scheduled_broadcast.start_time }}
-              </div>
-              <blockquote class="no-line">{{ scheduled_broadcast.host.title() }} schedulded a broadcast with the description, "{{ scheduled_broadcast.description }}" and is schedulded to start at {{ scheduled_broadcast.start_time }}.</blockquote>
-            </article>
-          {% endfor %}
-        </div>
-      {% endif %}
-      {% if broadcast_count %}
-        <h3 class="center-align">Active Broadcasts</h3>
-        <hr />
-        <div class="small-padding grid" id="broadcasts-container">
-          {% for broadcast in broadcast_status %}
-          {% if not broadcast.is_private %}
-            <article class="s12 m6 l6" id="{{ broadcast.host }}">
-              <div class="row no-space top-align">
-                <h6 class="bottom-margin max">{{ broadcast.server_description }}</h6>
-                <a class="transparent small-round circle link wave" href="http://hbniaudio.hbni.net:8000/{{ broadcast.host }}" target="_blank">
-                  <i>open_in_new</i>
-                  <span>Direct Link</span>
-                </a>
-                <button class="transparent small-round circle link" onclick="shareUpcomingBroadcast('{{ broadcast.server_description }}')"><i>share</i></button>
-                <button class="transparent small-round circle link" onclick="copyUpcomingBroadcastToClipboard('{{ broadcast.server_description }}')"><i>content_copy</i></button>
-              </div>
-              <div>
-                <i>artist</i> {{ broadcast.host.replace('/', '').title() }}
-              </div>
-              <div>
-                <i>event</i> {{ broadcast.stream_start.replace('_', ':') }}
-              </div>
-              <div>
-                <i>hearing</i> Current Listeners: {{ broadcast.listeners }}
-              </div>
-              <div>
-                <i>trending_up</i> Listener Peak: {{ broadcast.listener_peak }}
-              </div>
-              <div class="top-margin center-align middle-align">
-                <audio controls autoplay class="s12 m8 l8" title="{{ broadcast.server_description }}">
-                  <source src="http://hbniaudio.hbni.net:8000/{{ broadcast.host }}" type="audio/mpeg" />Your browser does not support the audio element.
-                </audio>
-              </div>
-            </article>
-          {% endif %}
-          {% endfor %}
-        </div>
-      {% else %}
-        <h6 class="center-align middle-align extra-padding extra-margin">No broadcasts currently online.</h6>
-      {% endif %}
-      <div class="snackbar green" id="copied-to-clipboard">Copied to Clipboard</div>
-    </main>
-    <script type="text/javascript" src="/static/js/listeners_page.js"></script>
-  </body>
+    <body class="dark">
+        <main class="responsive">
+            {% if scheduled_broadcast_count %}
+            <h3 class="center-align">Scheduled Broadcasts</h3>
+            <hr>
+            <div class="small-padding grid" id="schedulded-broadcasts-container">
+                {% for scheduled_date, scheduled_broadcast in schedule.items()
+                %}
+                <article class="s12 m12 l6">
+                    <div class="row no-space">
+                        <h6 class="bottom-margin max">
+                            {{ scheduled_broadcast.description }}
+                        </h6>
+                        <button class="transparent small-round circle link ripple" onclick="shareUpcomingBroadcast('{{ scheduled_broadcast.host.title() }} schedulded a broadcast with the description, {{ scheduled_broadcast.description }} and is schedulded to start at {{ scheduled_broadcast.start_time }}.')">
+                            <i>share</i>
+                        </button>
+                        <button class="transparent small-round circle link ripple" onclick="copyUpcomingBroadcastToClipboard('{{ scheduled_broadcast.host.title() }} schedulded a broadcast with the description, {{ scheduled_broadcast.description }} and is schedulded to start at {{ scheduled_broadcast.start_time }}.')">
+                            <i>content_copy</i>
+                        </button>
+                    </div>
+                    <div>
+                        <i>artist</i> {{ scheduled_broadcast.host.replace('/',
+                        '').title() }}
+                    </div>
+                    <div><i>event</i> {{ scheduled_broadcast.start_time }}</div>
+                    <blockquote class="no-line">
+                        {{ scheduled_broadcast.host.title() }} schedulded a
+                        broadcast with the description, "{{
+                        scheduled_broadcast.description }}" and is schedulded to
+                        start at {{ scheduled_broadcast.start_time }}.
+                    </blockquote>
+                </article>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% if broadcast_count %}
+            <h3 class="center-align">Active Broadcasts</h3>
+            <hr>
+            <div class="small-padding grid" id="broadcasts-container">
+                {% for broadcast in broadcast_status %} {% if not
+                broadcast.is_private %}
+                <article class="s12 m6 l6" id="{{ broadcast.host }}">
+                    <div class="row no-space top-align">
+                        <h6 class="bottom-margin max">
+                            {{ broadcast.server_description }}
+                        </h6>
+                        <a class="transparent small-round circle link ripple" href="http://hbniaudio.hbni.net:8000/{{ broadcast.host }}" target="_blank">
+                            <i>open_in_new</i>
+                            <span>Direct Link</span>
+                        </a>
+                        <button class="transparent small-round circle link ripple" onclick="shareUpcomingBroadcast('{{ broadcast.server_description }}')">
+                            <i>share</i>
+                        </button>
+                        <button class="transparent small-round circle link ripple" onclick="copyUpcomingBroadcastToClipboard('{{ broadcast.server_description }}')">
+                            <i>content_copy</i>
+                        </button>
+                    </div>
+                    <div>
+                        <i>artist</i> {{ broadcast.host.replace('/', '').title() }}
+                    </div>
+                    <div>
+                        <i>event</i> {{ broadcast.stream_start.replace('_', ':') }}
+                    </div>
+                    <div>
+                        <i>hearing</i> Current Listeners: {{ broadcast.listeners }}
+                    </div>
+                    <div>
+                        <i>trending_up</i> Listener Peak: {{ broadcast.listener_peak }}
+                    </div>
+                    <div class="top-margin center-align middle-align">
+                        <audio controls autoplay class="s12 m8 l8" title="{{ broadcast.server_description }}">
+                            <source src="http://hbniaudio.hbni.net:8000/{{ broadcast.host }}" type="audio/mpeg" />
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+                </article>
+                {% endif %} {% endfor %}
+            </div>
+            {% endif %}
+            {% if scheduled_broadcast_count == 0 and broadcast_count == 0 %}
+            <h6 class="absolute padding center middle medium-width center-align">
+                No broadcasts currently online or events schedulded.
+            </h6>
+            {% endif %}
+            <div class="snackbar" id="copied-to-clipboard">
+                Copied to Clipboard
+            </div>
+            <div class="snackbar" id="no-broadcasts-online">
+                No broadcasts currently online
+            </div>
+            <div class="snackbar" id="no-events-scheduled">
+                No events scheduled
+            </div>
+        </main>
+        <script type="text/javascript" src="/static/js/listeners_page.js"></script>
+    </body>
+    {% if scheduled_broadcast_count and not broadcast_count %}
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+          ui("#no-broadcasts-online");
+        });
+    </script>
+    {% elif not scheduled_broadcast_count and broadcast_count %}
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+          ui("#no-events-scheduled");
+        });
+    </script>
+    {% endif %}
 </html>

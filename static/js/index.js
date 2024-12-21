@@ -50,6 +50,28 @@ function searchAndFilter() {
         }
     });
 }
+
+function adjustDialogForScreenSize() {
+    const infoDialog = document.getElementById('info-dialog');
+    const downloadDialog = document.getElementById('download-dialog');
+    if (window.innerWidth <= 600) {
+        infoDialog.classList.add('max');
+        downloadDialog.classList.add('bottom');
+    } else {
+        downloadDialog.classList.remove('bottom');
+        infoDialog.classList.remove('max');
+    }
+}
+
+function adjustDetailsForScreenSize() {
+    const detailsElements = document.querySelectorAll('details');
+    if (window.innerWidth <= 600) { // Mobile view threshold
+        detailsElements.forEach(details => details.removeAttribute('open'));
+    } else {
+        detailsElements.forEach(details => details.setAttribute('open', ''));
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     let savedMode = localStorage.getItem("mode") || "light";
     ui("mode", savedMode);
@@ -59,4 +81,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     searchInput.addEventListener('input', searchAndFilter);
     updateImageSource();
+    adjustDialogForScreenSize();
+    adjustDetailsForScreenSize();
+
+    window.addEventListener('resize', () => {
+        adjustDialogForScreenSize();
+        adjustDetailsForScreenSize();
+    });
 });
