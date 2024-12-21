@@ -680,7 +680,7 @@ def make_app():
         ],
         static_path=os.path.join(
             os.path.dirname(__file__), "static"
-        ),  # Path inside container
+        ),
     )
 
 
