@@ -1,22 +1,21 @@
 import json
-from typing import Any, Union
-import requests
 import os
+import shutil
 import subprocess
 import traceback
 from datetime import datetime, timedelta
-import shutil
-import jwt  # PyJWT
+from typing import Any, Union
 
 import asyncpg
 import jinja2
+import jwt  # PyJWT
+import requests
+import tornado.escape
 import tornado.gen
 import tornado.httpserver
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
-import tornado.escape
-import os
 from dotenv import load_dotenv
 from tornado.web import Application, RequestHandler, url
 
@@ -202,11 +201,14 @@ error_messages = {
     418: "I’m a teapot, not a coffee maker! Why would you ask me to do that?",
 }
 
+
 class BaseHandler(RequestHandler):
-    def write_error(self, status_code: int, stack_trace: str="", **kwargs):
+    def write_error(self, status_code: int, stack_trace: str = "", **kwargs):
         error_message = error_messages.get(status_code, "Something went majorly wrong.")
         template = env.get_template("error.html")
-        rendered_template = template.render(error_code=status_code, error_message=error_message, stack_trace=stack_trace)
+        rendered_template = template.render(
+            error_code=status_code, error_message=error_message, stack_trace=stack_trace
+        )
         self.write(rendered_template)
 
 
@@ -378,7 +380,7 @@ class ScheduleBroadcastHandler(BaseHandler):
             self.write({"success": True})
         except Exception as e:
             self.set_status(500)
-            self.write_error(500, stack_trace=f'{str(e)} {traceback.print_exc()}')
+            self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
 
 
 class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
@@ -576,7 +578,9 @@ class ListenHandler(BaseHandler):
                 return []
         except requests.exceptions.RequestException as e:
             self.set_status(500)
-            self.write_error(500, stack_trace=f"Error while fetching JSON data: {str(e)}")
+            self.write_error(
+                500, stack_trace=f"Error while fetching JSON data: {str(e)}"
+            )
             return []
 
         # Extract relevant data for rendering
@@ -716,9 +720,7 @@ def make_app():
             url(r"/recording_status.json", RecordingStatusJSONHandler),
             url(r"/.*", BaseHandler),
         ],
-        static_path=os.path.join(
-            os.path.dirname(__file__), "static"
-        ),
+        static_path=os.path.join(os.path.dirname(__file__), "static"),
     )
 
 
