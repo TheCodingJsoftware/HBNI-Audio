@@ -80,6 +80,19 @@ document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('search');
 
     searchInput.addEventListener('input', searchAndFilter);
+    document.querySelectorAll("[id^='download-button']").forEach((button) => {
+        button.addEventListener("click", function (e) {
+            e.preventDefault();
+            const url = this.getAttribute("data-url");
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", "");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    });
+
     updateImageSource();
     adjustDialogForScreenSize();
     adjustDetailsForScreenSize();

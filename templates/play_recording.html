@@ -32,31 +32,27 @@
                 </button>
             </nav>
         </header>
-        <div class="overlay blur"></div>
-        <dialog class="left" id="info-dialog">
-            <nav class="right-align">
-                <button class="circle transparent ripple" onclick="ui('#info-dialog');">
-                    <i>close</i>
-                </button>
-            </nav>
-            <p>Visit Count: {{ visit_count }}</p>
-            <p>Latest Visit: {{ latest_visit }}</p>
-        </dialog>
-        <main class="responsive center-align middle-align">
-            <article class="no-padding medium-width" id="main-article">
-                <div class="center-align primary">
-                    <h1 class="extra music-note">♫</h1>
-                </div>
-                <div class="left-align">
-                    <button class="circle link transparent ripple" onclick="ui('#info-dialog');">
-                        <i>info</i>
-                    </button>
+        <main class="responsive">
+            <article class="absolute no-padding center middle medium-width" id="main-article">
+                <div class="center-align primary m l">
+                    <h1 class="extra music-note" style="color: var(--on-primary);">♫</h1>
                 </div>
                 <div class="padding">
-                    <div class="center-align">
-                        {{ file_name.replace('_', ':').replace('.mp3', '') }}
+                    <h6 class="bottom-margin">
+                        {{ description }}
+                    </h6>
+                    <div><i>artist</i> {{ title }}</div>
+                    <div><i>event</i> {{ date.replace("_", ":") }}</div>
+                    <div><i>schedule</i> {{ length }}</div>
+                    <div class="row no-margin" style="max-height: 24.3px;">
+                        <div class="max"><i>web_traffic</i> {{ visit_count }} visits</div>
+                        <button class="circle link transparent">
+                            <i>info</i>
+                            <div class="tooltip left">
+                                <span class="left-align">Latest Visit:<br>{{ latest_visit }}</span>
+                            </div>
+                        </button>
                     </div>
-                    <div class="left-align"><i>artist</i> {{ title }}</div>
                     <div class="row max">
                         <label class="checkbox icon">
                             <input type="checkbox" id="play-button" />
@@ -66,8 +62,7 @@
                             </span>
                         </label>
                         <label class="slider">
-                            <input type="range" max="100" value="0" id="timeline"
-                             >
+                            <input type="range" max="100" value="0" id="timeline">
                             <span></span>
                         </label>
                         <label class="checkbox icon">
@@ -82,17 +77,15 @@
                         <span id="current-time">00:00</span>/
                         <span id="total-time">00:00</span>
                     </div>
-                    <nav>
-                        <div class="grid max">
-                            <button class="small-round responsive ripple s6 m6 l6" id="download-button" data-url="{{ url_for(file_name) }}">
-                                <i>download</i>
-                                <span>Download</span>
-                            </button>
-                            <button class="small-round responsive ripple s6 m6 l6" onclick="sharePage()">
-                                <i>share</i>
-                                <span>Share</span>
-                            </button>
-                        </div>
+                    <nav class="row">
+                        <button class="small-round max ripple" id="download-button" data-url="{{ url_for(file_name) }}">
+                            <i>download</i>
+                            <span>Download</span>
+                        </button>
+                        <button class="circle ripple" onclick="sharePage()">
+                            <i>share</i>
+                            <span>Share</span>
+                        </button>
                     </nav>
                 </div>
                 <canvas id="canvas" style="width: 100%; height: 100px"></canvas>

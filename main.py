@@ -141,7 +141,7 @@ def get_grouped_data(audio_data):
 
         item_date = datetime.strptime(row["date"], "%B %d %A %Y %I_%M %p")
         item_week = item_date.isocalendar()[1]
-        diff_days = (today - item_date).days
+        diff_days = (today.date() - item_date.date()).days
         item_name = row["filename"].replace("_", ":").replace(".mp3", "")
 
         if diff_days == 0:
@@ -219,18 +219,19 @@ class MainHandler(BaseHandler):
             grouped_data = get_grouped_data(audio_data)
 
             try:
-                path = os.getenv("STATIC_PATH", "/app/static")
-                with open(f"{path}/recording_status.json", "r", encoding="utf-8") as f:
+                path = os.getenv("RECORDING_STATUS_PATH", r"\\Pinecone\web\HBNI Audio Stream Recorder\static\recording_status.json")
+                with open(path, "r", encoding="utf-8") as f:
                     recording_status = json.load(f)
-            except Exception:
+            except Exception as e:
                 recording_status = {
-                    "ERROR": "Could not load recording status JSON file."
+                    "ERROR": "Could not load recording status JSON file. Ensure that the enviornment variables are set correctly.<br><br>Error: " + str(e)
                 }
 
             template = env.get_template("index.html")
             rendered_template = template.render(
                 downloadableRecordings=grouped_data,
                 recording_status=recording_status,
+                url_for=url_for_static,
             )
             self.write(rendered_template)
         except Exception as e:
@@ -253,7 +254,7 @@ class PlayRecordingHandler(BaseHandler):
         try:
             result = await conn.fetchrow(
                 """
-                SELECT visit_count, click_count, latest_visit, latest_click
+                SELECT visit_count, latest_visit, date, description, length
                 FROM audioarchives
                 WHERE filename = $1
             """,
@@ -264,14 +265,16 @@ class PlayRecordingHandler(BaseHandler):
 
         if result:
             visit_count = result["visit_count"] or 0
-            click_count = result["click_count"] or 0
             latest_visit = result["latest_visit"] or "N/A"
-            latest_click = result["latest_click"] or "N/A"
+            date = result["date"] or "N/A"
+            description = result["description"] or "N/A"
+            length = format_length(result["length"]) or "N/A"
         else:
             visit_count = 0
-            click_count = 0
             latest_visit = "N/A"
-            latest_click = "N/A"
+            date = "N/A"
+            description = "N/A"
+            length = format_length(0)
 
         audio_data = await fetch_audio_archives()
         grouped_data = get_grouped_data(audio_data)
@@ -281,9 +284,10 @@ class PlayRecordingHandler(BaseHandler):
             title=file_name.split(" - ")[0],
             file_name=file_name,
             visit_count=visit_count,
-            click_count=click_count,
             latest_visit=latest_visit,
-            latest_click=latest_click,
+            date=date,
+            description=description,
+            length=length,
             downloadableRecordings=grouped_data,
             url_for=url_for_static,
         )
@@ -691,8 +695,8 @@ class DownloadLinksJSONHandler(RequestHandler):
 class RecordingStatusJSONHandler(RequestHandler):
     def get(self):
         try:
-            path = os.getenv("STATIC_PATH", "/app/static")
-            with open(f"{path}/recording_status.json", "r", encoding="utf-8") as f:
+            path = os.getenv("RECORDING_STATUS_PATH", r"\\Pinecone\web\HBNI Audio Stream Recorder\static\recording_status.json")
+            with open(path, "r", encoding="utf-8") as f:
                 recording_status = json.load(f)
         except Exception:
             recording_status = {"ERROR": "Could not load recording status JSON file."}

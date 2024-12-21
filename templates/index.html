@@ -242,6 +242,12 @@
                                     <button class="small-round ripple" target="_blank" onclick="window.location.href='{{ itemData["download_link"] }}';">
                                         <i>{% if "play_recording" in itemData['download_link'] %}play_arrow{% elif "mega" in itemData['download_link'] or "google" in itemData['download_link'] %}globe{% else %}download{% endif %}</i>
                                         <span>{% if "play_recording" in itemData['download_link'] %}Play{% else %}Download{% endif %}</span>
+                                        {% if "play_recording" in itemData['download_link'] %}
+                                        <button class="small-round ripple" id="download-button-{{ loop.index }}" data-url="{{ url_for(file_name) }}">
+                                            <i>download</i>
+                                            <span>Download</span>
+                                        </button>
+                                        {% endif %}
                                     </button>
                                     <div class="max"></div>
                                     {% if "Days" in groupName or "Yesterday" in groupName or "Today" in groupName %}
@@ -263,6 +269,9 @@
         </div>
         {% if recording_status %}
         <h4 class="center-align top-padding">Currently Recording</h4>
+        {% if "ERROR" in recording_status %}
+        <p class="center center-align medium-width">{{ recording_status["ERROR"] }}</p>
+        {% else %}
         <div class="border small-round small-padding grid">
             {% for host, host_data in recording_status.items() %}
             <article class="no-padding s12 m6 l4" id="recording-card">
@@ -284,6 +293,7 @@
                 </div>
             </article>
             {% endfor %}
+            {% endif%}
         </div>
         {% endif %}
     </main>
