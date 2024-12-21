@@ -270,7 +270,8 @@
         {% if recording_status %}
         <h4 class="center-align top-padding">Currently Recording</h4>
         {% if "ERROR" in recording_status %}
-        <p class="center center-align medium-width">{{ recording_status["ERROR"] }}</p>
+        <p class="center center-align medium-width">Could not load recording status JSON file. Ensure that the enviornment variables are set correctly.</p>
+        <pre class="center"><code>{{ recording_status["ERROR"] }}</code></pre>
         {% else %}
         <div class="border small-round small-padding grid">
             {% for host, host_data in recording_status.items() %}

@@ -224,7 +224,7 @@ class MainHandler(BaseHandler):
                     recording_status = json.load(f)
             except Exception as e:
                 recording_status = {
-                    "ERROR": "Could not load recording status JSON file. Ensure that the enviornment variables are set correctly.<br><br>Error: " + str(e)
+                    "ERROR": str(e)
                 }
 
             template = env.get_template("index.html")
