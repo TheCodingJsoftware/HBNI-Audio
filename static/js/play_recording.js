@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
         link.href = url;
         link.setAttribute("download", "");
         link.click();
+        console.log(url);
     });
 });
 const mode = () => {

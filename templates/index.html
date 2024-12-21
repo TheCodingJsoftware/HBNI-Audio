@@ -243,7 +243,7 @@
                                         <i>{% if "play_recording" in itemData['download_link'] %}play_arrow{% elif "mega" in itemData['download_link'] or "google" in itemData['download_link'] %}globe{% else %}download{% endif %}</i>
                                         <span>{% if "play_recording" in itemData['download_link'] %}Play{% else %}Download{% endif %}</span>
                                         {% if "play_recording" in itemData['download_link'] %}
-                                        <button class="small-round ripple" id="download-button-{{ loop.index }}" data-url="{{ url_for(file_name) }}">
+                                        <button class="small-round ripple" id="download-button-{{ loop.index }}" data-url="{{ url_for(itemData['filename']) }}">
                                             <i>download</i>
                                             <span>Download</span>
                                         </button>
