@@ -63,10 +63,20 @@ function adjustDialogForScreenSize() {
     }
 }
 
+function closeAllDetails() {
+    const detailsElements = document.querySelectorAll('details');
+    detailsElements.forEach(details => details.removeAttribute('open'));
+}
+
 function adjustDetailsForScreenSize() {
     const detailsElements = document.querySelectorAll('details');
     if (window.innerWidth <= 600) { // Mobile view threshold
-        detailsElements.forEach(details => details.removeAttribute('open'));
+        detailsElements.forEach(details => {
+            // Only close details that are not already open
+            if (!details.open) {
+                details.removeAttribute('open');
+            }
+        });
     } else {
         detailsElements.forEach(details => details.setAttribute('open', ''));
     }
@@ -74,6 +84,7 @@ function adjustDetailsForScreenSize() {
 
 document.addEventListener('DOMContentLoaded', function () {
     let savedMode = localStorage.getItem("mode") || "light";
+    let lastWidth = window.innerWidth;
     ui("mode", savedMode);
     updateIcon(savedMode);
     document.documentElement.classList.toggle("dark", savedMode === "dark");
@@ -95,11 +106,18 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     updateImageSource();
+    if (window.innerWidth <= 600) {
+        closeAllDetails();
+    }
     adjustDialogForScreenSize();
     adjustDetailsForScreenSize();
 
     window.addEventListener('resize', () => {
-        adjustDialogForScreenSize();
-        adjustDetailsForScreenSize();
+        const currentWidth = window.innerWidth;
+        if (currentWidth !== lastWidth) {
+            adjustDialogForScreenSize();
+            adjustDetailsForScreenSize();
+            lastWidth = currentWidth; // Update the last known width
+        }
     });
 });

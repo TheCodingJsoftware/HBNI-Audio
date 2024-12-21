@@ -27,7 +27,9 @@ This is a web application that allows users to browse and listen to archived bro
    - `POSTGRES_USER`: The username to use when connecting to the PostgreSQL server.
    - `POSTGRES_PASSWORD`: The password to use when connecting to the PostgreSQL server.
    - `STATIC_RECORDINGS_PATH`: The path to the directory where the archived broadcasts are stored.
-   - `STATIC_PATH`: The path to the directory where the static files are stored.
+   - `RECORDINGS_STATUS_PATH`: The path to the file where the recording status is stored.
+   - `SECRET_KEY`: A secret key used for session management.
+   - `HBNI_STREAMING_PASSWORD`: The password used to access the HBNI Audio Streaming Service.
 
 4. Run the application by executing the following command:
 
@@ -42,8 +44,8 @@ To access the application, open your web browser and navigate to the URL where t
 ## Docker & Synology NAS
 
 - Make sure you set port to 5053.
-- Under Volume Settings you need to add a folder, you need to set it to this path: `/web/HBNI Audio Stream Recorder/static/Recordings` and call the mount point `/app/static/Recordings` (It should be the same as the `STATIC_RECORDINGS_PATH` environment variable).
-- Under Volume Settings you need to add a folder, you need to set it to this path: `/web/HBNI Audio Stream Recorder/static` and call the mount point `/app/static` (It should be the same as the `STATIC_PATH` environment variable).
+- Under Volume Settings you need to add a **folder**, you need to set it to this path: `/web/HBNI Audio Stream Recorder/static/Recordings` and call the mount point `/app/static/Recordings` (It should be the same as the `STATIC_RECORDINGS_PATH` environment variable).
+- Under Volume Settings you need to add a **file**, you need to set it to this path: `/web/HBNI Audio Stream Recorder/static/recording_status.json` and call the mount point `/app/static/recording_status.json` (It should be the same as the `RECORDINGS_STATUS_PATH` environment variable).
 
 ## Contributing
 
