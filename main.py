@@ -108,6 +108,12 @@ def format_length(length_in_minutes):
         return f"{hours_string}, {minutes_string}"
     return hours_string or minutes_string
 
+def get_duration(stream_start: str) -> float:
+    start_time = datetime.strptime(stream_start, "%a, %d %b %Y %H:%M:%S %z")
+    current_time = datetime.now(start_time.tzinfo)
+    duration = current_time - start_time
+    return duration.total_seconds() / 60
+
 
 def get_grouped_data(audio_data):
     today = datetime.today()
@@ -554,6 +560,93 @@ class BroadcastHandler(BaseHandler):
         self.write(rendered_template)
 
 
+class CurrentBroadcastStatsHandler(RequestHandler):
+    async def get(self):
+        broadcast_data = await self.get_active_hbni_broadcasts()
+        if broadcast_data:
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps(broadcast_data))
+        else:
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps([]))
+
+    def is_broadcast_private(self, host: str) -> bool:
+        if broadcast := active_broadcasts.get(host):
+            return broadcast.is_private
+        return False
+
+    async def get_active_hbni_broadcasts(self) -> list[dict[str, Union[str, int]]]:
+        # URL for fetching the JSON data
+        status_url = "http://hbniaudio.hbni.net:8000/status-json.xsl"
+
+        # Attempt to get the JSON data from the URL
+        try:
+            response = requests.get(status_url)
+            if response.status_code == 200:
+                json_data = response.json()
+            else:
+                self.set_status(500)
+                self.write_error(500)
+                return []
+        except requests.exceptions.RequestException as e:
+            self.set_status(500)
+            self.write_error(
+                500, stack_trace=f"Error while fetching JSON data: {str(e)}"
+            )
+            return []
+
+        # Extract relevant data for rendering
+        icestats = json_data.get("icestats", {})
+        sources = icestats.get("source", {})
+        broadcast_data = []
+
+        # Prepare data for template rendering
+        if sources:
+            if isinstance(sources, dict):  # Only one broadcast is currently online
+                host = sources.get("listenurl", "/").split("/")[-1]
+                broadcast_data.append(
+                    {
+                        "admin": icestats.get("admin", "N/A"),
+                        "location": icestats.get("location", "N/A"),
+                        "server_name": sources.get("server_name", "Unspecified name"),
+                        "server_description": sources.get(
+                            "server_description", "Unspecified description"
+                        ),
+                        "genre": sources.get("genre", "N/A"),
+                        "listeners": sources.get("listeners", 0),
+                        "host": host,
+                        "listener_peak": sources.get("listener_peak", 0),
+                        "listen_url": sources.get("listenurl", "#"),
+                        "stream_start": sources.get("stream_start", "N/A"),
+                        "is_private": self.is_broadcast_private(host),
+                        "length": f"{format_length(get_duration(sources.get('stream_start', 'N/A')))}",
+                    }
+                )
+            elif isinstance(sources, list):  # Multiple broadcasts are currently online
+                for source in sources:
+                    host = source.get("listenurl", "/").split("/")[-1]
+                    broadcast_data.append(
+                        {
+                            "admin": icestats.get("admin", "N/A"),
+                            "location": icestats.get("location", "N/A"),
+                            "server_name": source.get(
+                                "server_name", "Unspecified name"
+                            ),
+                            "server_description": source.get(
+                                "server_description", "Unspecified description"
+                            ),
+                            "genre": source.get("genre", "N/A"),
+                            "listeners": source.get("listeners", 0),
+                            "host": host,
+                            "listener_peak": source.get("listener_peak", 0),
+                            "listen_url": source.get("listenurl", "#"),
+                            "stream_start": source.get("stream_start", "N/A"),
+                            "is_private": self.is_broadcast_private(host),
+                            "length": f"{format_length(get_duration(source.get('stream_start', 'N/A')))}",
+                        }
+                    )
+        return broadcast_data
+
 class ListenHandler(BaseHandler):
     def is_broadcast_private(self, host: str) -> bool:
         if broadcast := active_broadcasts.get(host):
@@ -611,6 +704,7 @@ class ListenHandler(BaseHandler):
                         "listen_url": sources.get("listenurl", "#"),
                         "stream_start": sources.get("stream_start", "N/A"),
                         "is_private": self.is_broadcast_private(host),
+                        "length": f"{format_length(get_duration(sources.get('stream_start', 'N/A')))}",
                     }
                 )
             elif isinstance(sources, list):  # Multiple broadcasts are currently online
@@ -633,6 +727,7 @@ class ListenHandler(BaseHandler):
                             "listen_url": source.get("listenurl", "#"),
                             "stream_start": source.get("stream_start", "N/A"),
                             "is_private": self.is_broadcast_private(host),
+                            "length": f"{format_length(get_duration(source.get('stream_start', 'N/A')))}",
                         }
                     )
         return broadcast_data
@@ -714,6 +809,7 @@ def make_app():
             url(r"/schedule_broadcast", ScheduleBroadcastHandler),
             url(r"/broadcasting_page", BroadcastHandler),
             url(r"/validate-password", ValidatePasswordHandler),
+            url(r"/get_broadcast_data", CurrentBroadcastStatsHandler),
             url(r"/listeners_page", ListenHandler),
             url(r"/download_links.json", DownloadLinksJSONHandler),
             url(

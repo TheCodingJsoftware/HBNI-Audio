@@ -34,8 +34,7 @@
         <main class="responsive">
             {% if scheduled_broadcast_count %}
             <h3 class="center-align">Scheduled Broadcasts</h3>
-            <hr>
-            <div class="small-padding grid" id="schedulded-broadcasts-container">
+            <div class="small-padding grid border small-round" id="schedulded-broadcasts-container">
                 {% for scheduled_date, scheduled_broadcast in schedule.items()
                 %}
                 <article class="s12 m12 l6">
@@ -67,40 +66,41 @@
             {% endif %}
             {% if broadcast_count %}
             <h3 class="center-align">Active Broadcasts</h3>
-            <hr>
-            <div class="small-padding grid" id="broadcasts-container">
+            <div class="small-padding grid border small-round" id="broadcasts-container">
                 {% for broadcast in broadcast_status %} {% if not
                 broadcast.is_private %}
                 <article class="s12 m6 l6" id="{{ broadcast.host }}">
                     <div class="row no-space top-align">
-                        <h6 class="bottom-margin max">
+                        <h6 class="bottom-margin max" id="server-description-{{ broadcast.host }}">
                             {{ broadcast.server_description }}
                         </h6>
-                        <a class="transparent small-round circle link ripple" href="http://hbniaudio.hbni.net:8000/{{ broadcast.host }}" target="_blank">
+                        <button class="small-round circle link transparent wave" onclick="window.open('http://hbniaudio.hbni.net:8000/{{ broadcast.host }}')">
                             <i>open_in_new</i>
-                            <span>Direct Link</span>
-                        </a>
-                        <button class="transparent small-round circle link ripple" onclick="shareUpcomingBroadcast('{{ broadcast.server_description }}')">
+                        </button>
+                        <button class="small-round circle link transparent" onclick="shareUpcomingBroadcast('{{ broadcast.server_description }}')">
                             <i>share</i>
                         </button>
-                        <button class="transparent small-round circle link ripple" onclick="copyUpcomingBroadcastToClipboard('{{ broadcast.server_description }}')">
+                        <button class="small-round circle link transparent" onclick="copyUpcomingBroadcastToClipboard('{{ broadcast.server_description }}')">
                             <i>content_copy</i>
                         </button>
                     </div>
                     <div>
-                        <i>artist</i> {{ broadcast.host.replace('/', '').title() }}
+                        <i>artist</i> <span id="artist-{{ broadcast.host }}">{{ broadcast.host.replace('/', '').title() }}</span>
                     </div>
                     <div>
-                        <i>event</i> {{ broadcast.stream_start.replace('_', ':') }}
+                        <i>event</i> <span id="event-{{ broadcast.host }}">{{ broadcast.stream_start.replace('_', ':') }}</span>
                     </div>
                     <div>
-                        <i>hearing</i> Current Listeners: {{ broadcast.listeners }}
+                        <i>schedule</i> <span>Length:</span> <span id="length-{{ broadcast.host }}">{{ broadcast.length }}</span>
                     </div>
                     <div>
-                        <i>trending_up</i> Listener Peak: {{ broadcast.listener_peak }}
+                        <i>hearing</i> <span>Current Listeners:</span> <span id="listeners-{{ broadcast.host }}">{{ broadcast.listeners }}</span>
+                    </div>
+                    <div>
+                        <i>trending_up</i> <span>Listener Peak:</span> <span id="listener-peak-{{ broadcast.host }}">{{ broadcast.listener_peak }}</span>
                     </div>
                     <div class="top-margin center-align middle-align">
-                        <audio controls autoplay class="s12 m8 l8" title="{{ broadcast.server_description }}">
+                        <audio controls id="audio-{{ broadcast.host }}" class="s12 m8 l8" title="{{ broadcast.server_description }}">
                             <source src="http://hbniaudio.hbni.net:8000/{{ broadcast.host }}" type="audio/mpeg" />
                             Your browser does not support the audio element.
                         </audio>
