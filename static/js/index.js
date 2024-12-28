@@ -1,27 +1,4 @@
-const mode = () => {
-    let currentMode = localStorage.getItem("mode") || "dark";
-    let newMode = currentMode === "dark" ? "light" : "dark";
-    localStorage.setItem("mode", newMode); // Save mode to localStorage
-    ui("mode", newMode);
-    updateIcon(newMode);
-    updateImageSource();
-    document.documentElement.classList.toggle("dark", newMode === "dark");
-};
-
-function updateImageSource() {
-    const mode = localStorage.getItem('mode') || 'light';
-    const images = document.querySelectorAll('img[id^="recording-card-image"]');
-    images.forEach(image => {
-        image.src = mode === 'dark' ? '/static/hbni_logo_dark.png' : '/static/hbnilogo.png';
-    });
-}
-
-const updateIcon = (mode) => {
-    const iconElements = document.querySelectorAll('#toggle-theme i');
-    iconElements.forEach(iconElement => {
-        iconElement.textContent = mode === "dark" ? "light_mode" : "dark_mode";
-    });
-};
+import { loadTheme, toggleMode } from "/static/js/theme.js";
 
 function searchAndFilter() {
     const searchInput = document.getElementById('search');
@@ -83,12 +60,14 @@ function adjustDetailsForScreenSize() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    let savedMode = localStorage.getItem("mode") || "light";
+    loadTheme();
+    if (window.innerWidth <= 600) {
+        closeAllDetails();
+    }
     let lastWidth = window.innerWidth;
-    ui("mode", savedMode);
-    updateIcon(savedMode);
-    document.documentElement.classList.toggle("dark", savedMode === "dark");
     const searchInput = document.getElementById('search');
+
+    document.getElementById('toggle-theme').addEventListener('click', toggleMode);
 
     searchInput.addEventListener('input', searchAndFilter);
     document.querySelectorAll("[id^='download-button']").forEach((button) => {
@@ -104,10 +83,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    updateImageSource();
-    if (window.innerWidth <= 600) {
-        closeAllDetails();
-    }
     adjustDialogForScreenSize();
     adjustDetailsForScreenSize();
 

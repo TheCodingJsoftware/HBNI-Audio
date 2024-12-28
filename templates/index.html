@@ -11,6 +11,7 @@
     <script type="module"
         src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js">
     </script>
+    <script type="module" src="/static/js/index.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/css/theme.css">
     <link rel="stylesheet" type="text/css" href="/static/css/style.css">
     <link rel="icon" href="/static/icon.png">
@@ -179,13 +180,13 @@
             <img src="/static/icon.png" class="responsive">
         </button>
         <h5 class="max center-align small">Audio Archive</h5>
-        <button class="circle transparent ripple" onclick="mode()" id="toggle-theme">
+        <button class="circle transparent ripple" id="toggle-theme">
             <i>dark_mode</i>
         </button>
     </nav>
 </header>
 
-<body class="dark">
+<body class="dark hidden">
     <main class="responsive">
         <br>
         <div class="field label prefix border">
@@ -298,7 +299,6 @@
         </div>
         {% endif %}
     </main>
-    <script type="text/javascript" src="/static/js/index.js"></script>
 </body>
 
 <footer class="fixed bottom surface-container m l" id="bottom-nav">

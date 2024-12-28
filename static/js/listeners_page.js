@@ -1,29 +1,6 @@
+import { loadTheme, toggleMode } from "/static/js/theme.js";
+
 let fetchInterval = null;
-
-const mode = () => {
-    let currentMode = localStorage.getItem("mode") || "dark";
-    let newMode = currentMode === "dark" ? "light" : "dark";
-    localStorage.setItem("mode", newMode); // Save mode to localStorage
-    ui("mode", newMode);
-    updateIcon(newMode);
-    updateImageSource();
-    document.documentElement.classList.toggle("dark", newMode === "dark");
-};
-
-function updateImageSource() {
-    const mode = localStorage.getItem('mode') || 'light';
-    const images = document.querySelectorAll('img[id^="recording-card-image"]');
-    images.forEach(image => {
-        image.src = mode === 'dark' ? '/static/hbni_logo_dark.png' : '/static/hbnilogo.png';
-    });
-}
-
-const updateIcon = (mode) => {
-    const iconElements = document.querySelectorAll('#toggle-theme i');
-    iconElements.forEach(iconElement => {
-        iconElement.textContent = mode === "dark" ? "light_mode" : "dark_mode";
-    });
-};
 
 function shareUpcomingBroadcast(text) {
     // Check if the Web Share API is available
@@ -89,17 +66,13 @@ async function fetchBroadcastData() {
 
 // Periodically fetch updates
 document.addEventListener('DOMContentLoaded', function () {
-    let savedMode = localStorage.getItem("mode") || "light";
-    ui("mode", savedMode);
-    updateIcon(savedMode);
-    document.documentElement.classList.toggle("dark", savedMode === "dark");
-    updateImageSource();
+    loadTheme();
+    document.getElementById('toggle-theme').addEventListener('click', toggleMode);
     document.querySelectorAll('audio').forEach(audioElement => {
         audioElement.onerror = function () {
             alert('The audio stream is unavailable because it is served over an insecure connection. Please contact support for assistance.');
         };
     });
-
 });
 
 document.addEventListener('DOMContentLoaded', async function () {

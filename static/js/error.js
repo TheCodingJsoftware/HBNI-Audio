@@ -1,5 +1,5 @@
+import { loadTheme, toggleMode } from "/static/js/theme.js";
+
 document.addEventListener('DOMContentLoaded', function () {
-    let savedMode = localStorage.getItem("mode") || "light";
-    ui("mode", savedMode);
-    document.documentElement.classList.toggle("dark", savedMode === "dark");
+    loadTheme();
 });

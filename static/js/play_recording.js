@@ -1,34 +1,4 @@
-document.addEventListener("DOMContentLoaded", function () {
-    let savedMode = localStorage.getItem("mode") || "light";
-    ui("mode", savedMode);
-    updateIcon(savedMode);
-    const downloadButton = document.getElementById("download-button");
-
-    downloadButton.addEventListener("click", function () {
-        const url = this.getAttribute("data-url");
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", "");
-        link.click();
-    });
-});
-
-const mode = () => {
-    let currentMode = localStorage.getItem("mode") || "light";
-    let newMode = currentMode === "dark" ? "light" : "dark";
-    localStorage.setItem("mode", newMode); // Save mode to localStorage
-    ui("mode", newMode);
-    updateIcon(newMode);
-};
-
-const updateIcon = (mode) => {
-    const iconElements = document.querySelectorAll("#toggle-theme i");
-    iconElements.forEach((iconElement) => {
-        iconElement.textContent = mode === "dark" ? "light_mode" : "dark_mode";
-    });
-    // const musicNote = document.querySelector(".music-note");
-    // musicNote.style.color = "var(--on-primary)";
-};
+import { loadTheme, toggleMode } from "/static/js/theme.js";
 
 function sharePage() {
     if (navigator.share) {
@@ -195,3 +165,44 @@ var audioContext;
 function toggleSound() {
     audio.muted = !audio.muted;
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+    loadTheme();
+    const downloadButton = document.getElementById("download-button");
+    downloadButton.addEventListener("click", function () {
+        const url = this.getAttribute("data-url");
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "");
+        link.click();
+    });
+    this.getElementById('toggle-theme').addEventListener('click', toggleMode);
+});
+
+async function updateRecordingStats(fileName) {
+    try {
+        const response = await fetch(`/recording_stats/${decodeURIComponent(fileName)}`);
+        if (!response.ok) throw new Error('Failed to fetch recording stats');
+
+        const data = await response.json();
+
+        // Update the visit count and latest visit in the UI
+        const visitCountElem = document.querySelector('#visit-count');
+        const latestVisitElem = document.querySelector('#latest-visit');
+
+        if (visitCountElem) {
+            visitCountElem.textContent = `${data.visit_count}`;
+        }
+
+        if (latestVisitElem) {
+            latestVisitElem.innerHTML = `${data.latest_visit}`;
+        }
+    } catch (error) {
+        console.error('Error updating recording stats:', error);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const fileName = document.title;
+    setInterval(() => updateRecordingStats(fileName), 5000);
+});

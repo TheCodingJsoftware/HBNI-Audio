@@ -252,6 +252,32 @@ def url_for_static(filename):
     return f"{static_recordings_path}/{filename}"
 
 
+class RecordingStatsHandler(BaseHandler):
+    async def get(self, file_name):
+        conn = await get_db_connection()
+        try:
+            result = await conn.fetchrow(
+                """
+                SELECT visit_count, latest_visit
+                FROM audioarchives
+                WHERE filename = $1
+                """,
+                file_name,
+            )
+        finally:
+            await conn.close()
+
+
+        self.set_header("Content-Type", "application/json")
+        if result:
+            self.write(json.dumps({
+                "visit_count": result["visit_count"] or 0,
+                "latest_visit": result["latest_visit"].strftime("%B %d %A %Y %I:%M %p") or "N/A",
+            }))
+        else:
+            self.write(json.dumps({"visit_count": 0, "latest_visit": "N/A"}))
+
+
 class PlayRecordingHandler(BaseHandler):
     async def get(self, file_name):
         await update_visit(file_name)  # Await the async database update
@@ -271,7 +297,7 @@ class PlayRecordingHandler(BaseHandler):
 
         if result:
             visit_count = result["visit_count"] or 0
-            latest_visit = result["latest_visit"] or "N/A"
+            latest_visit = result["latest_visit"].strftime("%B %d %A %Y %I:%M %p") or "N/A"
             date = result["date"] or "N/A"
             description = result["description"] or "N/A"
             length = format_length(result["length"]) or "N/A"
@@ -647,6 +673,7 @@ class CurrentBroadcastStatsHandler(RequestHandler):
                     )
         return broadcast_data
 
+
 class ListenHandler(BaseHandler):
     def is_broadcast_private(self, host: str) -> bool:
         if broadcast := active_broadcasts.get(host):
@@ -804,6 +831,7 @@ def make_app():
     return Application(
         [
             url(r"/", MainHandler),
+            url(r"/recording_stats/(.*)", RecordingStatsHandler),
             url(r"/play_recording/(.*)", PlayRecordingHandler),
             url(r"/broadcast_ws", BroadcastWSHandler),
             url(r"/schedule_broadcast", ScheduleBroadcastHandler),

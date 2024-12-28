@@ -1,3 +1,5 @@
+import { loadTheme, toggleMode } from "/static/js/theme.js";
+
 let mediaRecorder;
 let ws;
 let audioContext;
@@ -17,16 +19,6 @@ function validateInput() {
     hostInput.value = hostValue;
 }
 
-const mode = () => {
-    let currentMode = localStorage.getItem("mode") || "dark";
-    let newMode = currentMode === "dark" ? "light" : "dark";
-    localStorage.setItem("mode", newMode); // Save mode to localStorage
-    ui("mode", newMode);
-    updateIcon(newMode);
-    updateImageSource();
-    document.documentElement.classList.toggle("dark", newMode === "dark");
-};
-
 function share() {
     const isPrivate = document.getElementById('isPrivate').checked;
     const host = document.getElementById('host').value;
@@ -40,14 +32,6 @@ function share() {
         title: "HBNI Audio Listeners Page",
         text: "Listen to this broadcast on the HBNI Audio Listeners page!",
         url: url
-    });
-}
-
-function updateImageSource() {
-    const mode = localStorage.getItem('mode') || 'light';
-    const images = document.querySelectorAll('img[id^="recording-card-image"]');
-    images.forEach(image => {
-        image.src = mode === 'dark' ? '/static/hbni_logo_dark.png' : '/static/hbnilogo.png';
     });
 }
 
@@ -77,13 +61,6 @@ async function submitSchedule() {
         ui("#schedule-error");
     }
 }
-
-const updateIcon = (mode) => {
-    const iconElements = document.querySelectorAll('#toggle-theme i');
-    iconElements.forEach(iconElement => {
-        iconElement.textContent = mode === "dark" ? "light_mode" : "dark_mode";
-    });
-};
 
 document.getElementById("startBroadcast").disabled = true;
 
@@ -361,6 +338,8 @@ function visualize() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+    loadTheme();
+
     const host = localStorage.getItem('host') || "";
     document.getElementById('host').value = host;
     document.getElementById('host').addEventListener('input', function () {
@@ -379,6 +358,8 @@ document.addEventListener('DOMContentLoaded', function () {
         localStorage.setItem('password', this.value);
     });
 
+    document.getElementById('toggle-theme').addEventListener('click', toggleMode);
+
     // Initialize canvas and audio context
     canvas = document.getElementById("canvas");
     canvasCtx = canvas.getContext("2d");
@@ -389,10 +370,6 @@ document.addEventListener('DOMContentLoaded', function () {
     canvas.height = canvas.clientHeight * dpr;
     canvasCtx.scale(dpr, dpr);
 
-    let savedMode = localStorage.getItem("mode") || "light";
-    ui("mode", savedMode);
-    updateIcon(savedMode);
-    document.documentElement.classList.toggle("dark", savedMode === "dark");
     const searchInput = document.getElementById('search');
 
     const header = document.getElementById('main-header');
@@ -409,7 +386,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (document.getElementById('password').value !== "") {
         checkPassword();
     }
-    updateImageSource();
     flatpickr("#date-time-picker", {
         enableTime: true,
         dateFormat: "Y-m-d H:i",
