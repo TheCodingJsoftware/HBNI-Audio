@@ -588,13 +588,13 @@ class BroadcastHandler(BaseHandler):
 
 class CurrentBroadcastStatsHandler(RequestHandler):
     async def get(self):
-        broadcast_data = await self.get_active_hbni_broadcasts()
-        if broadcast_data:
+        try:
+            broadcast_data = await self.get_active_hbni_broadcasts()
             self.set_header("Content-Type", "application/json")
-            self.write(json.dumps(broadcast_data))
-        else:
-            self.set_header("Content-Type", "application/json")
-            self.write(json.dumps([]))
+            self.write(json.dumps(broadcast_data if broadcast_data else []))
+        except Exception as e:
+            self.set_status(500)
+            self.write_error(json.dumps({"error": str(e)}))
 
     def is_broadcast_private(self, host: str) -> bool:
         if broadcast := active_broadcasts.get(host):
@@ -609,7 +609,8 @@ class CurrentBroadcastStatsHandler(RequestHandler):
         try:
             response = requests.get(status_url)
             if response.status_code == 200:
-                json_data = response.json()
+                json_content = response.text.replace('"title": - ,', '"title": null,')
+                json_data = json.loads(json_content)
             else:
                 self.set_status(500)
                 self.write_error(500)
@@ -620,7 +621,6 @@ class CurrentBroadcastStatsHandler(RequestHandler):
                 500, stack_trace=f"Error while fetching JSON data: {str(e)}"
             )
             return []
-
         # Extract relevant data for rendering
         icestats = json_data.get("icestats", {})
         sources = icestats.get("source", {})
@@ -695,7 +695,8 @@ class ListenHandler(BaseHandler):
         try:
             response = requests.get(status_url)
             if response.status_code == 200:
-                json_data = response.json()
+                json_content = response.text.replace('"title": - ,', '"title": null,')
+                json_data = json.loads(json_content)
             else:
                 self.set_status(500)
                 self.write_error(500)
