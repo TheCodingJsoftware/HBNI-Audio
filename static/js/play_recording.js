@@ -15,6 +15,7 @@ function sharePage() {
         alert("Share not supported on this browser, do it the old way.");
     }
 }
+
 const playerButton = document.querySelector("#play-button"),
     audio = document.querySelector("audio"),
     timeline = document.querySelector("#timeline"),
@@ -177,6 +178,11 @@ document.addEventListener("DOMContentLoaded", function () {
         link.click();
     });
     this.getElementById('toggle-theme').addEventListener('click', toggleMode);
+
+    const shareButton = document.getElementById("share-button");
+    shareButton.addEventListener("click", function () {
+        sharePage();
+    });
 });
 
 async function updateRecordingStats(fileName) {
@@ -186,7 +192,6 @@ async function updateRecordingStats(fileName) {
 
         const data = await response.json();
 
-        // Update the visit count and latest visit in the UI
         const visitCountElem = document.querySelector('#visit-count');
         const latestVisitElem = document.querySelector('#latest-visit');
 

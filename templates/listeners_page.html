@@ -100,7 +100,7 @@
                     <i>trending_up</i> <span>Listener Peak:</span> <span id="listener-peak-{{ broadcast.host }}">{{ broadcast.listener_peak }}</span>
                 </div>
                 <div class="top-margin center-align middle-align">
-                    <audio controls id="audio-{{ broadcast.host }}" class="s12 m8 l8" title="{{ broadcast.server_description }}">
+                    <audio controls id="audio-{{ broadcast.host }}" class="s12 m8 l8" title="{{ broadcast.server_description }}" preload="auto">
                         <source src="http://hbniaudio.hbni.net:8000/{{ broadcast.host }}" type="audio/mpeg" />
                         Your browser does not support the audio element.
                     </audio>

@@ -1,226 +1,227 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-        <meta name="google" content="notranslate" />
-        <link href="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.css" rel="stylesheet"/>
-        <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.js"></script>
-        <script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
-        <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css"/>
-        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-        <script type="module" src="/static/js/broadcasting_page.js?v=1.0" ></script>
-        <link rel="stylesheet" type="text/css" href="/static/css/theme.css?v=1.0" />
-        <link rel="stylesheet" type="text/css" href="/static/css/style.css?v=1.0" />
-        <link rel="icon" href="/static/icon.png" />
-        <title>HBNI Audio Broadcasting</title>
-        <meta property="og:title" content="HBNI Audio Broadcasting" />
-        <meta property="og:url" content="https://audioarchives.hbni.net/broadcasting_page" />
-        <meta property="og:image" content="https://audioarchives.hbni.net/static/icon.png" />
-        <meta property="og:description" content="Broadcast streams to the HBNI Audio Streaming Service." />
-    </head>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <meta name="google" content="notranslate" />
+    <link href="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.css" rel="stylesheet"/>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script type="module" src="/static/js/broadcasting_page.js?v=1.0" ></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/theme.css?v=1.0" />
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css?v=1.0" />
+    <link rel="icon" href="/static/icon.png" />
+    <title>HBNI Audio Broadcasting</title>
+    <meta property="og:title" content="HBNI Audio Broadcasting" />
+    <meta property="og:url" content="https://audioarchives.hbni.net/broadcasting_page" />
+    <meta property="og:image" content="https://audioarchives.hbni.net/static/icon.png" />
+    <meta property="og:description" content="Broadcast streams to the HBNI Audio Streaming Service." />
+</head>
 
-    <body class="dark hidden">
-        <header class="fixed primary" id="header">
-            <nav>
-                <button class="circle transparent ripple" onclick="window.location.href='/';">
-                    <i>arrow_back</i>
-                </button>
-                <h5 class="max center-align small">Broadcasting Page</h5>
-                <button class="circle transparent ripple" id="toggle-theme">
-                    <i>dark_mode</i>
-                </button>
-            </nav>
-        </header>
-        <main class="responsive">
-          <div class="large-width center" >
-            <article class="no-padding">
-                <details open>
-                  <summary class="small-round padding" style="font-size: 25px;">
-                    Broadcast Details
-                  </summary>
-                  <form class="padding" id="metadataForm">
-                      <div class="field label border">
-                          <input type="text" id="host" name="host" oninput="validateInput()" />
-                          <label>Colony Name</label>
-                      </div>
-                      <div class="field border label textarea">
-                          <textarea type="text" id="description" name="description" required></textarea>
-                          <label>Description</label>
-                          <span class="helper no-line left-align">Explain what the broadcast is about</span>
-                      </div>
-                      <div class="row">
-                        <div class="field label border max">
-                            <input type="password" id="password" name="password" autocomplete="on" required />
-                            <label>Password</label>
+<header class="fixed primary" id="header">
+    <nav>
+        <button class="circle transparent ripple" onclick="window.location.href='/';">
+            <i>arrow_back</i>
+        </button>
+        <h5 class="max center-align small">Broadcasting Page</h5>
+        <button class="circle transparent ripple" id="toggle-theme">
+            <i>dark_mode</i>
+        </button>
+    </nav>
+</header>
+
+<body class="dark hidden">
+    <main class="responsive">
+        <div class="large-width center" >
+        <article class="no-padding">
+            <details open>
+                <summary class="small-round padding" style="font-size: 25px;">
+                Broadcast Details
+                </summary>
+                <form class="padding" id="metadataForm">
+                    <div class="field label border">
+                        <input type="text" id="host" name="host" oninput="validateInput()" />
+                        <label>Colony Name</label>
+                    </div>
+                    <div class="field border label textarea">
+                        <textarea type="text" id="description" name="description" required></textarea>
+                        <label>Description</label>
+                        <span class="helper no-line left-align">Explain what the broadcast is about</span>
+                    </div>
+                    <div class="row">
+                    <div class="field label border max">
+                        <input type="password" id="password" name="password" autocomplete="on" required />
+                        <label>Password</label>
+                    </div>
+                    <button class="circle transparent link ripple" type="button" onclick="ui('#password-dialog');">
+                        <i>help</i>
+                    </button>
+                    </div>
+                    <div class="large-space"></div>
+                    <div class="field middle-align no-margin">
+                    <nav>
+                        <div class="max">
+                            <h6>Private Broadcast</h6>
+                            <p class="no-line">Private broadcasts aren't listed on the
+                            <a class="link" target="_blank" href="/listeners_page">listeners' page</a>
+                            or archived but can be shared by the host and saved to your device after ending.</p>
                         </div>
-                        <button class="circle transparent link ripple" type="button" onclick="ui('#password-dialog');">
-                            <i>help</i>
+                        <label class="switch">
+                            <input type="checkbox" id="isPrivate" name="isPrivate">
+                            <span></span>
+                        </label>
+                        </nav>
+                    </div>
+                </form>
+                <div class="row center-align padding">
+                    <button id="scheduleBroadcast" class="small-round border max ripple" onclick="ui('#schedule-dialog');" disabled>
+                        <i>schedule</i>
+                        <span>Schedule Broadcast</span>
+                    </button>
+                    <button class="circle border ripple" onclick="share()" id="share-button">
+                        <i>share</i>
+                    </button>
+                </div>
+            </details>
+        </article>
+        <article class="no-padding" id="main-article">
+            <details open>
+                <summary class="small-round padding" style="font-size: 25px;">
+                Broadcast Controls
+                </summary>
+                <nav class="center-align padding">
+                    <i>volume_down</i>
+                    <label class="small-width slider">
+                        <input
+                            type="range"
+                            id="volumeControl"
+                            min="0"
+                            max="15"
+                            step="0.1"
+                            value="1"
+                            disabled="disabled"
+                        />
+                        <span></span>
+                        <div class="tooltip"></div>
+                    </label>
+                    <i>volume_up</i>
+                </nav>
+                <div class="grid padding">
+                    <div class="grid max s12 m8 l8">
+                        <div class="grid max s12 center-align">
+                            <button id="startBroadcast" class="small-round extra s12 ripple" disabled>
+                                <i>play_circle</i>
+                                <span>Start Broadcast</span>
+                            </button>
+                            <button id="stopBroadcast" class="small-round extra s12 ripple" disabled>
+                                <i>stop_circle</i>
+                                <span>End Broadcast</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="s12 m4 l4 middle-align center-align">
+                        <button id="muteToggle" class="circle extra ripple" style="height: 128px; width: 128px;     border-radius: 50%; " disabled>
+                            <i class="mic-icon">mic</i>
+                            <i>pen_size_1</i>
+                            <i class="pause-icon">pause</i>
                         </button>
-                      </div>
-                      <div class="large-space"></div>
-                      <div class="field middle-align no-margin">
-                        <nav>
-                            <div class="max">
-                              <h6>Private Broadcast</h6>
-                              <p class="no-line">Private broadcasts aren't listed on the
-                                <a class="link" target="_blank" href="/listeners_page">listeners' page</a>
-                                or archived but can be shared by the host and saved to your device after ending.</p>
-                            </div>
-                            <label class="switch">
-                              <input type="checkbox" id="isPrivate" name="isPrivate">
-                              <span></span>
-                            </label>
-                          </nav>
-                      </div>
-                  </form>
-                  <div class="row center-align padding">
-                      <button id="scheduleBroadcast" class="small-round border max ripple" onclick="ui('#schedule-dialog');" disabled>
-                          <i>schedule</i>
-                          <span>Schedule Broadcast</span>
-                      </button>
-                      <button class="circle border ripple" onclick="share()" id="share-button">
-                          <i>share</i>
-                      </button>
-                  </div>
-                </details>
-              </article>
-            <article class="no-padding" id="main-article">
-                <details open>
-                  <summary class="small-round padding" style="font-size: 25px;">
-                    Broadcast Controls
-                  </summary>
-                  <nav class="center-align padding">
-                      <i>volume_down</i>
-                      <label class="small-width slider">
-                          <input
-                              type="range"
-                              id="volumeControl"
-                              min="0"
-                              max="15"
-                              step="0.1"
-                              value="1"
-                              disabled="disabled"
-                          />
-                          <span></span>
-                          <div class="tooltip"></div>
-                      </label>
-                      <i>volume_up</i>
-                  </nav>
-                  <div class="grid padding">
-                      <div class="grid max s12 m8 l8">
-                          <div class="grid max s12 center-align">
-                              <button id="startBroadcast" class="small-round extra s12 ripple" disabled>
-                                  <i>play_circle</i>
-                                  <span>Start Broadcast</span>
-                              </button>
-                              <button id="stopBroadcast" class="small-round extra s12 ripple" disabled>
-                                  <i>stop_circle</i>
-                                  <span>End Broadcast</span>
-                              </button>
-                          </div>
-                      </div>
-                      <div class="s12 m4 l4 middle-align center-align">
-                          <button id="muteToggle" class="circle extra ripple" style="height: 128px; width: 128px;     border-radius: 50%; " disabled>
-                              <i class="mic-icon">mic</i>
-                              <i>pen_size_1</i>
-                              <i class="pause-icon">pause</i>
-                          </button>
-                      </div>
-                  </div>
-                  <canvas class="small-round" id="canvas" style="width: 100%; height: 100px"></canvas>
-                </details>
-            </article>
-          </div>
-        </main>
-        <div class="snackbar error" id="incorrect-password">
-            Incorrect Password
-        </div>
-        <div class="snackbar green" id="correct-password">
-            Password Validated
-        </div>
-        <div class="snackbar error" id="schedule-error">
-            Error Submitting Schedule
-        </div>
-        <div class="snackbar" id="schedule-success">
-            <div class="max">Schedule Submitted</div>
-            <a class="inverse-link" href="/listeners_page" target="_blank">View</a>
-        </div>
-        <div class="snackbar" id="broadcast-started">
-            <div class="max">Broadcast Started</div>
-            <a class="inverse-link" href="/listeners_page" target="_blank">View</a>
-        </div>
-        <div class="overlay blur"></div>
-        <dialog id="schedule-dialog">
-            <h5 class="center-align">Schedule Broadcast</h5>
-            <p class="no-line medium-width">
-                Schedule a broadcast to display an event on the
-                <a class="link" target="_blank" href="/listeners_page">listeners' page</a>
-                with details like the colony name, description, and date. It
-                will remain visible until the scheduled date passes, then be
-                automatically removed.
-            </p>
-            <div class="grid">
-                <div class="field label prefix border s12">
-                    <i>artist</i>
-                    <input type="text" id="schedule-host" name="schedule-host" />
-                    <label>Colony Name</label>
+                    </div>
                 </div>
-                <div class="field border label textarea s12 bottom-margin">
-                    <textarea
-                        type="text"
-                        id="schedule-description"
-                        name="schedule-description"
-                        required="required"
-                    ></textarea>
-                    <label>Description</label>
-                    <span class="helper no-line">Explain what the broadcast is about</span>
-                </div>
-                <div class="field label prefix border s12">
-                    <i>event</i>
-                    <input type="date" id="date-time-picker" name="date" />
-                    <label>Date</label>
-                </div>
-                <button class="small-round s6 ripple" onclick="submitSchedule()">
-                    <i>send</i>
-                    <span>Submit</span>
-                </button>
-                <button class="small-round s6 ripple" onclick="ui('#schedule-dialog');">
-                    <i>close</i>
-                    <span>Cancel</span>
-                </button>
+                <canvas class="small-round" id="canvas" style="width: 100%; height: 100px"></canvas>
+            </details>
+        </article>
+        </div>
+    </main>
+    <div class="snackbar error" id="incorrect-password">
+        Incorrect Password
+    </div>
+    <div class="snackbar green" id="correct-password">
+        Password Validated
+    </div>
+    <div class="snackbar error" id="schedule-error">
+        Error Submitting Schedule
+    </div>
+    <div class="snackbar" id="schedule-success">
+        <div class="max">Schedule Submitted</div>
+        <a class="inverse-link" href="/listeners_page" target="_blank">View</a>
+    </div>
+    <div class="snackbar" id="broadcast-started">
+        <div class="max">Broadcast Started</div>
+        <a class="inverse-link" href="/listeners_page" target="_blank">View</a>
+    </div>
+    <div class="overlay blur"></div>
+    <dialog id="schedule-dialog">
+        <h5 class="center-align">Schedule Broadcast</h5>
+        <p class="no-line medium-width">
+            Schedule a broadcast to display an event on the
+            <a class="link" target="_blank" href="/listeners_page">listeners' page</a>
+            with details like the colony name, description, and date. It
+            will remain visible until the scheduled date passes, then be
+            automatically removed.
+        </p>
+        <div class="grid">
+            <div class="field label prefix border s12">
+                <i>artist</i>
+                <input type="text" id="schedule-host" name="schedule-host" />
+                <label>Colony Name</label>
             </div>
-        </dialog>
-        <dialog class="bottom" id="save-broadcast-dialog">
-            <h5 class="center-align">Save Broadcast</h5>
-            <p class="center-align">File Name: <code id="broadcast-file-name"></code></p>
-            <p class="center-align">Do you want to save this broadcast? It will be saved to your device.</p>
-            <nav class="center-align">
-              <button class="small-round ripple" id="save-broadcast-btn" >
-                  <i>save</i>
-                  <span>Save</span>
-              </button>
-              <button class="small-round ripple" onclick="ui('#save-broadcast-dialog');">
+            <div class="field border label textarea s12 bottom-margin">
+                <textarea
+                    type="text"
+                    id="schedule-description"
+                    name="schedule-description"
+                    required="required"
+                ></textarea>
+                <label>Description</label>
+                <span class="helper no-line">Explain what the broadcast is about</span>
+            </div>
+            <div class="field label prefix border s12">
+                <i>event</i>
+                <input type="date" id="date-time-picker" name="date" />
+                <label>Date</label>
+            </div>
+            <button class="small-round s6 ripple" onclick="submitSchedule()">
+                <i>send</i>
+                <span>Submit</span>
+            </button>
+            <button class="small-round s6 ripple" onclick="ui('#schedule-dialog');">
                 <i>close</i>
                 <span>Cancel</span>
-              </button>
-            </nav>
-        </dialog>
-        <div class="overlay blur"></div>
-        <dialog id="password-dialog">
-            <nav class="right-align">
-                <button class="transparent circle ripple" onclick="ui('#password-dialog');">
-                    <i>close</i>
-                </button>
-            </nav>
-            <p class="medium-width">
-                Contact
-                <a class="link" href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>
-                or
-                <a class="link" href="mailto:justin@pinelandfarms.ca">justin@pinelandfarms.ca</a>
-                if you need the password. The password is required to start or schedule a broadcast.
-            </p>
-        </dialog>
-    </body>
+            </button>
+        </div>
+    </dialog>
+    <dialog class="bottom" id="save-broadcast-dialog">
+        <h5 class="center-align">Save Broadcast</h5>
+        <p class="center-align">File Name: <code id="broadcast-file-name"></code></p>
+        <p class="center-align">Do you want to save this broadcast? It will be saved to your device.</p>
+        <nav class="center-align">
+            <button class="small-round ripple" id="save-broadcast-btn" >
+                <i>save</i>
+                <span>Save</span>
+            </button>
+            <button class="small-round ripple" onclick="ui('#save-broadcast-dialog');">
+            <i>close</i>
+            <span>Cancel</span>
+            </button>
+        </nav>
+    </dialog>
+    <div class="overlay blur"></div>
+    <dialog id="password-dialog">
+        <nav class="right-align">
+            <button class="transparent circle ripple" onclick="ui('#password-dialog');">
+                <i>close</i>
+            </button>
+        </nav>
+        <p class="medium-width">
+            Contact
+            <a class="link" href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>
+            or
+            <a class="link" href="mailto:justin@pinelandfarms.ca">justin@pinelandfarms.ca</a>
+            if you need the password. The password is required to start or schedule a broadcast.
+        </p>
+    </dialog>
+</body>
 </html>
