@@ -443,8 +443,8 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                     .replace("/", "")
                 )
                 self.description = metadata.get(
-                    "description", "Unspecified Description"
-                )
+                    "description", "Unspecified description"
+                ).replace("&amp;", "&")
                 self.password = metadata.get("password", "")
                 if self.password != os.getenv("HBNI_STREAMING_PASSWORD"):
                     self.write_message("Invalid password.")
@@ -559,7 +559,7 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                 .replace("//", "\\\\")
                 .replace("/", "\\")
             )
-            if total_minutes > 10.0 and not self.is_private:
+            if total_minutes >= 10.0 and not (self.is_private or self.host == "test"):
                 shutil.move(
                     self.output_filename,
                     f"{static_recordings_path}\\{new_output_filename}",
@@ -572,11 +572,11 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                     self.starting_time.strftime("%B %d %A %Y %I_%M %p"),
                     total_minutes,
                 )
-            # else:
-            #     shutil.move(
-            #         self.output_filename,
-            #         f"{static_recordings_path}\\Tests\\{new_output_filename}",
-            #     )
+            elif not self.is_private:
+                shutil.move(
+                    self.output_filename,
+                    f"{static_recordings_path}\\TESTS\\{new_output_filename}",
+                )
 
 
 class BroadcastHandler(BaseHandler):

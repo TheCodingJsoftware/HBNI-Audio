@@ -360,6 +360,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.getElementById('toggle-theme').addEventListener('click', toggleMode);
 
+    const broadcastDetails = document.getElementById('broadcast-details');
+    const broadcastControls = document.getElementById('broadcast-controls');
+
+    broadcastDetails.open = localStorage.getItem('broadcast-details-open') === 'true';
+    broadcastControls.open = localStorage.getItem('broadcast-controls-open') === 'true';
+
+    broadcastDetails.addEventListener('click', function () {
+        localStorage.setItem('broadcast-details-open', !broadcastDetails.open);
+    });
+
+    broadcastControls.addEventListener('click', function () {
+        localStorage.setItem('broadcast-controls-open', !broadcastControls.open);
+    });
+
     // Initialize canvas and audio context
     canvas = document.getElementById("canvas");
     canvasCtx = canvas.getContext("2d");
