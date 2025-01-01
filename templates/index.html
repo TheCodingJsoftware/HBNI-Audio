@@ -216,8 +216,8 @@
             {% for groupName in downloadableRecordings %}
             <div class="page {% if loop.first %}active{% endif %}" id="{{ groupName.replace(' ', '_') }}">
                 <div class="scroll border small-round no-space grid" id="contents">
-                    {% for itemName, itemData in downloadableRecordings[groupName].items() %}
-                    <article data-name="{{ itemName }}" class="small-round small-margin no-padding s12 m6 l6" id="article-version">
+                    {% for itemData in downloadableRecordings[groupName] %}
+                    <article data-name="{{ itemData['filename'].replace("_", ":").replace(".mp3", "") }}" class="small-round small-margin no-padding s12 m6 l6" id="article-version">
                         <details open>
                             <summary class="small-round no-padding none s">
                                 <a class="summary-contents row ripple small-round">

@@ -117,81 +117,116 @@ def get_duration(stream_start: str) -> float:
 
 def get_grouped_data(audio_data):
     today = datetime.today()
-    current_year, current_month, current_week = (
-        today.year,
-        today.month,
-        today.isocalendar()[1],
-    )
-
     groups = {
-        "Today": {},
-        "Yesterday": {},
-        "Two Days Ago": {},
-        "Three Days Ago": {},
-        "Sometime This Week": {},
-        "Last Week": {},
-        "Sometime This Month": {},
-        "Last Month": {},
-        "Two Months Ago": {},
-        "Three Months Ago": {},
-        "Sometime This Year": {},
-        "Last Year": {},
-        "Two Years Ago": {},
-        "Three Years Ago": {},
-        "Everything Else": {},
+        "Today": [],
+        "Yesterday": [],
+        "Two Days Ago": [],
+        "Three Days Ago": [],
+        "Sometime This Week": [],
+        "Last Week": [],
+        "Sometime This Month": [],
+        "Last Month": [],
+        "Two Months Ago": [],
+        "Three Months Ago": [],
+        "Sometime This Year": [],
+        "Last Year": [],
+        "Two Years Ago": [],
+        "Three Years Ago": [],
+        "Everything Else": [],
     }
 
     for row in audio_data:
-        itemData = dict(row)
-        itemData["formatted_length"] = format_length(itemData["length"])
+        item_data = dict(row)
+        item_data["formatted_length"] = format_length(item_data["length"])
 
         item_date = datetime.strptime(row["date"], "%B %d %A %Y %I_%M %p")
-        item_week = item_date.isocalendar()[1]
         diff_days = (today.date() - item_date.date()).days
-        item_name = row["filename"].replace("_", ":").replace(".mp3", "")
+
+        item_data["item_date_obj"] = item_date
 
         if diff_days == 0:
-            itemData["uploaded_days_ago"] = "Today"
+            item_data["uploaded_days_ago"] = "Today"
         elif diff_days == 1:
-            itemData["uploaded_days_ago"] = "Yesterday"
+            item_data["uploaded_days_ago"] = "Yesterday"
         else:
-            itemData["uploaded_days_ago"] = f"{diff_days} days ago"
+            item_data["uploaded_days_ago"] = f"{diff_days} days ago"
 
-        if item_date.year == current_year:
-            if item_date.month == current_month:
-                if item_week == current_week:
-                    if diff_days == 0:
-                        groups["Today"][item_name] = itemData
-                    elif diff_days == 1:
-                        groups["Yesterday"][item_name] = itemData
-                    elif diff_days == 2:
-                        groups["Two Days Ago"][item_name] = itemData
-                    elif diff_days == 3:
-                        groups["Three Days Ago"][item_name] = itemData
-                    else:
-                        groups["Sometime This Week"][item_name] = itemData
-                elif item_week == current_week - 1:
-                    groups["Last Week"][item_name] = itemData
-                else:
-                    groups["Sometime This Month"][item_name] = itemData
-            elif item_date.month == current_month - 1:
-                groups["Last Month"][item_name] = itemData
-            elif item_date.month == current_month - 2:
-                groups["Two Months Ago"][item_name] = itemData
-            elif item_date.month == current_month - 3:
-                groups["Three Months Ago"][item_name] = itemData
-            else:
-                groups["Sometime This Year"][item_name] = itemData
-        elif item_date.year == current_year - 1:
-            groups["Last Year"][item_name] = itemData
-        elif item_date.year == current_year - 2:
-            groups["Two Years Ago"][item_name] = itemData
-        elif item_date.year == current_year - 3:
-            groups["Three Years Ago"][item_name] = itemData
+        if diff_days == 0:
+            groups["Today"].append(item_data)
+            continue
+        elif diff_days == 1:
+            groups["Yesterday"].append(item_data)
+            continue
+        elif diff_days == 2:
+            groups["Two Days Ago"].append(item_data)
+            continue
+        elif diff_days == 3:
+            groups["Three Days Ago"].append(item_data)
+            continue
+        elif diff_days <= 7:
+            groups["Sometime This Week"].append(item_data)
+            continue
+        elif diff_days <= 14:
+            groups["Last Week"].append(item_data)
+            continue
+
+        def month_diff(now: datetime, then: datetime) -> int:
+            return (now.year - then.year) * 12 + (now.month - then.month)
+
+        m_diff = month_diff(today, item_date)
+        if m_diff == 0:
+            groups["Sometime This Month"].append(item_data)
+            continue
+        elif m_diff == 1:
+            groups["Last Month"].append(item_data)
+            continue
+        elif m_diff == 2:
+            groups["Two Months Ago"].append(item_data)
+            continue
+        elif m_diff == 3:
+            groups["Three Months Ago"].append(item_data)
+            continue
+
+        y_diff = today.year - item_date.year
+        if y_diff == 0:
+            groups["Sometime This Year"].append(item_data)
+        elif y_diff == 1:
+            groups["Last Year"].append(item_data)
+        elif y_diff == 2:
+            groups["Two Years Ago"].append(item_data)
+        elif y_diff == 3:
+            groups["Three Years Ago"].append(item_data)
         else:
-            groups["Everything Else"][item_name] = itemData
+            groups["Everything Else"].append(item_data)
 
-    return {key: value for key, value in groups.items() if value}
+    for group_name, items in groups.items():
+        items.sort(key=lambda x: x["item_date_obj"], reverse=True)
+
+    desired_order = [
+        "Today",
+        "Yesterday",
+        "Two Days Ago",
+        "Three Days Ago",
+        "Sometime This Week",
+        "Last Week",
+        "Sometime This Month",
+        "Last Month",
+        "Two Months Ago",
+        "Three Months Ago",
+        "Sometime This Year",
+        "Last Year",
+        "Two Years Ago",
+        "Three Years Ago",
+        "Everything Else",
+    ]
+
+    # Build a final dict in that order, skipping empty groups
+    final_groups = {}
+    for key in desired_order:
+        if groups[key]:  # Not empty
+            final_groups[key] = groups[key]
+
+    return final_groups
 
 
 error_messages = {
