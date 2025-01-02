@@ -8,9 +8,9 @@
     <link href="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.css" rel="stylesheet" />
     <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.js"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
-    <script type="module" src="/static/js/listeners_page.js?v=1.0"></script>
-    <link rel="stylesheet" type="text/css" href="/static/css/theme.css?v=1.0" />
-    <link rel="stylesheet" type="text/css" href="/static/css/style.css?v=1.0" />
+    <script type="module" src="/static/js/listeners_page.js?v=1.1"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/theme.css?v=1.1" />
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css?v=1.1" />
     <link rel="icon" href="/static/icon.png" />
     <title>HBNI Audio Listeners Page</title>
     <meta property="og:title" content="HBNI Audio Listeners Page" />
@@ -21,11 +21,11 @@
 
 <header class="fixed primary" id="main-header">
     <nav>
-        <button class="circle transparent ripple" onclick="window.location.href='/';">
+        <button class="circle transparent" onclick="window.location.href='/';">
             <i>arrow_back</i>
         </button>
         <h5 class="max center-align small">Listeners Page</h5>
-        <button class="circle transparent ripple" id="toggle-theme">
+        <button class="circle transparent" id="toggle-theme">
             <i>dark_mode</i>
         </button>
     </nav>
@@ -34,19 +34,19 @@
 <body class="dark hidden">
     <main class="responsive">
         {% if scheduled_broadcast_count %}
-        <h3 class="center-align">Scheduled Broadcasts</h3>
-        <div class="small-padding grid border small-round" id="schedulded-broadcasts-container">
+        <h5 class="center-align">Scheduled Broadcasts</h5>
+        <div class="small-padding grid border round" id="schedulded-broadcasts-container">
             {% for scheduled_date, scheduled_broadcast in schedule.items()
             %}
-            <article class="s12 m12 l6">
+            <article class="s12 m12 l6 round" id="article-{{ scheduled_broadcast.host }} data-title="{{ scheduled_broadcast.host.title() }}" data-description="{{ scheduled_broadcast.description }}" data-start-time="{{ scheduled_broadcast.start_time }}">
                 <div class="row no-space">
                     <h6 class="bottom-margin max">
                         {{ scheduled_broadcast.description }}
                     </h6>
-                    <button class="transparent small-round circle link ripple" onclick="shareUpcomingBroadcast('{{ scheduled_broadcast.host.title() }} schedulded a broadcast with the description, {{ scheduled_broadcast.description }} and is schedulded to start at {{ scheduled_broadcast.start_time }}.')">
+                    <button id="share-button" class="transparent circle link">
                         <i>share</i>
                     </button>
-                    <button class="transparent small-round circle link ripple" onclick="copyUpcomingBroadcastToClipboard('{{ scheduled_broadcast.host.title() }} schedulded a broadcast with the description, {{ scheduled_broadcast.description }} and is schedulded to start at {{ scheduled_broadcast.start_time }}.')">
+                    <button id="copy-button" class="transparent circle link">
                         <i>content_copy</i>
                     </button>
                 </div>
@@ -66,26 +66,26 @@
         </div>
         {% endif %}
         {% if broadcast_count %}
-        <h3 class="center-align">Active Broadcasts</h3>
-        <div class="small-padding grid border small-round" id="broadcasts-container">
+        <h5 class="center-align">Active Broadcasts</h5>
+        <div class="small-padding grid border round" id="broadcasts-container">
             {% for broadcast in broadcast_status %} {% if not broadcast.is_private %}
-            <article class="s12 m6 l6" id="{{ broadcast.host }}">
+            <article class="s12 m6 l6 round" id="article-{{ broadcast.host }}" data-title="{{ broadcast.host.title() }}" data-description="{{ broadcast.server_description }}">
                 <div class="row no-space top-align">
                     <h6 class="bottom-margin max" id="server-description-{{ broadcast.host }}">
                         {{ broadcast.server_description }}
                     </h6>
-                    <button class="small-round circle link transparent wave" onclick="window.open('http://hbniaudio.hbni.net:8000/{{ broadcast.host }}')">
+                    <button class=" circle link transparent wave" onclick="window.open('http://hbniaudio.hbni.net:8000/{{ broadcast.host }}')">
                         <i>open_in_new</i>
                     </button>
-                    <button class="small-round circle link transparent" onclick="shareUpcomingBroadcast('{{ broadcast.server_description }}')">
+                    <button id="share-button" class="circle link transparent">
                         <i>share</i>
                     </button>
-                    <button class="small-round circle link transparent" onclick="copyUpcomingBroadcastToClipboard('{{ broadcast.server_description }}')">
+                    <button id="copy-button" class="circle link transparent">
                         <i>content_copy</i>
-                    </button>
+                    </button><div id="recording-status-{{ broadcast.host }}" class="badge min none hidden"></div>
                 </div>
                 <div>
-                    <i>artist</i> <span id="artist-{{ broadcast.host }}">{{ broadcast.host.replace('/', '').title() }}</span>
+                    <i>artist</i> <span id="artist-{{ broadcast.host }}">{{ broadcast.host.replace('/', '').title() }} </span>
                 </div>
                 <div>
                     <i>event</i> <span id="event-{{ broadcast.host }}">{{ broadcast.stream_start.replace('_', ':') }}</span>
@@ -125,6 +125,7 @@
         </div>
     </main>
 </body>
+
 {% if scheduled_broadcast_count and not broadcast_count %}
 <script>
     document.addEventListener("DOMContentLoaded", () => {

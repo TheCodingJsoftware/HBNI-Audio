@@ -16,3 +16,15 @@ article {
 .music-note {
     color: var(--primary);
 }
+
+#contents{
+    height: 700px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+@media (max-width: 600px) {
+    #contents{
+        height: 500px;
+    }
+}

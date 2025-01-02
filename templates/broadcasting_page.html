@@ -6,13 +6,14 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <meta name="google" content="notranslate" />
     <link href="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.css" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.13/dist/umd/ffmpeg.min.js"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.js"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css"/>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script type="module" src="/static/js/broadcasting_page.js?v=1.0" ></script>
-    <link rel="stylesheet" type="text/css" href="/static/css/theme.css?v=1.0" />
-    <link rel="stylesheet" type="text/css" href="/static/css/style.css?v=1.0" />
+    <script type="module" src="/static/js/broadcasting_page.js?v=1.1" ></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/theme.css?v=1.1" />
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css?v=1.1" />
     <link rel="icon" href="/static/icon.png" />
     <title>HBNI Audio Broadcasting</title>
     <meta property="og:title" content="HBNI Audio Broadcasting" />
@@ -23,11 +24,11 @@
 
 <header class="fixed primary" id="header">
     <nav>
-        <button class="circle transparent ripple" onclick="window.location.href='/';">
+        <button class="circle transparent" onclick="window.location.href='/';">
             <i>arrow_back</i>
         </button>
         <h5 class="max center-align small">Broadcasting Page</h5>
-        <button class="circle transparent ripple" id="toggle-theme">
+        <button class="circle transparent" id="toggle-theme">
             <i>dark_mode</i>
         </button>
     </nav>
@@ -36,20 +37,20 @@
 <body class="dark hidden">
     <main class="responsive">
         <div class="large-width center" >
-            <article class="no-padding">
+            <article class="round no-padding">
                 <details id="broadcast-details">
-                    <summary class="small-round padding" style="font-size: 25px;">
+                    <summary class=" padding" style="font-size: 18px;">
                     Broadcast Details
                     </summary>
                     <nav class="center-align">
-                        <button class="small-round" onclick="ui('#broadcasting-guide');">
+                        <button onclick="window.location.href='/broadcasting_guide';">
                             <i>developer_guide</i>
                             <span>Broadcasting Guide</span>
                         </button>
                     </nav>
                     <form class="padding" id="metadataForm">
                         <div class="field label border">
-                            <input type="text" id="host" name="host" oninput="validateInput()" />
+                            <input type="text" id="host" name="host" required/>
                             <label>Colony Name</label>
                         </div>
                         <div class="field border label textarea">
@@ -62,8 +63,17 @@
                             <input type="password" id="password" name="password" autocomplete="on" required />
                             <label>Password</label>
                         </div>
-                        <button class="circle transparent link ripple" type="button" onclick="ui('#password-dialog');">
+                        <button class="circle transparent link" type="button">
                             <i>help</i>
+                            <div class="tooltip left max" style="inline-size: 14rem !important;">
+                                <p class="small-width">
+                                    Contact
+                                    <a class="link" href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>
+                                    or
+                                    <a class="link" href="mailto:justin@pinelandfarms.ca">justin@pinelandfarms.ca</a>
+                                    if you need the password. The password is required to start or schedule a broadcast.
+                                </p>
+                            </div>
                         </button>
                         </div>
                         <div class="large-space"></div>
@@ -81,20 +91,20 @@
                         </div>
                     </form>
                     <div class="row center-align padding">
-                        <button id="scheduleBroadcast" class="small-round max" onclick="ui('#schedule-dialog');" disabled>
+                        <button id="scheduleBroadcast" class="max" onclick="ui('#schedule-dialog');" disabled>
                             <i>schedule</i>
-                            <span>Schedule Broadcast</span>
+                            <span>Schedule Event</span>
                         </button>
-                        <button class="link transparent no-border small-round" onclick="share()" id="share-button">
+                        <button class="link transparent no-border" id="share-button">
                             <i>share</i>
                             <span>Share</span>
                         </button>
                     </div>
                 </details>
             </article>
-            <article class="no-padding" id="main-article">
+            <article class="round no-padding" id="main-article">
                 <details id="broadcast-controls">
-                    <summary class="small-round padding" style="font-size: 25px;">
+                    <summary class=" padding" style="font-size: 18px;">
                     Broadcast Controls
                     </summary>
                     <nav class="center-align padding">
@@ -117,25 +127,25 @@
                     <div class="grid padding">
                         <div class="grid max s12 m8 l8">
                             <div class="grid max s12 center-align">
-                                <button id="startBroadcast" class="small-round extra s12 ripple" disabled>
+                                <button id="startBroadcast" class=" extra s12" disabled>
                                     <i>play_circle</i>
                                     <span>Start Broadcast</span>
                                 </button>
-                                <button id="stopBroadcast" class="small-round extra s12 ripple" disabled>
+                                <button id="stopBroadcast" class=" extra s12" disabled>
                                     <i>stop_circle</i>
                                     <span>End Broadcast</span>
                                 </button>
                             </div>
                         </div>
                         <div class="s12 m4 l4 middle-align center-align">
-                            <button id="muteToggle" class="circle extra ripple" style="height: 128px; width: 128px;     border-radius: 50%; " disabled>
+                            <button id="muteToggle" class="circle extra" style="height: 128px; width: 128px;     border-radius: 50%; " disabled>
                                 <i class="mic-icon">mic</i>
                                 <i>pen_size_1</i>
                                 <i class="pause-icon">pause</i>
                             </button>
                         </div>
                     </div>
-                    <canvas class="small-round" id="canvas" style="width: 100%; height: 100px"></canvas>
+                    <canvas id="canvas" style="width: 100%; height: 100px"></canvas>
                 </details>
             </article>
         </div>
@@ -156,6 +166,9 @@
     <div class="snackbar" id="broadcast-started">
         <div class="max">Broadcast Started</div>
         <a class="inverse-link" href="/listeners_page" target="_blank">View</a>
+    </div>
+    <div class="snackbar" id="copied-to-clipboard">
+        Copied to Clipboard
     </div>
     <div class="overlay blur"></div>
     <dialog id="schedule-dialog">
@@ -188,11 +201,11 @@
                 <input type="date" id="date-time-picker" name="date" />
                 <label>Date</label>
             </div>
-            <button class="small-round s6 ripple" onclick="submitSchedule()">
+            <button id="submit-schedule-button" class="s6">
                 <i>send</i>
                 <span>Submit</span>
             </button>
-            <button class="small-round s6 ripple" onclick="ui('#schedule-dialog');">
+            <button class=" s6" onclick="ui('#schedule-dialog');">
                 <i>close</i>
                 <span>Cancel</span>
             </button>
@@ -203,153 +216,15 @@
         <p class="center-align">File Name: <code id="broadcast-file-name"></code></p>
         <p class="center-align">Do you want to save this broadcast? It will be saved to your device.</p>
         <nav class="center-align">
-            <button class="small-round ripple" id="save-broadcast-btn" >
+            <button id="save-broadcast-btn" >
                 <i>save</i>
                 <span>Save</span>
             </button>
-            <button class="small-round ripple" onclick="ui('#save-broadcast-dialog');">
+            <button onclick="ui('#save-broadcast-dialog');">
             <i>close</i>
             <span>Cancel</span>
             </button>
         </nav>
-    </dialog>
-    <div class="overlay blur"></div>
-    <dialog id="password-dialog">
-        <nav class="right-align">
-            <button class="transparent circle ripple" onclick="ui('#password-dialog');">
-                <i>close</i>
-            </button>
-        </nav>
-        <p class="medium-width">
-            Contact
-            <a class="link" href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>
-            or
-            <a class="link" href="mailto:justin@pinelandfarms.ca">justin@pinelandfarms.ca</a>
-            if you need the password. The password is required to start or schedule a broadcast.
-        </p>
-    </dialog>
-    <dialog class="max" id="broadcasting-guide">
-        <nav>
-            <button class="transparent circle" onclick="ui('#broadcasting-guide');">
-                <i>close</i>
-            </button>
-        </nav>
-        <div class="large-width absolute center padding">
-            <section aria-labelledby="summary-title">
-                <h5 id="summary-title">Summary</h5>
-                <ol>
-                    <li>Gather Your Equipment (<strong>microphone</strong> + optional <strong>mixer</strong>).</li>
-                    <li>Visit the <strong>HBNI Audio Broadcasting Webpage</strong> on any device.</li>
-                    <li>Enter Your <strong>Colony Name</strong>, <strong>Description</strong>, and <strong>Password</strong> (request it if you don’t have it).</li>
-                    <li>Test by using <em>“test”</em> as the Colony Name to ensure the mic and connection are good.</li>
-                    <li>Go Live and speak clearly.</li>
-                    <li>Choose <strong>Public</strong> or <strong>Private</strong> broadcast settings:
-                    <ul>
-                        <li><strong>Public:</strong> will show up on the listeners page and be archived.</li>
-                        <li><strong>Private:</strong> stays hidden, but you get a personal copy.</li>
-                    </ul>
-                    </li>
-                    <li>Always Keep Your Connection Stable for uninterrupted streaming.</li>
-                </ol>
-                <p>That’s it! You’re now ready to broadcast your audio with HBNI Audio. <strong>Happy broadcasting!</strong></p>
-            </section>
-            <hr class="small-margin" />
-            <!-- Equipment Needed -->
-            <section aria-labelledby="equipment-title">
-                <h5 id="equipment-title">Equipment Needed</h5>
-                <p><strong>Microphone</strong> – At the very least, a decent microphone is required. This could be:</p>
-                <ul>
-                    <li>A built-in microphone on your phone or laptop.</li>
-                    <li>A USB microphone for improved audio quality.</li>
-                    <li>A mixer (optional) if you want even higher-quality or more professional sound.</li>
-                </ul>
-                <p><strong>Stable Internet Connection</strong> – Reliable connectivity is crucial:</p>
-                <ul>
-                    <li>Aim for at least <strong>1 Mbps upload speed</strong>.</li>
-                    <li>Avoid network activities that might interrupt or slow your upload.</li>
-                </ul>
-            </section>
-            <hr class="small-margin" />
-            <!-- Accessing the Broadcasting Webpage -->
-            <section aria-labelledby="access-title">
-                <h5 id="access-title">2. Accessing the Broadcasting Webpage</h5>
-
-                <h6>Open the HBNI Audio Broadcasting Webpage</h6>
-                <ul>
-                    <li>You can use any device—mobile phone, tablet, or computer.</li>
-                    <li>Ensure your device’s microphone is enabled and has permission to capture audio in your browser.</li>
-                </ul>
-
-                <h6>Enter the Required Fields</h6>
-                <p>The webpage will prompt you for three pieces of information:</p>
-                <ol>
-                    <li><strong>Colony Name</strong> – This is how your broadcast will be labeled/identified.</li>
-                    <li><strong>Description</strong> – Give a brief description of your broadcast (e.g., topic, event).</li>
-                    <li><strong>Password</strong> – A password is required to start broadcasting.
-                    <ul>
-                        <li>The password is always the same for authorized broadcasters.</li>
-                        <li>Contact the HBNI Audio administrator or team if you do not have it.</li>
-                    </ul>
-                    </li>
-                </ol>
-            </section>
-            <hr class="small-margin" />
-            <!-- Starting Your Broadcast -->
-            <section aria-labelledby="start-title">
-                <h5 id="start-title">3. Starting Your Broadcast</h5>
-
-                <h6>Test First</h6>
-                <ul>
-                    <li>We strongly recommend doing a quick test by setting your Colony Name to <em>“test”</em>.</li>
-                    <li>Make sure your microphone is working, and your internet connection is steady.</li>
-                    <li>If the test broadcast works smoothly, you’re ready to go live.</li>
-                </ul>
-
-                <h6>Go Live</h6>
-                <ul>
-                    <li>Use your desired Colony Name, Description, and the same Password.</li>
-                    <li>Once you press <strong>Start Broadcasting</strong>, you are on air.</li>
-                </ul>
-            </section>
-            <hr class="small-margin" />
-            <!-- Privacy Options & Archives -->
-            <section aria-labelledby="privacy-title">
-                <h5 id="privacy-title">4. Privacy Options &amp; Archives</h5>
-
-                <h6>Public Broadcasts</h6>
-                <ul>
-                    <li>By default, your broadcasts will be available on the listeners page.</li>
-                    <li>They are also automatically archived, and you will receive your own copy of the recorded broadcast.</li>
-                </ul>
-
-                <h6>Private Broadcasts</h6>
-                <ul>
-                    <li>You can mark your broadcast as <strong>Private</strong> (if provided as an option on the broadcast page).</li>
-                    <li><strong>Private broadcasts:</strong></li>
-                    <ul>
-                    <li>Will not appear on the listeners page.</li>
-                    <li>Will not be archived publicly.</li>
-                    <li>You still receive your own copy for personal records.</li>
-                    </ul>
-                </ul>
-            </section>
-            <hr class="small-margin" />
-            <!-- Best Practices & Tips -->
-            <section aria-labelledby="tips-title">
-                <h5 id="tips-title">5. Best Practices &amp; Tips</h5>
-
-                <h6>Maintain a Stable Internet Connection</h6>
-                <ul>
-                    <li>Use a wired Ethernet connection if possible, or stay close to your Wi-Fi router if using wireless.</li>
-                    <li>Avoid other heavy internet usage during your broadcast.</li>
-                </ul>
-
-                <h6>Keep an Eye on Battery (for Mobile Devices)</h6>
-                <ul>
-                    <li>Make sure your device is charged or plugged in if you plan an extended broadcast.</li>
-                </ul>
-            </section>
-        </div>
     </dialog>
 </body>
 

@@ -10,8 +10,8 @@
     <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.js"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
     <script type="module" src="/static/js/play_recording.js?v=1.1"></script>
-    <link rel="stylesheet" type="text/css" href="/static/css/theme.css?v=1.0" />
-    <link rel="stylesheet" type="text/css" href="/static/css/style.css?v=1.0" />
+    <link rel="stylesheet" type="text/css" href="/static/css/theme.css?v=1.1" />
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css?v=1.1" />
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css" rel="stylesheet"/>
     <link rel="icon" href="/static/icon.png" />
     <meta property="og:title" content="{{ file_name }}" />
@@ -22,11 +22,11 @@
 
 <header class="fixed primary" id="header">
     <nav>
-        <button class="circle transparent ripple" onclick="location.href='/';">
+        <button class="circle transparent" onclick="location.href='/';">
             <i>arrow_back</i>
         </button>
         <h5 class="max">{{ title }}</h5>
-        <button class="circle transparent ripple" id="toggle-theme">
+        <button class="circle transparent" id="toggle-theme">
             <i>dark_mode</i>
         </button>
     </nav>
@@ -79,11 +79,11 @@
                     <span id="total-time">00:00</span>
                 </div>
                 <nav class="row">
-                    <button class="small-round max" id="download-button" data-url="{{ url_for(file_name) }}">
+                    <button class=" max" id="download-button" data-url="{{ url_for(file_name) }}">
                         <i>download</i>
                         <span>Download</span>
                     </button>
-                    <button id="share-button" class="link transparent no-border small-round">
+                    <button id="share-button" class="link transparent no-border ">
                         <i>share</i>
                         <span>Share</span>
                     </button>

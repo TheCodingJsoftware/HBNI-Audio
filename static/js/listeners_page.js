@@ -36,6 +36,20 @@ function copyUpcomingBroadcastToClipboard(text) {
     ui("#copied-to-clipboard");
 }
 
+async function updateRecordingStatus() {
+    const response = await fetch('/get_recording_status');
+    if (!response.ok) throw new Error('Failed to fetch recording status');
+    const recordingStatus = await response.json();
+
+    for (let [host, recordingStatusData] of Object.entries(recordingStatus)) {
+        host = host.replace("/", "")
+        const recordingStatusElement = document.getElementById(`recording-status-${host}`);
+        if (recordingStatusElement){
+            recordingStatusElement.classList.remove('hidden');
+        }
+    }
+}
+
 async function fetchBroadcastData() {
     try {
         const response = await fetch('/get_broadcast_data');
@@ -63,7 +77,6 @@ async function fetchBroadcastData() {
     }
 }
 
-
 // Periodically fetch updates
 document.addEventListener('DOMContentLoaded', function () {
     loadTheme();
@@ -73,6 +86,43 @@ document.addEventListener('DOMContentLoaded', function () {
             alert('The audio stream is unavailable because it is served over an insecure connection. Please contact support for assistance.');
         };
     });
+    const scheduledBroadcastsContainer = document.getElementById('schedulded-broadcasts-container');
+    if (scheduledBroadcastsContainer) { // There might not be any scheduled broadcasts
+        scheduledBroadcastsContainer.querySelectorAll('[id^=\'article\']').forEach(article => {
+            const title = article.getAttribute('data-title');
+            const description = article.getAttribute('data-description');
+            const startTime = article.getAttribute('data-start-time');
+
+            const copyMessage = `${title} schedulded a broadcast with the description, ${description} and is schedulded to start at ${startTime}.`;
+
+            const shareButton = article.querySelector(`#share-button`);
+            const copyButton = article.querySelector(`#copy-button`);
+            shareButton.addEventListener('click', function () {
+                shareUpcomingBroadcast(copyMessage);
+            });
+            copyButton.addEventListener('click', function () {
+                copyUpcomingBroadcastToClipboard(copyMessage);
+            });
+        });
+    }
+    const broadcastsContainer = document.getElementById('broadcasts-container');
+    if (broadcastsContainer) { // There might not be any broadcasts live
+        broadcastsContainer.querySelectorAll('[id^=\'article\']').forEach(article => {
+            const title = article.getAttribute('data-title');
+            const description = article.getAttribute('data-description');
+
+            const copyMessage = `${title} started a broadcast with the description, ${description}.`;
+
+            const shareButton = article.querySelector(`#share-button`);
+            const copyButton = article.querySelector(`#copy-button`);
+            shareButton.addEventListener('click', function () {
+                shareUpcomingBroadcast(copyMessage);
+            });
+            copyButton.addEventListener('click', function () {
+                copyUpcomingBroadcastToClipboard(copyMessage);
+            });
+        });
+    }
 });
 
 document.addEventListener('DOMContentLoaded', async function () {
@@ -84,6 +134,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (broadcast_data && broadcast_data.length > 0) {
             fetchInterval = setInterval(fetchBroadcastData, 5000);
         }
+        await updateRecordingStatus();
     } catch (error) {
         console.error('Error during initial fetch:', error);
     }

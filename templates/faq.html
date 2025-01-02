@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="google" content="notranslate">
+    <link href="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.css" rel="stylesheet" />
+    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.js"></script>
+    <script type="module"
+        src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js">
+    </script>
+    <script type="module" src="/static/js/faq.js?v=1.1"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/theme.css?v=1.1">
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css?v=1.1">
+    <link rel="icon" href="/static/icon.png">
+    <title>Audio Archive</title>
+    <meta property="og:title" content="Audio Archive" />
+    <meta property="og:url" content="https://audioarchives.hbni.net/faq" />
+    <meta property="og:image" content="https://audioarchives.hbni.net/static/icon.png" />
+    <meta property="og:description" content="Download or relisten to previously broadcasted streams." />
+</head>
+
+<header class="fixed primary" id="main-header">
+    <nav>
+        <button class="circle transparent" onclick="window.history.back();">
+            <i>arrow_back</i>
+        </button>
+        <h5 class="max center-align small m l">Frequently Asked Questions</h5>
+        <h5 class="max center-align small s">FAQ</h5>
+        <button class="circle transparent" id="toggle-theme">
+            <i>dark_mode</i>
+        </button>
+    </nav>
+</header>
+
+<body class="dark hidden">
+    <main class="responsive">
+        <ul>
+            <li><a class="link" href="#play-archives">How do I play archives without downloading them?</a></li>
+            <li><a class="link" href="#where-archives-stored">Where are the archives stored?</a></li>
+            <li><a class="link" href="#using-mega-and-google-drive">Why are you using both Mega and GoogleDrive?</a></li>
+            <li><a class="link" href="#not-migrating-to-google-drive">Why not migrate the entire database over to GoogleDrive?</a></li>
+            <li><a class="link" href="#stop-using-google-drive">Why stop using GoogleDrive?</a></li>
+            <li><a class="link" href="#remove-broadcast">I want to remove a broadcast on the archive.</a></li>
+            <li><a class="link" href="#never-recorded">I don't want any of my broadcasts on the archive and never be recorded.</a></li>
+            <li><a class="link" href="#broadcast-missing">Why is the broadcast not finished or missing?</a></li>
+            <li><a class="link" href="#upload-time">How long does it take to upload archives?</a></li>
+            <li><a class="link" href="#private-broadcasts">How do I make a private broadcast?</a></li>
+        </ul>
+        <hr>
+        <div class="small-space"></div>
+        <h5 id="play-archives">How do I play archives without downloading them?</h5>
+        <h6>Apple</h6>
+        <p>
+            1. Install <a class="link" href="https://apps.apple.com/us/app/mega/id706857885">Mega</a> or <a
+                class="link" href="https://apps.apple.com/ca/app/google-drive/id507874739">GoogleDrive</a>.
+            2. Go to the <a class="link" href="http://audioarchives.hbni.net">HBNI archive</a> and press any archive you want to listen to.
+            3. You will be redirected to the <a href="https://apps.apple.com/us/app/mega/id706857885">Mega</a> or
+            <a class="link" href="https://apps.apple.com/ca/app/google-drive/id507874739">GoogleDrive</a> app.
+            4. Play the broadcast directly without downloading it.
+        </p>
+        <h6>Android</h6>
+        <p>
+            Similar steps as Apple. Install <a class="link"
+                href="https://play.google.com/store/apps/details?id=mega.privacy.android.app&hl=en_US&gl=US">Mega</a>
+            or <a class="link" href="https://play.google.com/store/apps/details?id=com.google.android.apps.docs">GoogleDrive</a>.
+            Use the <a class="link" href="http://audioarchives.hbni.net">HBNI archive</a> to select the broadcast.
+        </p>
+        <h6>Windows (Computer)</h6>
+        <p>
+            Click any archive on the <a class="link" href="http://audioarchives.hbni.net">HBNI archive</a>. It will redirect you to
+            <a class="link" href="https://mega.nz">mega.nz</a> or <a class="link" href="https://drive.google.com">GoogleDrive</a>.
+        </p>
+
+        <h5 id="where-archives-stored">Where are the archives stored?</h5>
+        <h6>2022-07-12 to 2023-07-21</h6>
+        <p>
+            Archives were stored on <a class="link" href="https://mega.nz">mega.nz</a>. Access them
+            <a class="link" href="https://mega.nz/folder/CxF1AQwS#rucPTrUDuhHE5I76NtpkLA">here</a>.
+        </p>
+        <h6>2023-07-21 to 2023-07-29</h6>
+        <p>
+            Archives were stored on <a class="link" href="https://drive.google.com">GoogleDrive</a>. Access them
+            <a class="link" href="https://drive.google.com/drive/u/0/folders/1ceDO2zOx8pdEzQDRa-aHXVXhXO-QT-cq">here</a>.
+        </p>
+        <h6>2023-07-29 to today</h6>
+        <p>
+            Archives are stored on our servers in Pineland Colony. The data is stored on Postgres database. Data for each broadcast can be found <a class="link" href="http://audioarchives.hbni.net/download_links.json">here</a>.
+        </p>
+
+        <h5 id="using-mega-and-google-drive">Why are you using both Mega and GoogleDrive?</h5>
+        <p>
+            Mega was quicker to start with but ran out of storage, leading to a switch to GoogleDrive, which HBNI supported.
+        </p>
+
+        <h5 id="not-migrating-to-google-drive">Why not migrate the entire database over to GoogleDrive?</h5>
+        <p>
+            Mega does not provide an easy way to migrate data. Inconsistent file data and changing upload methods make
+            it impractical without risking data loss.
+        </p>
+
+        <h5 id="stop-using-google-drive">Why stop using GoogleDrive?</h5>
+        <p>
+            Google doesn't allow permanent access tokens, requiring weekly manual token refreshes, which isn't practical.
+        </p>
+
+        <h5 id="remove-broadcast">I want to remove a broadcast on the archive.</h5>
+        <p>
+            Email exact details to <a class="link" href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>.
+        </p>
+
+        <h5 id="never-recorded">I don't want any of my broadcasts on the archive and never be recorded.</h5>
+        <p>
+            Email <a class="link" href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>. The
+            <a class="link" href="https://github.com/TheCodingJsoftware/HBNI-Audio-Stream-Recorder">HBNI recorder</a>
+            can exempt specific hosts from being recorded. Use the same host name each time.
+        </p>
+
+        <h5 id="broadcast-missing">Why is the broadcast not finished or missing?</h5>
+        <p>
+            Internet connection issues during recording can lead to incomplete uploads.
+        </p>
+
+        <h5 id="upload-time">How long does it take to upload archives?</h5>
+        <p>
+            Archives are usually uploaded within 5 minutes, depending on broadcast length. Manual uploads may take longer if there are issues.
+        </p>
+        <h5 id="private-broadcasts">How do I make a private broadcast?</h5>
+        <p>
+            Go to the <a class="link" href="http://audioarchives.hbni.net/broadcasting_page">broadcasting page</a> and check mark the private checkbox. Private broadcasts are not listed on the <a class="link" href="http://audioarchives.hbni.net/listeners_page">listeners page</a> or archived but can be shared by the host and saved to your device after ending.
+        </p>
+    </main>
+</body>
+</html>

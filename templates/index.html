@@ -11,145 +11,40 @@
     <script type="module"
         src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js">
     </script>
-    <script type="module" src="/static/js/index.js?v=1.0"></script>
-    <link rel="stylesheet" type="text/css" href="/static/css/theme.css?v=1.0">
-    <link rel="stylesheet" type="text/css" href="/static/css/style.css?v=1.0">
+    <script type="module" src="/static/js/index.js?v=1.1"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/theme.css?v=1.1">
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css?v=1.1">
     <link rel="icon" href="/static/icon.png">
-    <title>HBNI Audio Archive</title>
-    <meta property="og:title" content="HBNI Audio Archive" />
-    <meta property="og:url" content="https://audioarchives.hbni.net" />
+    <title>Audio Archive</title>
+    <meta property="og:title" content="Audio Archive" />
+    <meta property="og:url" content="https://audioarchives.hbni.net/archives" />
     <meta property="og:image" content="https://audioarchives.hbni.net/static/icon.png" />
     <meta property="og:description" content="Download or relisten to previously broadcasted streams." />
 </head>
 
-<dialog id="faq-dialog" class="max">
-    <div class="right-align">
-        <button class="transparent circle ripple" onclick="ui('#faq-dialog');">
-            <i>close</i>
-        </button>
-    </div>
-    <h3 class="center-align padding-bottom">Frequently Asked Questions</h3>
-    <div class="large-width center">
-        <hr>
-        <ul>
-            <li><a class="link" href="#play-archives">How do I play archives without downloading them?</a></li>
-            <li><a class="link" href="#where-archives-stored">Where are the archives stored?</a></li>
-            <li><a class="link" href="#using-mega-and-google-drive">Why are you using both Mega and GoogleDrive?</a></li>
-            <li><a class="link" href="#not-migrating-to-google-drive">Why not migrate the entire database over to GoogleDrive?</a></li>
-            <li><a class="link" href="#stop-using-google-drive">Why stop using GoogleDrive?</a></li>
-            <li><a class="link" href="#remove-broadcast">I want to remove a broadcast on the archive.</a></li>
-            <li><a class="link" href="#never-recorded">I don't want any of my broadcasts on the archive and never be recorded.</a></li>
-            <li><a class="link" href="#broadcast-missing">Why is the broadcast not finished or missing?</a></li>
-            <li><a class="link" href="#upload-time">How long does it take to upload archives?</a></li>
-            <li><a class="link" href="#private-broadcasts">How do I make a private broadcast?</a></li>
-        </ul>
-        <hr>
-        <h5 id="play-archives">How do I play archives without downloading them?</h5>
-        <h6>Apple</h6>
-        <p>
-            1. Install <a class="link" href="https://apps.apple.com/us/app/mega/id706857885">Mega</a> or <a
-                class="link" href="https://apps.apple.com/ca/app/google-drive/id507874739">GoogleDrive</a>.
-            2. Go to the <a class="link" href="http://audioarchives.hbni.net">HBNI archive</a> and press any archive you want to listen to.
-            3. You will be redirected to the <a href="https://apps.apple.com/us/app/mega/id706857885">Mega</a> or
-            <a class="link" href="https://apps.apple.com/ca/app/google-drive/id507874739">GoogleDrive</a> app.
-            4. Play the broadcast directly without downloading it.
-        </p>
-        <h6>Android</h6>
-        <p>
-            Similar steps as Apple. Install <a class="link"
-                href="https://play.google.com/store/apps/details?id=mega.privacy.android.app&hl=en_US&gl=US">Mega</a>
-            or <a class="link" href="https://play.google.com/store/apps/details?id=com.google.android.apps.docs">GoogleDrive</a>.
-            Use the <a class="link" href="http://audioarchives.hbni.net">HBNI archive</a> to select the broadcast.
-        </p>
-        <h6>Windows (Computer)</h6>
-        <p>
-            Click any archive on the <a class="link" href="http://audioarchives.hbni.net">HBNI archive</a>. It will redirect you to
-            <a class="link" href="https://mega.nz">mega.nz</a> or <a class="link" href="https://drive.google.com">GoogleDrive</a>.
-        </p>
-
-        <h5 id="where-archives-stored">Where are the archives stored?</h5>
-        <h6>2022-07-12 to 2023-07-21</h6>
-        <p>
-            Archives were stored on <a class="link" href="https://mega.nz">mega.nz</a>. Access them
-            <a class="link" href="https://mega.nz/folder/CxF1AQwS#rucPTrUDuhHE5I76NtpkLA">here</a>.
-        </p>
-        <h6>2023-07-21 to 2023-07-29</h6>
-        <p>
-            Archives were stored on <a class="link" href="https://drive.google.com">GoogleDrive</a>. Access them
-            <a class="link" href="https://drive.google.com/drive/u/0/folders/1ceDO2zOx8pdEzQDRa-aHXVXhXO-QT-cq">here</a>.
-        </p>
-        <h6>2023-07-29 to today</h6>
-        <p>
-            Archives are stored on our servers in Pineland Colony. The data is stored on Postgres database. Data for each broadcast can be found <a class="link" href="http://audioarchives.hbni.net/download_links.json">here</a>.
-        </p>
-
-        <h5 id="using-mega-and-google-drive">Why are you using both Mega and GoogleDrive?</h5>
-        <p>
-            Mega was quicker to start with but ran out of storage, leading to a switch to GoogleDrive, which HBNI supported.
-        </p>
-
-        <h5 id="not-migrating-to-google-drive">Why not migrate the entire database over to GoogleDrive?</h5>
-        <p>
-            Mega does not provide an easy way to migrate data. Inconsistent file data and changing upload methods make
-            it impractical without risking data loss.
-        </p>
-
-        <h5 id="stop-using-google-drive">Why stop using GoogleDrive?</h5>
-        <p>
-            Google doesn't allow permanent access tokens, requiring weekly manual token refreshes, which isn't practical.
-        </p>
-
-        <h5 id="remove-broadcast">I want to remove a broadcast on the archive.</h5>
-        <p>
-            Email exact details to <a class="link" href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>.
-        </p>
-
-        <h5 id="never-recorded">I don't want any of my broadcasts on the archive and never be recorded.</h5>
-        <p>
-            Email <a class="link" href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>. The
-            <a class="link" href="https://github.com/TheCodingJsoftware/HBNI-Audio-Stream-Recorder">HBNI recorder</a>
-            can exempt specific hosts from being recorded. Use the same host name each time.
-        </p>
-
-        <h5 id="broadcast-missing">Why is the broadcast not finished or missing?</h5>
-        <p>
-            Internet connection issues during recording can lead to incomplete uploads.
-        </p>
-
-        <h5 id="upload-time">How long does it take to upload archives?</h5>
-        <p>
-            Archives are usually uploaded within 5 minutes, depending on broadcast length. Manual uploads may take longer if there are issues.
-        </p>
-        <h5 id="private-broadcasts">How do I make a private broadcast?</h5>
-        <p>
-            Go to the <a class="link" href="http://audioarchives.hbni.net/broadcasting_page">broadcasting page</a> and check mark the private checkbox. Private broadcasts are not listed on the <a class="link" href="http://audioarchives.hbni.net/listeners_page">listeners page</a> or archived but can be shared by the host and saved to your device after ending.
-        </p>
-    </div>
-    <button class="transparent circle" onclick="ui('#faq-dialog');">
-        <span>Close</span>
-    </button>
-</dialog>
 <div class="overlay blur"></div>
 <dialog id="download-dialog">
     <h3 class="center-align">Apps</h3>
-    <button class="row responsive small-round ripple" onclick="location.href='https://github.com/TheCodingJsoftware/HBNI-Audio-Stream-Listener/releases';">
-        <i>desktop_windows</i>
-        <span>Desktop</span>
-    </button>
-    <button class="row responsive small-round ripple"
-        onclick="location.href='https://apps.apple.com/ca/app/hbni-audio-streaming/id1611672333';">
-        <i>ios</i>
-        <span>Apple</span>
-    </button>
-    <button class="row responsive small-round ripple" onclick="location.href='https://play.google.com/store/apps/details?id=com.thecodingjsoftware.hutteritechurch';">
-        <i>android</i>
-        <span>Android</span>
-    </button>
+    <div class="grid">
+        <button class="s4" onclick="location.href='https://github.com/TheCodingJsoftware/HBNI-Audio-Stream-Listener/releases';">
+            <i>desktop_windows</i>
+            <span>Desktop</span>
+        </button>
+        <button class="s4" onclick="location.href='https://apps.apple.com/ca/app/hbni-audio-streaming/id1611672333';">
+            <i>ios</i>
+            <span>Apple</span>
+        </button>
+        <button class="s4" onclick="location.href='https://play.google.com/store/apps/details?id=com.thecodingjsoftware.hutteritechurch';">
+            <i>android</i>
+            <span>Android</span>
+        </button>
+    </div>
 </dialog>
+
 <div class="overlay blur"></div>
 <dialog id="info-dialog">
     <div class="right-align">
-        <button class="transparent circle ripple" onclick="ui('#info-dialog');">
+        <button class="transparent circle" onclick="ui('#info-dialog');">
             <i>close</i>
         </button>
     </div>
@@ -157,30 +52,30 @@
         <img class="responsive circle border" src="/static/icon.png" style="height: auto; max-width: 150px;">
     </div>
     <div class="padding">
-        <h5 class="small center-align">HBNI Audio Archive</h5>
+        <h5 class="small center-align">HBNI Audio</h5>
         <p class="center-align medium-width">
             Browse archived broadcasts, schedule events, broadcast live audio, and view live broadcasts and scheduled events.
         </p>
         <br>
-        <p class="center-align">Developed with <button class="chip small-round circle no-border transparent no-margin"><i style="color: var(--error)">favorite</i><div class="tooltip top">love</div></button> by <a class="link" href="https://thecodingjsoftware.github.io/">TheCodingJ's</a></p>
+        <p class="center-align">Developed with <button class="chip  circle no-border transparent no-margin"><i style="color: var(--error)">favorite</i><div class="tooltip top">love</div></button> by <a class="link" href="https://thecodingjsoftware.github.io/">TheCodingJ's</a></p>
     </div>
     <br>
     <article class="border" style="margin-top: auto;">
         <p class="center-align medium-width">
             For questions, comments, suggestions,
             or concerns about this service please
-            email: <a class="link" href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>.
+            email: <a class="link" href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>
         </p>
     </article>
 </dialog>
 
 <header class="fixed primary" id="main-header">
     <nav>
-        <button class="circle transparent ripple" onclick="ui('#info-dialog');">
+        <button class="circle transparent" onclick="ui('#info-dialog');">
             <img src="/static/icon.png" class="responsive">
         </button>
-        <h5 class="max center-align small">Audio Archive</h5>
-        <button class="circle transparent ripple" id="toggle-theme">
+        <h5 class="max center-align small">HBNI Audio</h5>
+        <button class="circle transparent" id="toggle-theme">
             <i>dark_mode</i>
         </button>
     </nav>
@@ -188,157 +83,46 @@
 
 <body class="dark hidden">
     <main class="responsive">
-        <br>
-        <div class="field label prefix border">
-            <i>search</i>
-            <input type="text" id="search">
-            <label>Search</label>
-            <div class="helper no-line">Search for a broadcast by date, description, or host</div>
+        <div class="absolute center middle large-width padding grid">
+            <button class="border small-round left-align extra s6 m4 l4" onclick="window.location.href='/audio_archive';">
+                <i>library_music</i>
+                <span>Audio Archives</span>
+            </button>
+            <button class="border small-round left-align extra s6 m4 l4" onclick="window.location.href='/broadcasting_page';">
+                <i>adaptive_audio_mic</i>
+                <span>Broadcast Audio</span>
+            </button>
+            <button class="border small-round left-align extra s6 m4 l4" onclick="window.location.href='/listeners_page';">
+                <i>media_output</i>
+                <span>Live Events</span>
+                <div id="event-tooltip-status" class="tooltip top"></div>
+                <div id="event-count" class="badge none hidden"></div>
+            </button>
+            <button class="border small-round left-align extra s6 m4 l4" onclick="window.location.href='/broadcasting_guide';">
+                <i>developer_guide</i>
+                <span>Broadcasting Guide</span>
+            </button>
+            <button class="border small-round left-align extra s6 m4 l4" onclick="ui('#download-dialog');">
+                <i>apps</i>
+                <span>Apps</span>
+            </button>
+            <button class="border small-round left-align extra s6 m4 l4" onclick="window.location.href='/faq';">
+                <i>help</i>
+                <span>FAQ</span>
+                <div class="tooltip bottom">Frequently Asked Questions</div>
+            </button>
+            <button class="border small-round left-align extra s6 m4 l4" onclick="ui('#info-dialog');">
+                <i>info</i>
+                <span>Info</span>
+            </button>
         </div>
-        <div class="no-results center-align middle-align" style="display: none;">No recordings found</div>
-        <div>
-            <div class="tabs scroll left-align">
-            {% for groupName in downloadableRecordings %}
-                <a data-ui="#{{ groupName.replace(' ', '_') }}" class="ripple {% if loop.first %}active{% endif %}">
-                    <i>
-                        {% if "Days" in groupName or "Today" in groupName or "Yesterday" in groupName %}
-                        today
-                        {% elif "Week" in groupName %}
-                        date_range
-                        {% else %}
-                        calendar_month
-                        {% endif %}
-                    </i>
-                    <span>{{groupName}}</span>
-                </a>
-            {% endfor %}
-            </div>
-            {% for groupName in downloadableRecordings %}
-            <div class="page {% if loop.first %}active{% endif %}" id="{{ groupName.replace(' ', '_') }}">
-                <div class="scroll border small-round no-space grid" id="contents">
-                    {% for itemData in downloadableRecordings[groupName] %}
-                    <article data-name="{{ itemData['filename'].replace("_", ":").replace(".mp3", "") }}" class="small-round small-margin no-padding s12 m6 l6" id="article-version">
-                        <details open>
-                            <summary class="small-round no-padding none s">
-                                <a class="summary-contents row ripple small-round">
-                                    <span class="max broadcast-title">{{ itemData["host"].replace("/", "").title() }} - {{ itemData["description"]}}</span>
-                                    <span>{{ itemData["uploaded_days_ago"]}}</span>
-                                </a>
-                            </summary>
-                            <div class="padding">
-                                <h6 class="bottom-margin m l">{{ itemData["description"]}}</h6>
-                                <div><i>artist</i> {{ itemData["host"].replace("/", "").title() }}</div>
-                                <div><i>event</i> {{ itemData["date"].replace("_", ":") }} <span class="m l">({{ itemData["uploaded_days_ago"]}})</span></div>
-                                <div><i>schedule</i> {{ itemData["formatted_length"]}}</div>
-                                <div class="row no-margin" style="max-height: 24.3px;">
-                                    <div class="max"><i>web_traffic</i> {{ itemData["visit_count"]}} visits</div>
-                                    <button class="circle link transparent">
-                                        <i>info</i>
-                                        <div class="tooltip left">
-                                            <span class="left-align">Latest Visit:<br>{{itemData["latest_visit"]}}</span>
-                                        </div>
-                                    </button>
-                                </div>
-                                <nav class="row">
-                                    <button class="small-round ripple" target="_blank" onclick="window.location.href='{{ itemData["download_link"] }}';">
-                                        <i>{% if "play_recording" in itemData['download_link'] %}play_arrow{% elif "mega" in itemData['download_link'] or "google" in itemData['download_link'] %}globe{% else %}download{% endif %}</i>
-                                        <span>{% if "play_recording" in itemData['download_link'] %}Play{% else %}Download{% endif %}</span>
-                                        {% if "play_recording" in itemData['download_link'] %}
-                                        <button class="small-round ripple" id="download-button-{{ loop.index }}" data-url="{{ url_for(itemData['filename']) }}">
-                                            <i>download</i>
-                                            <span>Download</span>
-                                        </button>
-                                        {% endif %}
-                                    </button>
-                                    <div class="max"></div>
-                                    {% if "Days" in groupName or "Yesterday" in groupName or "Today" in groupName %}
-                                    <div class="badge none">New</div>
-                                    {% endif %}
-                                    {% if "mega" in itemData['download_link'] %}
-                                    <div class="badge none"><i>cloud</i></div>
-                                    {% elif "google" in itemData['download_link'] %}
-                                    <div class="badge none"><i>add_to_drive</i></div>
-                                    {% endif %}
-                                </nav>
-                            </div>
-                        </details>
-                    </article>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endfor %}
+        <div class="snackbar" id="notification-snackbar">
+            <div class="max" id="text">Some text here</div>
+            <a class="inverse-link" href="/listeners_page">View</a>
         </div>
-        {% if recording_status %}
-        <h4 class="center-align top-padding">Currently Recording</h4>
-        {% if "ERROR" in recording_status %}
-        <p class="center center-align medium-width">Could not load recording status JSON file. Ensure that the enviornment variables are set correctly.</p>
-        <pre class="center"><code>{{ recording_status["ERROR"] }}</code></pre>
-        {% else %}
-        <div class="border small-round small-padding grid">
-            {% for host, host_data in recording_status.items() %}
-            <article class="no-padding s12 m6 l4" id="recording-card">
-                <img class="responsive small top-round" src="/static/hbnilogo.png" style="height: auto; max-height: 200px; max-width: 400px;" id="recording-card-image">
-                <div class="padding">
-                    <progress></progress>
-                    <h6>{{ host_data["description"] }}</h6>
-                    <div><i>artist</i> {{host.replace("/", "").title()}}</div>
-                    <div><i>event</i> {{ host_data["starting_time"] }}</div>
-                    <div><i>schedule</i> {{ host_data["length"] }}</div>
-                    <nav>
-                        <button class="small-round ripple" target="_blank" onclick="location.href='{{ host_data["link"] }}';">
-                            <i>record_voice_over</i>
-                            <span>Listen</span>
-                        </button>
-                        <div class="max"></div>
-                        <div class="badge none">New</div>
-                    </nav>
-                </div>
-            </article>
-            {% endfor %}
-            {% endif%}
+        <div class="snackbar" id="no-broadcasts-or-events-scheduled">
+            No broadcasts currently online or events schedulded.
         </div>
-        {% endif %}
     </main>
 </body>
-
-<footer class="fixed bottom surface-container m l" id="bottom-nav">
-    <nav class="row center-align">
-        <button class="transparent vertical tiny ripple" onclick="ui('#faq-dialog');">
-            <i>help</i>
-            <span>FAQ</span>
-        </button>
-        <button class="transparent vertical tiny ripple" onclick="ui('#download-dialog');">
-            <i>apps</i>
-            <span>Download</span>
-        </button>
-        <button class="transparent vertical tiny ripple" onclick="window.location.href='/broadcasting_page';">
-            <i>adaptive_audio_mic</i>
-            <span>Broadcasting Page</span>
-        </button>
-        <button class="transparent vertical tiny ripple" onclick="window.location.href='/listeners_page';">
-            <i>media_output</i>
-            <span>Listeners Page</span>
-        </button>
-    </nav>
-</footer>
-<footer class="fixed bottom surface-container s" id="bottom-nav" style="min-block-size: 50px !important;">
-    <nav class="row center-align">
-        <button class="transparent circle tiny ripple" onclick="ui('#faq-dialog');">
-            <i>help</i>
-            <div class="tooltip top">FAQ</div>
-        </button>
-        <button class="transparent circle tiny ripple" onclick="ui('#download-dialog');">
-            <i>apps</i>
-            <div class="tooltip top">Download</div>
-        </button>
-        <button class="transparent circle tiny ripple" onclick="window.location.href='/broadcasting_page';">
-            <i>adaptive_audio_mic</i>
-            <div class="tooltip top">Broadcasting Page</div>
-        </button>
-        <button class="transparent circle tiny ripple" onclick="window.location.href='/listeners_page';">
-            <i>media_output</i>
-            <div class="tooltip top">Listeners Page</div>
-        </button>
-    </nav>
-</footer>
 </html>

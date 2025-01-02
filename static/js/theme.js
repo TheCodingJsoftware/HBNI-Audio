@@ -1,7 +1,7 @@
 export function toggleMode() {
     let currentMode = localStorage.getItem("mode") || "dark";
     let newMode = currentMode === "dark" ? "light" : "dark";
-    localStorage.setItem("mode", newMode); // Save mode to localStorage
+    localStorage.setItem("mode", newMode);
     ui("mode", newMode);
     updateIcon(newMode);
     updateImageSource();

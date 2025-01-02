@@ -13,26 +13,53 @@ let canvasCtx;
 let timeout;
 let recordedChunks = [];
 
-function validateInput() {
+function validateHostName() {
     const hostInput = document.getElementById('host');
-    const hostValue = hostInput.value.toLowerCase().replace(/ /g, '_').replace(/\d/g, '');
+    let hostValue = hostInput.value.toLowerCase();
+    hostValue = hostValue.replace(/[<>:"/\\|?*]/g, '');
+    hostValue = hostValue.replace(/ /g, '_');
+    hostValue = hostValue.replace(/^_+|_+$/g, '');
+    hostValue = hostValue.replace(/\d/g, '');
     hostInput.value = hostValue;
+}
+
+function validateDescription() {
+    const descriptionInput = document.getElementById('description');
+    let descriptionValue = descriptionInput.value;
+    descriptionValue = descriptionValue.replace(/&/g, 'and');
+    descriptionValue = descriptionValue.replace(/[/\\]/g, ' or ');
+    descriptionValue = descriptionValue.replace(/[<>:"|?*]/g, '_');
+    descriptionValue = descriptionValue.replace(/[^a-zA-Z\s]/g, '');
+    descriptionValue = descriptionValue.replace(/^_+|_+$/g, '');
+    descriptionInput.value = descriptionValue;
 }
 
 function share() {
     const isPrivate = document.getElementById('isPrivate').checked;
     const host = document.getElementById('host').value;
+    const description = document.getElementById('description').value;
     let url = "";
     if (isPrivate) {
         url = "http://hbniaudio.hbni.net:8000/" + host;
     } else {
         url = window.location.origin + "/listeners_page";
     }
-    navigator.share({
-        title: "HBNI Audio Listeners Page",
-        text: "Listen to this broadcast on the HBNI Audio Listeners page!",
-        url: url
-    });
+    if (navigator.share) {
+        navigator.share({
+            title: "HBNI Audio Listeners Page",
+            text: "Listen to this broadcast on the HBNI Audio Listeners page!",
+            url: url
+        });
+    } else {
+        navigator.clipboard.writeText(`${host} just started a broadcast with the description, ${description}. - Visit here: ${url}`)
+            .then(() => {
+                const snackbar = document.getElementById("copied-to-clipboard");
+                snackbar.classList.add("show");
+                setTimeout(() => snackbar.classList.remove("show"), 3000);
+            })
+            .catch((error) => console.error("Error copying to clipboard:", error));
+        ui("#copied-to-clipboard");
+    }
 }
 
 async function submitSchedule() {
@@ -344,12 +371,14 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('host').value = host;
     document.getElementById('host').addEventListener('input', function () {
         localStorage.setItem('host', this.value);
+        validateHostName()
     });
 
     const description = localStorage.getItem('description') || "";
     document.getElementById('description').value = description;
     document.getElementById('description').addEventListener('input', function () {
         localStorage.setItem('description', this.value);
+        validateDescription()
     });
 
     const password = localStorage.getItem('password') || "";
@@ -360,11 +389,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.getElementById('toggle-theme').addEventListener('click', toggleMode);
 
+    const submitScheduleButton = document.getElementById('submit-schedule-button');
+    submitScheduleButton.addEventListener('click', function () {
+        submitSchedule();
+    });
+
+    const shareButton = document.getElementById('share-button');
+    shareButton.addEventListener('click', function () {
+        share();
+    });
+
     const broadcastDetails = document.getElementById('broadcast-details');
     const broadcastControls = document.getElementById('broadcast-controls');
 
-    broadcastDetails.open = localStorage.getItem('broadcast-details-open') === 'true';
-    broadcastControls.open = localStorage.getItem('broadcast-controls-open') === 'true';
+    broadcastDetails.open = localStorage.getItem('broadcast-details-open') === 'true' ? true : false;
+    broadcastControls.open = localStorage.getItem('broadcast-controls-open') === 'true' ? true : false;
 
     broadcastDetails.addEventListener('click', function () {
         localStorage.setItem('broadcast-details-open', !broadcastDetails.open);

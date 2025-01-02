@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="google" content="notranslate">
+    <link href="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.css" rel="stylesheet" />
+    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.js"></script>
+    <script type="module"
+        src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js">
+    </script>
+    <script type="module" src="/static/js/archives.js?v=1.1"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/theme.css?v=1.1">
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css?v=1.1">
+    <link rel="icon" href="/static/icon.png">
+    <title>Audio Archive</title>
+    <meta property="og:title" content="Audio Archive" />
+    <meta property="og:url" content="https://audioarchives.hbni.net/archives" />
+    <meta property="og:image" content="https://audioarchives.hbni.net/static/icon.png" />
+    <meta property="og:description" content="Download or relisten to previously broadcasted streams." />
+</head>
+
+<div class="overlay blur"></div>
+<dialog id="download-dialog">
+    <h3 class="center-align">Apps</h3>
+    <div class="grid">
+        <button class="s4" onclick="location.href='https://github.com/TheCodingJsoftware/HBNI-Audio-Stream-Listener/releases';">
+            <i>desktop_windows</i>
+            <span>Desktop</span>
+        </button>
+        <button class="s4" onclick="location.href='https://apps.apple.com/ca/app/hbni-audio-streaming/id1611672333';">
+            <i>ios</i>
+            <span>Apple</span>
+        </button>
+        <button class="s4" onclick="location.href='https://play.google.com/store/apps/details?id=com.thecodingjsoftware.hutteritechurch';">
+            <i>android</i>
+            <span>Android</span>
+        </button>
+    </div>
+</dialog>
+
+<header class="fixed primary" id="main-header">
+    <nav>
+        <button class="circle transparent" onclick="window.location.href='/';">
+            <i>arrow_back</i>
+        </button>
+        <h5 class="max center-align small">Audio Archives</h5>
+        <button class="circle transparent" id="toggle-theme">
+            <i>dark_mode</i>
+        </button>
+    </nav>
+</header>
+
+<body class="dark hidden">
+    <main class="responsive">
+        <div class="field label prefix border round">
+            <i>search</i>
+            <input type="text" id="search">
+            <label>Search</label>
+            <div class="helper no-line">Search by date, description, or colony name</div>
+        </div>
+        <div class="no-results center-align middle-align" style="display: none;">No recordings found</div>
+        <article id="contents" class="border round no-padding scroll grid no-space">
+        </article>
+        <div id="pagination-controls" class="row">
+            <button id="prev-page-btn" class="border no-margin small-round" disabled>
+                <i>chevron_left</i> <span>Back</span>
+            </button>
+            <nav id="page-numbers" class="max row center-align tiny-space scroll"></nav>
+            <button id="next-page-btn" class="border no-margin small-round" disabled>
+                <span>Next</span> <i>chevron_right</i>
+            </button>
+        </div>
+    </main>
+</body>
+
+<footer class="fixed bottom surface-container m l" id="bottom-nav">
+    <div class="tabs no-border">
+        <button class="transparent vertical tiny" onclick="window.location.href='/broadcasting_page';">
+            <i>adaptive_audio_mic</i>
+            <span>Broadcasting Page</span>
+        </button>
+        <button class="transparent vertical tiny" onclick="window.location.href='/listeners_page';">
+            <i>media_output</i>
+            <span>Listeners Page</span>
+            <div class="tooltip top" id="event-tooltip-status">No broadcasts currently online or events schedulded.</div>
+            <div class="badge hidden" id="event-count">0</div>
+        </button>
+    </div>
+</footer>
+<footer class="fixed bottom surface-container s" id="bottom-nav" style="min-block-size: 50px !important;">
+    <div class="tabs no-border">
+        <button class="transparent circle tiny" onclick="window.location.href='/broadcasting_page';">
+            <i>adaptive_audio_mic</i>
+            <div class="tooltip top">Broadcasting Page</div>
+        </button>
+        <button class="transparent circle tiny" onclick="window.location.href='/listeners_page';">
+            <i>media_output</i>
+            <div class="tooltip top" id="event-tooltip-status">No broadcasts currently online or events schedulded.</div>
+            <div class="badge hidden" id="event-count">0</div>
+        </button>
+    </div>
+</footer>
+</html>
