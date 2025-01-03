@@ -56,7 +56,7 @@
                 </div>
                 <div class="row max">
                     <label class="checkbox icon">
-                        <input type="checkbox" id="play-button" checked/>
+                        <input type="checkbox" id="play-button"/>
                         <span>
                             <i>play_arrow</i>
                             <i>pause</i>
@@ -91,7 +91,7 @@
             </div>
             <canvas id="canvas" style="width: 100%; height: 100px"></canvas>
         </article>
-        <audio class="audio" id="audio" title="{{ file_name }}" preload="auto" autoplay>
+        <audio class="audio" id="audio" title="{{ file_name }}" preload="auto">
             <source src="{{ url_for(file_name) }}" type="audio/mpeg" />
         </audio>
     </main>
