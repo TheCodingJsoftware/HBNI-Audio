@@ -1,37 +1,38 @@
-<!doctype html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-        <meta name="google" content="notranslate" />
-        <link href="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.css" rel="stylesheet" />
-        <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.js"></script>
-        <script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
-        <script type="module" src="/static/js/error.js"></script>
-        <link rel="stylesheet" type="text/css" href="/static/css/error-theme.css" />
-        <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
-        <link rel="icon" href="/static/icon.png" />
-        <title>HBNI Audio Archive</title>
-        <meta property="og:title" content="HBNI Audio Archive" />
-        <meta property="og:url" content="https://broadcasting.hbni.net" />
-        <meta property="og:image" content="https://broadcasting.hbni.net/static/icon.png" />
-        <meta property="og:description" content="Download or relisten to previously broadcasted streams." />
-    </head>
 
-    <body class="dark hidden">
-        <main class="responsive">
-            <div class="absolute center middle large-width">
-                <h1 class="center-align extra">{{ error_code }}</h1>
-                <h5 class="center-align">{{ error_message }}</h5>
-                {% if stack_trace %}
-                    <pre><code>{{ stack_trace }}</code></pre>
-                {% endif %}
-                <p class="center-align">
-                    If this error persists, please email <a class="link" href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>
-                </p>
-                <a class="link center" href="/">Go back to the main page</a>
-            </div>
-        </main>
-    </body>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <meta name="google" content="notranslate" />
+    <link href="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.css" rel="stylesheet" />
+    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
+    <script type="module" src="/static/js/error.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/error-theme.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
+    <link rel="icon" href="/static/icon.png" />
+    <title>HBNI Audio Archive</title>
+    <meta property="og:title" content="HBNI Audio Archive" />
+    <meta property="og:url" content="https://broadcasting.hbni.net" />
+    <meta property="og:image" content="https://broadcasting.hbni.net/static/icon.png" />
+    <meta property="og:description" content="Download or relisten to previously broadcasted streams." />
+</head>
+
+<body class="dark hidden">
+    <main class="responsive">
+        <div class="absolute center middle large-width">
+            <h1 class="center-align extra">{{ error_code }}</h1>
+            <h5 class="center-align">{{ error_message }}</h5>
+            {% if stack_trace %}
+                <pre><code>{{ stack_trace }}</code></pre>
+            {% endif %}
+            <p class="center-align">
+                If this error persists, please email <a class="link" href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>
+            </p>
+            <a class="link center" href="/">Go back to the main page</a>
+        </div>
+    </main>
+</body>
 </html>

@@ -35,15 +35,6 @@ function searchAndFilter() {
     }
 }
 
-function adjustDialogForScreenSize() {
-    const downloadDialog = document.getElementById('download-dialog');
-    if (window.innerWidth <= 600) {
-        downloadDialog.classList.add('bottom');
-    } else {
-        downloadDialog.classList.remove('bottom');
-    }
-}
-
 const adjustPaginationForScreenSize = () => {
     if (window.innerWidth <= 600) {
         pageNumbersContainer.classList.remove("center-align");
@@ -121,17 +112,19 @@ function getArchiveBroadcastElement(itemData, index){
         </nav>
     </div>
     `;
-    const downButton = article.querySelector(`#download-button-${index}`);
-    downButton.addEventListener("click", function (e) {
-        e.preventDefault();
-        const url = this.getAttribute("data-url");
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", "");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    });
+    const downloadButton = article.querySelector(`#download-button-${index}`);
+    if (downloadButton) {
+        downloadButton.addEventListener("click", function (e) {
+            e.preventDefault();
+            const url = this.getAttribute("data-url");
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", "");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    }
 
     return article;
 }
@@ -194,7 +187,6 @@ function renderPage(pageNumber) {
 
     // Update pagination controls
     updatePaginationButtons();
-    adjustDialogForScreenSize();
     adjustPaginationForScreenSize();
     searchAndFilter();
 }
@@ -272,7 +264,7 @@ async function updateEventCount() {
         if (scheduledBroadcastCount >= 1)
             message += `${scheduledBroadcastCount} scheduled broadcast${scheduledBroadcastCount > 1 ? "s" : ""}`;
         if (broadcastCount + scheduledBroadcastCount === 0)
-            message = "No broadcasts currently online or events schedulded.";
+            message = "No broadcasts currently<br>online or events schedulded.";
         eventTooltipStatus.innerHTML = message;
     });
 
@@ -318,13 +310,11 @@ document.addEventListener('DOMContentLoaded', function () {
         renderPage(currentPage);
     });
 
-    adjustDialogForScreenSize();
     adjustPaginationForScreenSize();
 
     window.addEventListener('resize', () => {
         const currentWidth = window.innerWidth;
         if (currentWidth !== lastWidth) {
-            adjustDialogForScreenSize();
             adjustPaginationForScreenSize();
             lastWidth = currentWidth; // Update the last known width
         }

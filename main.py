@@ -637,6 +637,10 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
         self.starting_time: datetime = None
         self.ending_time: datetime = None
 
+    def generate_silence(self, duration_ms, sample_rate=48000, channels=2):
+        num_samples = int(sample_rate * (duration_ms / 1000.0) * channels)
+        return b"\x00" * num_samples * 2  # 16-bit PCM (2 bytes per sample)
+
     def on_message(self, message):
         # If the received message is JSON metadata, start the ffmpeg process
         if isinstance(message, str):
@@ -724,10 +728,13 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
 
         # If the received message is binary (audio data)
         elif isinstance(message, bytes):
+            silence_buffer = self.generate_silence(1) # 1ms
             if self.ffmpeg_process and self.ffmpeg_process.stdin:
                 try:
-                    # Write the audio data directly as bytes
-                    self.ffmpeg_process.stdin.write(message)
+                    if message:  # Non-empty audio data
+                        self.ffmpeg_process.stdin.write(message)
+                    else:  # Silence during pause
+                        self.ffmpeg_process.stdin.write(silence_buffer)
                 except BrokenPipeError:
                     print("FFmpeg process has ended. Unable to write more data.")
                 except Exception as e:

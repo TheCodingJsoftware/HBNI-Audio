@@ -147,6 +147,14 @@ document.getElementById("description").addEventListener("input", () => {
     }
 });
 
+function generateSilenceBuffer(durationMs) {
+    const sampleRate = 48000; // 44.1 kHz, common sample rate
+    const channels = 2; // Stereo
+    const numSamples = Math.floor((durationMs / 1000) * sampleRate * channels);
+    const silence = new Int16Array(numSamples).fill(0); // 16-bit PCM silence
+    return silence.buffer; // Return as ArrayBuffer
+}
+
 document.getElementById('startBroadcast').addEventListener('click', async () => {
     try {
         const host = document.getElementById('host').value;
@@ -229,8 +237,7 @@ document.getElementById('startBroadcast').addEventListener('click', async () => 
                         // Save data locally
                         recordedChunks.push(event.data);
                     } else {
-                        // Send silence if muted
-                        const silenceBuffer = new ArrayBuffer(0);
+                        const silenceBuffer = generateSilenceBuffer(1); // Generate 100ms of silence
                         ws.send(new Uint8Array(silenceBuffer));
                     }
                 }
