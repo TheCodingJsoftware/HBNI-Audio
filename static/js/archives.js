@@ -70,12 +70,13 @@ function getArchiveBroadcastElement(itemData, index){
         groupName.includes("Today")
     );
 
-    const downloadLink = itemData.download_link;
+    let downloadLink = itemData.download_link;
     let downloadIcon = 'download';
     let downloadText = 'Download';
     if (downloadLink.includes("play_recording")) {
         downloadIcon = 'play_arrow';
         downloadText = 'Play';
+        downloadLink = `/play_recording/${itemData.filename}`;
     } else if (downloadLink.includes("mega") || downloadLink.includes("google")) {
         downloadIcon = 'globe';
     }
