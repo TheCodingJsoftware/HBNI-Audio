@@ -44,6 +44,20 @@ class Broadcast:
 
 
 active_broadcasts: dict[str, Broadcast] = {}
+db_pool: asyncpg.Pool = None
+
+
+async def initialize_db_pool():
+    global db_pool
+    db_pool = await asyncpg.create_pool(
+        host=os.getenv("POSTGRES_HOST"),
+        port=os.getenv("POSTGRES_PORT"),
+        database=os.getenv("POSTGRES_DB"),
+        user=os.getenv("POSTGRES_USER"),
+        password=os.getenv("POSTGRES_PASSWORD"),
+        min_size=10,  # Minimum number of connections
+        max_size=100,  # Adjust based on expected load
+    )
 
 
 async def get_db_connection():
@@ -57,44 +71,31 @@ async def get_db_connection():
 
 
 async def fetch_audio_archives():
-    conn = await get_db_connection()
     try:
-        rows = await conn.fetch("SELECT * FROM audioarchives")
-        return [dict(row) for row in rows]
-    finally:
-        await conn.close()
+        async with db_pool.acquire() as conn:
+            rows = await conn.fetch("SELECT * FROM audioarchives")
+            return [dict(row) for row in rows]
+    except Exception as e:
+        print(f"Database fetch error: {e}")
+        return []
 
 
 async def update_visit(file_name):
-    conn = await get_db_connection()
-    try:
+    async with db_pool.acquire() as conn:
         await conn.execute(
             """
             UPDATE audioarchives
             SET visit_count = COALESCE(visit_count, 0) + 1, latest_visit = $1
             WHERE filename = $2
-        """,
+            """,
             datetime.now(),
             file_name,
         )
-    finally:
-        await conn.close()
 
 
-async def update_click(file_name):
-    conn = await get_db_connection()
-    try:
-        await conn.execute(
-            """
-            UPDATE audioarchives
-            SET click_count = COALESCE(click_count, 0) + 1, latest_click = $1
-            WHERE filename = $2
-        """,
-            datetime.now(),
-            file_name,
-        )
-    finally:
-        await conn.close()
+async def execute_query(query: str, *params):
+    async with db_pool.acquire() as conn:
+        return await conn.fetchrow(query, *params)
 
 
 def format_length(length_in_minutes):
@@ -260,68 +261,76 @@ def is_broadcast_private(host: str) -> bool:
 
 
 async def get_active_hbni_broadcasts() -> list[dict[str, Union[str, int]]]:
-    # URL for fetching the JSON data
-    status_url = "http://hbniaudio.hbni.net:8000/status-json.xsl"
-
-    # Attempt to get the JSON data from the URL
-    try:
-        response = requests.get(status_url)
-        if response.status_code == 200:
-            json_content = response.text.replace('"title": - ,', '"title": null,')
-            json_data = json.loads(json_content)
-        else:
-            return []
-    except requests.exceptions.RequestException as e:
-        return []
-
-    # Extract relevant data for rendering
-    icestats = json_data.get("icestats", {})
-    sources = icestats.get("source", {})
     broadcast_data = []
 
-    # Prepare data for template rendering
-    if sources:
-        if isinstance(sources, dict):  # Only one broadcast is currently online
-            host = sources.get("listenurl", "/").split("/")[-1]
-            broadcast_data.append(
-                {
-                    "admin": icestats.get("admin", "N/A"),
-                    "location": icestats.get("location", "N/A"),
-                    "server_name": sources.get("server_name", "Unspecified name"),
-                    "server_description": sources.get(
-                        "server_description", "Unspecified description"
-                    ),
-                    "genre": sources.get("genre", "N/A"),
-                    "listeners": sources.get("listeners", 0),
-                    "host": host,
-                    "listener_peak": sources.get("listener_peak", 0),
-                    "listen_url": sources.get("listenurl", "#"),
-                    "stream_start": sources.get("stream_start", "N/A"),
-                    "is_private": is_broadcast_private(host),
-                    "length": f"{format_length(get_duration(sources.get('stream_start', 'N/A')))}",
-                }
-            )
-        elif isinstance(sources, list):  # Multiple broadcasts are currently online
-            for source in sources:
-                host = source.get("listenurl", "/").split("/")[-1]
+    # URL for fetching the JSON data
+    status_urls = {
+        "http://hbniaudio.hbni.net:8000/status-json.xsl": "http://hbniaudio.hbni.net:8000",
+        "https://broadcast.hbni.net/status-json.xsl": "https://broadcast.hbni.net",
+    }
+    for status_url, source_url in status_urls.items():
+        # Attempt to get the JSON data from the URL
+        try:
+            response = requests.get(status_url)
+            if response.status_code == 200:
+                json_content = response.text.replace('"title": - ,', '"title": null,')
+                json_data = json.loads(json_content)
+            else:
+                return []
+        except requests.exceptions.RequestException as e:
+            return []
+
+        # Extract relevant data for rendering
+        icestats = json_data.get("icestats", {})
+        sources = icestats.get("source", {})
+
+        # Prepare data for template rendering
+        if sources:
+            if isinstance(sources, dict):  # Only one broadcast is currently online
+                host = sources.get("listenurl", "/").split("/")[-1]
                 broadcast_data.append(
                     {
                         "admin": icestats.get("admin", "N/A"),
                         "location": icestats.get("location", "N/A"),
-                        "server_name": source.get("server_name", "Unspecified name"),
-                        "server_description": source.get(
+                        "server_name": sources.get("server_name", "Unspecified name"),
+                        "server_description": sources.get(
                             "server_description", "Unspecified description"
                         ),
-                        "genre": source.get("genre", "N/A"),
-                        "listeners": source.get("listeners", 0),
+                        "genre": sources.get("genre", "N/A"),
+                        "listeners": sources.get("listeners", 0),
                         "host": host,
-                        "listener_peak": source.get("listener_peak", 0),
-                        "listen_url": source.get("listenurl", "#"),
-                        "stream_start": source.get("stream_start", "N/A"),
+                        "listener_peak": sources.get("listener_peak", 0),
+                        "listen_url": sources.get("listenurl", "#"),
+                        "stream_start": sources.get("stream_start", "N/A"),
                         "is_private": is_broadcast_private(host),
-                        "length": f"{format_length(get_duration(source.get('stream_start', 'N/A')))}",
+                        "source_url": source_url,
+                        "length": f"{format_length(get_duration(sources.get('stream_start', 'N/A')))}",
                     }
                 )
+            elif isinstance(sources, list):  # Multiple broadcasts are currently online
+                for source in sources:
+                    host = source.get("listenurl", "/").split("/")[-1]
+                    broadcast_data.append(
+                        {
+                            "admin": icestats.get("admin", "N/A"),
+                            "location": icestats.get("location", "N/A"),
+                            "server_name": source.get(
+                                "server_name", "Unspecified name"
+                            ),
+                            "server_description": source.get(
+                                "server_description", "Unspecified description"
+                            ),
+                            "genre": source.get("genre", "N/A"),
+                            "listeners": source.get("listeners", 0),
+                            "host": host,
+                            "listener_peak": source.get("listener_peak", 0),
+                            "listen_url": source.get("listenurl", "#"),
+                            "stream_start": source.get("stream_start", "N/A"),
+                            "is_private": is_broadcast_private(host),
+                            "source_url": source_url,
+                            "length": f"{format_length(get_duration(source.get('stream_start', 'N/A')))}",
+                        }
+                    )
     return broadcast_data
 
 
@@ -474,18 +483,14 @@ def url_for_static(filename):
 
 class RecordingStatsHandler(BaseHandler):
     async def get(self, file_name):
-        conn = await get_db_connection()
-        try:
-            result = await conn.fetchrow(
-                """
-                SELECT visit_count, latest_visit
-                FROM audioarchives
-                WHERE filename = $1
-                """,
-                file_name,
-            )
-        finally:
-            await conn.close()
+        result = await execute_query(
+            """
+            SELECT visit_count, latest_visit
+            FROM audioarchives
+            WHERE filename = $1
+            """,
+            file_name,
+        )
 
         self.set_header("Content-Type", "application/json")
         if result:
@@ -508,18 +513,14 @@ class PlayRecordingHandler(BaseHandler):
     async def get(self, file_name):
         await update_visit(file_name)  # Await the async database update
 
-        conn = await get_db_connection()
-        try:
-            result = await conn.fetchrow(
-                """
-                SELECT visit_count, latest_visit, date, description, length
-                FROM audioarchives
-                WHERE filename = $1
+        result = await execute_query(
+            """
+            SELECT visit_count, latest_visit, date, description, length
+            FROM audioarchives
+            WHERE filename = $1
             """,
-                file_name,
-            )
-        finally:
-            await conn.close()
+            file_name,
+        )
 
         if result:
             visit_count = result["visit_count"] or 0
@@ -560,7 +561,7 @@ class ValidatePasswordHandler(RequestHandler):
             data: dict[str, str] = tornado.escape.json_decode(self.request.body)
             password = data.get("password")
 
-            correct_password = os.getenv("HBNI_STREAMING_PASSWORD")
+            correct_password = os.getenv("ICECAST_BROADCASTING_PASSWORD")
 
             if password == correct_password:
                 # Generate a token valid for a limited time
@@ -588,25 +589,22 @@ def cleanup_old_schedules():
         if not os.path.exists("schedule.json"):
             return
 
-        # Load the existing schedule
         with open("schedule.json", "r") as f:
             schedule: dict[str, dict[str, str]] = json.load(f)
 
-        # Get current time
         now = datetime.now()
 
-        # Remove old schedules
+        # Parse the schedule dates and remove old entries
         updated_schedule = {
             key: value
             for key, value in schedule.items()
-            if datetime.fromisoformat(value["start_time"]) > now
+            if datetime.strptime(value["start_time"], "%Y-%m-%d %H:%M") > now
         }
 
         # Save the updated schedule
         with open("schedule.json", "w") as f:
             json.dump(updated_schedule, f, indent=4)
 
-        # print("Old schedules cleaned up successfully.")
     except Exception as e:
         print(f"Error during schedule cleanup: {e}")
 
@@ -615,6 +613,7 @@ class ScheduleBroadcastHandler(BaseHandler):
     def post(self):
         try:
             data: dict[str, str] = tornado.escape.json_decode(self.request.body)
+            print(data)
             host = data.get("host")
             description = data.get("description")
             start_time = data.get("startTime")
@@ -658,7 +657,7 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
         self.starting_time: datetime = None
         self.ending_time: datetime = None
 
-    def on_message(self, message):
+    async def on_message(self, message):
         # If the received message is JSON metadata, start the ffmpeg process
         if isinstance(message, str):
             try:
@@ -672,14 +671,14 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                 )
                 self.description = metadata.get(
                     "description", "Unspecified description"
-                ).replace("&amp;", "&")
+                )
                 self.password = metadata.get("password", "")
-                if self.password != os.getenv("HBNI_STREAMING_PASSWORD"):
+                if self.password != os.getenv("ICECAST_BROADCASTING_PASSWORD"):
                     self.write_message("Invalid password.")
                     return
+
                 self.is_private = metadata.get("isPrivate", False)
                 self.starting_time = datetime.now()
-
                 self.output_filename = f'{self.host.title()} - {self.description} - {self.starting_time.strftime("%B %d %A %Y %I_%M %p")} - BROADCAST_LENGTH.wav'
 
                 self.ffmpeg_process = subprocess.Popen(
@@ -707,7 +706,7 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                         # Output 1: Icecast stream
                         "-f",
                         "mp3",
-                        f"icecast://source:{self.password}@hbniaudio.hbni.net:8000/{self.host}",
+                        f"icecast://source:{self.password}@{os.environ.get("ICECAST_BROADCASTING_HOST")}:{os.environ.get("ICECAST_BROADCASTING_PORT")}/{self.host}",
                         # Output 2: Local MP3 file to save the broadcast
                         "-f",
                         "wav",
@@ -747,7 +746,7 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                 except Exception as e:
                     print(f"Error writing to FFmpeg process stdin: {e}")
 
-    def on_close(self):
+    async def on_close(self):
         if self.ffmpeg_process:
             try:
                 if self.ffmpeg_process.stdin:
@@ -930,7 +929,7 @@ def make_app():
 if __name__ == "__main__":
     app = tornado.httpserver.HTTPServer(make_app())
     app.listen(int(os.getenv("PORT", default=5053)))
-
+    tornado.ioloop.IOLoop.current().run_sync(initialize_db_pool)
     tornado.ioloop.PeriodicCallback(cleanup_old_schedules, 5 * 60 * 1000).start()
 
     tornado.ioloop.IOLoop.instance().start()

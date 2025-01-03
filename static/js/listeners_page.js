@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         const broadcast_data = await response.json();
 
         if (broadcast_data && broadcast_data.length > 0) {
-            fetchInterval = setInterval(fetchBroadcastData, 5000);
+            fetchInterval = setInterval(fetchBroadcastData, 1000 * 60); // Update every minute
         }
         await updateRecordingStatus();
     } catch (error) {

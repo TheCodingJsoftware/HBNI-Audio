@@ -40,7 +40,7 @@ function share() {
     const description = document.getElementById('description').value;
     let url = "";
     if (isPrivate) {
-        url = "http://hbniaudio.hbni.net:8000/" + host;
+        url = "https://broadcast.hbni.net/" + host;
     } else {
         url = window.location.origin + "/listeners_page";
     }

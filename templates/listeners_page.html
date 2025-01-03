@@ -74,7 +74,7 @@
                     <h6 class="bottom-margin max" id="server-description-{{ broadcast.host }}">
                         {{ broadcast.server_description }}
                     </h6>
-                    <button class=" circle link transparent wave" onclick="window.open('http://hbniaudio.hbni.net:8000/{{ broadcast.host }}')">
+                    <button class=" circle link transparent wave" onclick="window.open('{{ broadcast.source_url }}/{{ broadcast.host }}')">
                         <i>open_in_new</i>
                     </button>
                     <button id="share-button" class="circle link transparent">
@@ -101,7 +101,7 @@
                 </div>
                 <div class="top-margin center-align middle-align">
                     <audio controls id="audio-{{ broadcast.host }}" class="s12 m8 l8" title="{{ broadcast.server_description }}" preload="auto">
-                        <source src="http://hbniaudio.hbni.net:8000/{{ broadcast.host }}" type="audio/mpeg" />
+                        <source src="{{ broadcast.source_url }}/{{ broadcast.host }}" type="audio/mpeg" />
                         Your browser does not support the audio element.
                     </audio>
                 </div>

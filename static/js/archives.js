@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 document.addEventListener('DOMContentLoaded', async function () {
     await updateEventCount();
-    setInterval(updateEventCount, 5000);
+    setInterval(updateEventCount, 1000 * 60);
 });
 
 document.addEventListener('DOMContentLoaded', function () {

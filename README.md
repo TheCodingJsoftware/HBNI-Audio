@@ -29,7 +29,7 @@ This is a web application that allows users to browse and listen to archived bro
    - `STATIC_RECORDINGS_PATH`: The path to the directory where the archived broadcasts are stored.
    - `RECORDINGS_STATUS_PATH`: The path to the file where the recording status is stored.
    - `SECRET_KEY`: A secret key used for session management.
-   - `HBNI_STREAMING_PASSWORD`: The password used to access the HBNI Audio Streaming Service.
+   - `ICECAST_BROADCASTING_PASSWORD`: The password used to access the HBNI Audio Streaming Service.
 
 4. Run the application by executing the following command:
 
