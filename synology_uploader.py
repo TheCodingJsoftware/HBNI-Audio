@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-website_url = "https://audioarchives.hbni.net"
+website_url = "https://broadcasting.hbni.net"
 
 db_settings = {
     "host": f"{os.getenv('POSTGRES_HOST')}",
