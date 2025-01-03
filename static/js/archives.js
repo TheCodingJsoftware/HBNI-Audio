@@ -121,6 +121,18 @@ function getArchiveBroadcastElement(itemData, index){
         </nav>
     </div>
     `;
+    const downButton = article.querySelector(`#download-button-${index}`);
+    downButton.addEventListener("click", function (e) {
+        e.preventDefault();
+        const url = this.getAttribute("data-url");
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+
     return article;
 }
 
@@ -304,18 +316,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     searchInput.addEventListener('input', () => {
         renderPage(currentPage);
-    });
-    document.querySelectorAll("[id^='download-button']").forEach((button) => {
-        button.addEventListener("click", function (e) {
-            e.preventDefault();
-            const url = this.getAttribute("data-url");
-            const link = document.createElement("a");
-            link.href = url;
-            link.setAttribute("download", "");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        });
     });
 
     adjustDialogForScreenSize();
