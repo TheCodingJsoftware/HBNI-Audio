@@ -210,4 +210,5 @@ async function updateRecordingStats(fileName) {
 document.addEventListener('DOMContentLoaded', function () {
     const fileName = document.title;
     setInterval(() => updateRecordingStats(fileName), 1000 * 60);
+    toggleAudio();
 });
