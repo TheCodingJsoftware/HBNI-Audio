@@ -21,15 +21,33 @@ This is a web application that allows users to browse and listen to archived bro
 
 3. Set the following environment variables in your system's environment variables (or create a `.env` file in the project directory):
 
-   - `POSTGRES_HOST`: The hostname or IP address of the PostgreSQL server.
-   - `POSTGRES_PORT`: The port number of the PostgreSQL server.
-   - `POSTGRES_DB`: The name of the PostgreSQL database.
+   - `PORT`: The port number to use for the application.
+     - (Default: 5053)
+   - `TZ`: The timezone to use for the application.
+     - (Default: America/Guatemala)
+   - `MAX_POSTGRES_WORKERS`: The maximum number of concurrent database connections.
+     - (Default: 200)
    - `POSTGRES_USER`: The username to use when connecting to the PostgreSQL server.
+     - (Default: admin)
    - `POSTGRES_PASSWORD`: The password to use when connecting to the PostgreSQL server.
+   - `POSTGRES_DB`: The name of the PostgreSQL database.
+     - (Default: hbni)
+   - `POSTGRES_HOST`: The hostname or IP address of the PostgreSQL server.
+     - (Default: 172.17.0.1)
+   - `POSTGRES_PORT`: The port number of the PostgreSQL server.
+     - (Default: 5434)
    - `STATIC_RECORDINGS_PATH`: The path to the directory where the archived broadcasts are stored.
+     - (Default: /app/static/Recordings)
    - `RECORDINGS_STATUS_PATH`: The path to the file where the recording status is stored.
+     - (Default: /app/static/recording_statis.json)
    - `SECRET_KEY`: A secret key used for session management.
+   - `ICECAST_BROADCASTING_HOST`: The username used to access the HBNI Audio Streaming Service.
+     - (Default: 172.17.0.1)
+   - `ICECAST_BROADCASTING_PORT`: The port number used to access the HBNI Audio Streaming Service.
+     - (Default: 8000)
    - `ICECAST_BROADCASTING_PASSWORD`: The password used to access the HBNI Audio Streaming Service.
+   - `ICECAST_BROADCASTING_SOURCE`: The source name used for the broadcast.
+     - (Default: broadcast.hbni.net)
 
 4. Run the application by executing the following command:
 

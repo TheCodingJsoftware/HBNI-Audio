@@ -666,7 +666,7 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                         "ffmpeg",
                         "-re",
                         "-i",
-                        "-",  # Input from stdin
+                        "-",
                         "-c:a",
                         "libmp3lame",  # Use MP3 codec
                         "-b:a",
@@ -675,21 +675,23 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                         "audio/mpeg",  # Set MIME type
                         "-y",  # Overwrite output file if it already exists
                         "-metadata",
-                        f"title={self.description}",  # Set title
+                        f"title={self.description}",
                         "-metadata",
-                        f"artist={self.host}",  # Set artist/host
+                        f"artist={self.host}",
                         "-metadata",
-                        "genre=various",  # Set genre
+                        "genre=RECORDING",
                         "-metadata",
-                        f"comment={self.description}",  # Additional comments
+                        "comment=RECORDING",
                         "-ice_name",
-                        self.description,  # Name of the stream (Icecast specific)
+                        self.host,
                         "-ice_description",
-                        self.description,  # Description of the stream
+                        self.description,
                         "-ice_genre",
-                        "various",  # Genre of the stream
+                        "RECORDING",
                         "-ice_url",
-                        f"https://broadcast.hbni.net/{self.host}",  # URL for the stream (optional)
+                        f"https://broadcast.hbni.net/{self.host}",
+                        "-ice_public",
+                        f"{'0' if self.is_private else '1'}",  # Whether the stream is public (1) or private (0)
                         "-f",
                         "mp3",
                         f"icecast://source:{self.password}@{os.environ.get('ICECAST_BROADCASTING_HOST')}:{os.environ.get('ICECAST_BROADCASTING_PORT')}/{self.host}",  # Icecast URL

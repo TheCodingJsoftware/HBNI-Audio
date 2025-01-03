@@ -164,5 +164,3 @@ cython_debug/
 *.json
 *.txt
 *.wav
-manually_schedule_broadcasts.py
-create_db.py
