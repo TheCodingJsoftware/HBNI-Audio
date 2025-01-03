@@ -139,7 +139,7 @@ class DateTimeEncoder(json.JSONEncoder):
         return super().default(obj)
 
 
-async def get_grouped_data(audio_data):
+def get_grouped_data(audio_data):
     today = datetime.today()
     groups = {
         "Today": [],
@@ -286,51 +286,31 @@ async def get_active_hbni_broadcasts() -> list[dict[str, Union[str, int]]]:
 
         # Prepare data for template rendering
         if sources:
-            if isinstance(sources, dict):  # Only one broadcast is currently online
-                host = sources.get("listenurl", "/").split("/")[-1]
+            if isinstance(sources, dict):
+                sources = [sources]
+            for source in sources:
+                host = source.get("listenurl", "/").split("/")[-1]
                 broadcast_data.append(
                     {
                         "admin": icestats.get("admin", "N/A"),
                         "location": icestats.get("location", "N/A"),
-                        "server_name": sources.get("server_name", "Unspecified name"),
-                        "server_description": sources.get(
+                        "server_name": source.get(
+                            "server_name", "Unspecified name"
+                        ),
+                        "server_description": source.get(
                             "server_description", "Unspecified description"
                         ),
-                        "genre": sources.get("genre", "N/A"),
-                        "listeners": sources.get("listeners", 0),
+                        "genre": source.get("genre", "N/A"),
+                        "listeners": source.get("listeners", 0),
                         "host": host,
-                        "listener_peak": sources.get("listener_peak", 0),
-                        "listen_url": sources.get("listenurl", "#"),
-                        "stream_start": sources.get("stream_start", "N/A"),
+                        "listener_peak": source.get("listener_peak", 0),
+                        "listen_url": source.get("listenurl", "#"),
+                        "stream_start": source.get("stream_start", "N/A"),
                         "is_private": is_broadcast_private(host),
                         "source_url": source_url,
-                        "length": f"{format_length(get_duration(sources.get('stream_start', 'N/A')))}",
+                        "length": f"{format_length(get_duration(source.get('stream_start', 'N/A')))}",
                     }
                 )
-            elif isinstance(sources, list):  # Multiple broadcasts are currently online
-                for source in sources:
-                    host = source.get("listenurl", "/").split("/")[-1]
-                    broadcast_data.append(
-                        {
-                            "admin": icestats.get("admin", "N/A"),
-                            "location": icestats.get("location", "N/A"),
-                            "server_name": source.get(
-                                "server_name", "Unspecified name"
-                            ),
-                            "server_description": source.get(
-                                "server_description", "Unspecified description"
-                            ),
-                            "genre": source.get("genre", "N/A"),
-                            "listeners": source.get("listeners", 0),
-                            "host": host,
-                            "listener_peak": source.get("listener_peak", 0),
-                            "listen_url": source.get("listenurl", "#"),
-                            "stream_start": source.get("stream_start", "N/A"),
-                            "is_private": is_broadcast_private(host),
-                            "source_url": source_url,
-                            "length": f"{format_length(get_duration(source.get('stream_start', 'N/A')))}",
-                        }
-                    )
     return broadcast_data
 
 
@@ -377,7 +357,7 @@ class GetArchiveDataHandler(BaseHandler):
     async def get(self):
         try:
             audio_data = await fetch_audio_archives()
-            broadcast_data = await get_grouped_data(audio_data)
+            broadcast_data = get_grouped_data(audio_data)
             self.set_header("Content-Type", "application/json")
             self.write(json.dumps(broadcast_data, cls=DateTimeEncoder))
         except Exception as e:
@@ -657,7 +637,7 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
         self.starting_time: datetime = None
         self.ending_time: datetime = None
 
-    async def on_message(self, message):
+    def on_message(self, message):
         # If the received message is JSON metadata, start the ffmpeg process
         if isinstance(message, str):
             try:
@@ -686,28 +666,33 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                         "ffmpeg",
                         "-re",
                         "-i",
-                        "-",
+                        "-",  # Input from stdin
                         "-c:a",
                         "libmp3lame",  # Use MP3 codec
                         "-b:a",
                         "128k",  # Audio bitrate
                         "-content_type",
-                        "audio/mpeg",
+                        "audio/mpeg",  # Set MIME type
                         "-y",  # Overwrite output file if it already exists
-                        # Add metadata for the Icecast stream
                         "-metadata",
-                        f"title={self.description}",
+                        f"title={self.description}",  # Set title
                         "-metadata",
-                        f"artist={self.host}",
+                        f"artist={self.host}",  # Set artist/host
                         "-metadata",
-                        "genre=various",
+                        "genre=various",  # Set genre
                         "-metadata",
-                        f"comment={self.description}",
-                        # Output 1: Icecast stream
+                        f"comment={self.description}",  # Additional comments
+                        "-ice_name",
+                        self.description,  # Name of the stream (Icecast specific)
+                        "-ice_description",
+                        self.description,  # Description of the stream
+                        "-ice_genre",
+                        "various",  # Genre of the stream
+                        "-ice_url",
+                        f"https://broadcast.hbni.net/{self.host}",  # URL for the stream (optional)
                         "-f",
                         "mp3",
-                        f"icecast://source:{self.password}@{os.environ.get("ICECAST_BROADCASTING_HOST")}:{os.environ.get("ICECAST_BROADCASTING_PORT")}/{self.host}",
-                        # Output 2: Local MP3 file to save the broadcast
+                        f"icecast://source:{self.password}@{os.environ.get('ICECAST_BROADCASTING_HOST')}:{os.environ.get('ICECAST_BROADCASTING_PORT')}/{self.host}",  # Icecast URL
                         "-f",
                         "wav",
                         self.output_filename,
@@ -746,7 +731,7 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                 except Exception as e:
                     print(f"Error writing to FFmpeg process stdin: {e}")
 
-    async def on_close(self):
+    def on_close(self):
         if self.ffmpeg_process:
             try:
                 if self.ffmpeg_process.stdin:
