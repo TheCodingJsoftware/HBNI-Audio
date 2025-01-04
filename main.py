@@ -260,20 +260,18 @@ def is_broadcast_private(host: str) -> bool:
     return False
 
 
-async def get_active_hbni_broadcasts() -> list[dict[str, Union[str, int]]]:
+async def get_active_icecast_broadcasts() -> list[dict[str, Union[str, int]]]:
     broadcast_data = []
 
-    # URL for fetching the JSON data
-    status_urls = {
-        "http://hbniaudio.hbni.net:8000/status-json.xsl": "http://hbniaudio.hbni.net:8000",
-        "https://broadcast.hbni.net/status-json.xsl": "https://broadcast.hbni.net",
-    }
-    for status_url, source_url in status_urls.items():
-        # Attempt to get the JSON data from the URL
+    icecast_urls = [
+        "https://hbniaudio.hbni.net",
+        "https://broadcast.hbni.net",
+    ]
+    for icecast_url in icecast_urls:
         try:
-            response = requests.get(status_url)
+            response = requests.get(f'{icecast_url}/status-json.xsl', timeout=5)
             if response.status_code == 200:
-                json_content = response.text.replace('"title": - ,', '"title": null,')
+                json_content = response.text.replace('"title": - ,', '"title": null,') # Some broadcasts are weird
                 json_data = json.loads(json_content)
             else:
                 return []
@@ -289,7 +287,7 @@ async def get_active_hbni_broadcasts() -> list[dict[str, Union[str, int]]]:
             if isinstance(sources, dict):
                 sources = [sources]
             for source in sources:
-                host = source.get("listenurl", "/").split("/")[-1]
+                mount_point = source.get("listenurl", "/").split("/")[-1]
                 broadcast_data.append(
                     {
                         "admin": icestats.get("admin", "N/A"),
@@ -300,14 +298,16 @@ async def get_active_hbni_broadcasts() -> list[dict[str, Union[str, int]]]:
                         "server_description": source.get(
                             "server_description", "Unspecified description"
                         ),
-                        "genre": source.get("genre", "N/A"),
+                        "genre": source.get("genre", "various"),
                         "listeners": source.get("listeners", 0),
-                        "host": host,
+                        "host": mount_point,
+                        "colony": mount_point,
+                        "moint_point": mount_point,
                         "listener_peak": source.get("listener_peak", 0),
-                        "listen_url": source.get("listenurl", "#"),
+                        "listen_url": source.get("listenurl", f"{icecast_url}/{mount_point}"),
                         "stream_start": source.get("stream_start", "N/A"),
-                        "is_private": is_broadcast_private(host),
-                        "source_url": source_url,
+                        "is_private": is_broadcast_private(mount_point),
+                        "source_url": icecast_url,
                         "length": f"{format_length(get_duration(source.get('stream_start', 'N/A')))}",
                     }
                 )
@@ -368,7 +368,7 @@ class GetArchiveDataHandler(BaseHandler):
 class GetEventCountHandler(BaseHandler):
     async def get(self):
         try:
-            broadcast_data = await get_active_hbni_broadcasts()
+            broadcast_data = await get_active_icecast_broadcasts()
             broadcast_count = get_active_broadcast_count(broadcast_data)
             scheduled_broadcast_count = get_scheduled_broadcast_count()
 
@@ -384,6 +384,42 @@ class GetEventCountHandler(BaseHandler):
         except Exception as e:
             self.set_status(500)
             self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
+
+
+class LoveTapsUpdateHandler(tornado.web.RequestHandler):
+    async def post(self):
+        try:
+            data = json.loads(self.request.body)
+            count = data.get("count", 0)
+
+            if count > 0:
+                async with db_pool.acquire() as conn:
+                    await conn.execute(
+                        """
+                        INSERT INTO love_taps (tap_count, timestamp)
+                        VALUES ($1, $2)
+                        """,
+                        count,
+                        datetime.now(),
+                    )
+            self.write({"status": "success"})
+        except Exception as e:
+            self.set_status(500)
+            self.write({"status": "error", "message": str(e)})
+
+
+class LoveTapsFetchHandler(tornado.web.RequestHandler):
+    async def get(self):
+        try:
+            async with db_pool.acquire() as conn:
+                row = await conn.fetchrow(
+                    "SELECT SUM(tap_count) as total_taps FROM love_taps"
+                )
+                total_taps = row["total_taps"] or 0
+                self.write({"count": total_taps})
+        except Exception as e:
+            self.set_status(500)
+            self.write({"status": "error", "message": str(e)})
 
 
 class MainHandler(BaseHandler):
@@ -628,6 +664,8 @@ class ScheduleBroadcastHandler(BaseHandler):
 
 class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
     def open(self):
+        load_dotenv()
+
         self.host: str = ""
         self.description: str = ""
         self.password: str = ""
@@ -646,22 +684,19 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
         if isinstance(message, str):
             try:
                 metadata: dict[str, str] = json.loads(message)
-                self.host = (
-                    metadata.get("host", "unknown")
-                    .lower()
-                    .strip()
-                    .replace(" ", "_")
-                    .replace("/", "")
-                )
-                self.description = metadata.get(
-                    "description", "Unspecified description"
-                )
                 self.password = metadata.get("password", "")
                 if self.password != os.getenv("ICECAST_BROADCASTING_PASSWORD"):
                     self.write_message("Invalid password.")
                     return
 
+                self.host = (
+                    metadata.get("host", "unknown")
+                )
+                self.description = metadata.get(
+                    "description", "Unspecified description"
+                )
                 self.is_private = metadata.get("isPrivate", False)
+                self.mount_point = metadata.get("mountPoint", "unknown")
                 self.starting_time = datetime.now()
                 self.output_filename = f'{self.host.title()} - {self.description} - {self.starting_time.strftime("%B %d %A %Y %I_%M %p")} - BROADCAST_LENGTH.wav'
 
@@ -693,12 +728,12 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                         "-ice_genre",
                         "RECORDING",
                         "-ice_url",
-                        f"https://broadcast.hbni.net/{self.host}",
+                        f"{os.environ.get('ICECAST_BROADCASTING_SOURCE')}/{self.mount_point}",
                         "-ice_public",
                         f"{'0' if self.is_private else '1'}",  # Whether the stream is public (1) or private (0)
                         "-f",
                         "mp3",
-                        f"icecast://source:{self.password}@{os.environ.get('ICECAST_BROADCASTING_HOST')}:{os.environ.get('ICECAST_BROADCASTING_PORT')}/{self.host}",  # Icecast URL
+                        f"icecast://source:{self.password}@{os.environ.get('ICECAST_BROADCASTING_IP')}:{os.environ.get('ICECAST_BROADCASTING_PORT')}/{self.mount_point}",  # Icecast URL
                         "-f",
                         "wav",
                         self.output_filename,
@@ -810,7 +845,7 @@ class BroadcastHandler(BaseHandler):
 class CurrentBroadcastStatsHandler(RequestHandler):
     async def get(self):
         try:
-            broadcast_data = await get_active_hbni_broadcasts()
+            broadcast_data = await get_active_icecast_broadcasts()
             self.set_header("Content-Type", "application/json")
             self.write(json.dumps(broadcast_data if broadcast_data else []))
         except Exception as e:
@@ -821,7 +856,7 @@ class CurrentBroadcastStatsHandler(RequestHandler):
 class ListenHandler(BaseHandler):
     async def get(self):
         try:
-            broadcast_data = await get_active_hbni_broadcasts()
+            broadcast_data = await get_active_icecast_broadcasts()
             broadcast_count = get_active_broadcast_count(broadcast_data)
             scheduled_broadcast_count = get_scheduled_broadcast_count()
 
@@ -888,6 +923,8 @@ def make_app():
     return Application(
         [
             url(r"/", MainHandler),
+            (r"/update-love-taps", LoveTapsUpdateHandler),
+            (r"/fetch-love-taps", LoveTapsFetchHandler),
             url(r"/favicon.ico", FaviconHandler),
             url(r"/faq", FaqHandler),
             url(r"/frequently_asked_questions", FaqHandler),
@@ -897,6 +934,7 @@ def make_app():
             url(r"/schedule_broadcast", ScheduleBroadcastHandler),
             url(r"/listeners_page", ListenHandler),
             url(r"/listening", ListenHandler),
+            url(r"/events", ListenHandler),
             url(r"/broadcasting_page", BroadcastHandler),
             url(r"/broadcasting", BroadcastHandler),
             url(r"/broadcasting_guide", BroadcastingGuideHandler),

@@ -75,8 +75,34 @@ async function showNotification() {
     ui('#notification-snackbar');
 }
 
+async function sendLoveTaps(count) {
+    try {
+        const response = await fetch("/update-love-taps", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ count }),
+        });
+    } catch (error) {
+    }
+}
+
+async function fetchLoveTaps() {
+    try {
+        const response = await fetch("/fetch-love-taps");
+        if (!response.ok) return;
+        const data = await response.json();
+        const loveCountElem = document.querySelector("#love-count");
+        if (loveCountElem) {
+            loveCountElem.textContent = `${data.count}`;
+        }
+    } catch (error) {
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async function () {
-    Promise.all([updateEventCount(), showNotification()]);
+    Promise.all([updateEventCount(), showNotification(), fetchLoveTaps()]);
 });
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -95,4 +121,20 @@ document.addEventListener('DOMContentLoaded', function () {
             lastWidth = currentWidth; // Update the last known width
         }
     });
+
+    const loveButton = document.getElementById("love-button");
+    let clickCount = 0;
+    let timeout = null;
+    const debounceTime = 4000; // 4 seconds
+
+    loveButton.addEventListener("click", () => {
+        clickCount++;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            sendLoveTaps(clickCount);
+            clickCount = 0;
+        }, debounceTime);
+    });
+
+    setInterval(fetchLoveTaps, 1000 * 60); // Fetch every minute
 });

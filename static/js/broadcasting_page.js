@@ -158,6 +158,7 @@ function generateSilenceBuffer(durationMs) {
 document.getElementById('startBroadcast').addEventListener('click', async () => {
     try {
         const host = document.getElementById('host').value;
+        let mountPoint = host;
         const description = document.getElementById('description').value;
         const password = document.getElementById('password').value;
         const isPrivate = document.getElementById('isPrivate').checked;
@@ -200,6 +201,7 @@ document.getElementById('startBroadcast').addEventListener('click', async () => 
         ws.onopen = () => {
             // Send metadata to the server
             const metadata = {
+                mountPoint: mountPoint,
                 host: host,
                 description: description,
                 password: password,
