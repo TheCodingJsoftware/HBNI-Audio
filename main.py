@@ -700,6 +700,10 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                 self.starting_time = datetime.now()
                 self.output_filename = f'{self.host.title()} - {self.description} - {self.starting_time.strftime("%B %d %A %Y %I_%M %p")} - BROADCAST_LENGTH.wav'
 
+                ICECAST_BROADCASTING_IP = os.getenv("ICECAST_BROADCASTING_IP") if not self.is_private else os.getenv("PRIVATE_ICECAST_BROADCASTING_IP")
+                ICECAST_BROADCASTING_PORT = os.getenv("ICECAST_BROADCASTING_PORT") if not self.is_private else os.getenv("PRIVATE_ICECAST_BROADCASTING_PORT")
+                ICECAST_BROADCASTING_SOURCE = os.getenv("ICECAST_BROADCASTING_SOURCE") if not self.is_private else os.getenv("PRIVATE_ICECAST_BROADCASTING_SOURCE")
+
                 self.ffmpeg_process = subprocess.Popen(
                     [
                         "ffmpeg",
@@ -728,12 +732,12 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                         "-ice_genre",
                         "RECORDING",
                         "-ice_url",
-                        f"{os.environ.get('ICECAST_BROADCASTING_SOURCE')}/{self.mount_point}",
+                        f"{ICECAST_BROADCASTING_SOURCE}/{self.mount_point}",
                         "-ice_public",
                         f"{'0' if self.is_private else '1'}",  # Whether the stream is public (1) or private (0)
                         "-f",
                         "mp3",
-                        f"icecast://source:{self.password}@{os.environ.get('ICECAST_BROADCASTING_IP')}:{os.environ.get('ICECAST_BROADCASTING_PORT')}/{self.mount_point}",  # Icecast URL
+                        f"icecast://source:{self.password}@{ICECAST_BROADCASTING_IP}:{ICECAST_BROADCASTING_PORT}/{self.mount_point}",  # Icecast URL
                         "-f",
                         "wav",
                         self.output_filename,
