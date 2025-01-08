@@ -20,7 +20,7 @@ function shareUpcomingBroadcast(text) {
             });
     } else {
         // Fallback to clipboard if Web Share API is not supported
-        navigator.clipboard.writeText(`${text} - Visit here: ${window.location.origin}/listeners_page`)
+        navigator.clipboard.writeText(`${text}\n\nVisit here: ${window.location.origin}/listeners_page`)
             .then(() => {
                 const snackbar = document.getElementById("copied-to-clipboard");
                 snackbar.classList.add("show");
@@ -32,7 +32,7 @@ function shareUpcomingBroadcast(text) {
 }
 
 function copyUpcomingBroadcastToClipboard(text) {
-    navigator.clipboard.writeText(`${text} - Visit here: ${window.location.origin}/listeners_page`);
+    navigator.clipboard.writeText(`${text}\n\nVisit here: ${window.location.origin}/listeners_page`);
     ui("#copied-to-clipboard");
 }
 
