@@ -108,7 +108,6 @@ async function checkPassword() {
         const result = await response.json();
 
         if (result.success) {
-            localStorage.setItem("broadcastToken", result.token); // Save token securely
             document.getElementById("startBroadcast").disabled = false;
             document.getElementById("scheduleBroadcast").disabled = false;
             ui("#correct-password");

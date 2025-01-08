@@ -45,8 +45,30 @@ class Broadcast:
 
 active_broadcasts: dict[str, Broadcast] = {}
 db_pool: asyncpg.Pool = None
-archive_data_cache = {
-    "data": [],
+
+audio_archive_cache = {
+    "data": {},
+    "grouped_data": {},
+    "last_updated": datetime.min,
+}
+
+love_taps_cache = {
+    "data": {},
+    "last_updated": datetime.min,
+}
+
+active_broadcasts_chache = {
+    "data": {},
+    "last_updated": datetime.min,
+}
+
+schedule_chache = {
+    "data": {},
+    "last_updated": datetime.min,
+}
+
+recording_status_chache = {
+    "data": {},
     "last_updated": datetime.min,
 }
 
@@ -59,17 +81,7 @@ async def initialize_db_pool():
         user=os.getenv("POSTGRES_USER"),
         password=os.getenv("POSTGRES_PASSWORD"),
         min_size=int(os.getenv("POSTGRES_MIN_SIZE", default=5)),  # Minimum number of connections
-        max_size=int(os.getenv("POSTGRES_MAX_SIZE", default=20)),  # Adjust based on expected load
-    )
-
-
-async def get_db_connection():
-    return await asyncpg.connect(
-        host=os.environ.get("POSTGRES_HOST"),
-        port=os.environ.get("POSTGRES_PORT"),
-        database=os.environ.get("POSTGRES_DB"),
-        user=os.environ.get("POSTGRES_USER"),
-        password=os.environ.get("POSTGRES_PASSWORD"),
+        max_size=int(os.getenv("POSTGRES_MAX_SIZE", default=10)),  # Adjust based on expected load
     )
 
 
@@ -326,23 +338,20 @@ def get_active_broadcast_count(broadcast_data) -> int:
 
 
 def get_scheduled_broadcast_count() -> int:
-    with open("schedule.json", "r") as f:
-        schedule = json.load(f)
-
-    return len(schedule)
+    return len(schedule_chache["data"])
 
 
 error_messages = {
     500: "Oooops! Internal Server Error. That is, something went terribly wrong.",
     404: "Uh-oh! You seem to have ventured into the void. This page doesn't exist!",
-    403: "Hold up! You’re trying to sneak into a restricted area. Access denied!",
+    403: "Hold up! You're trying to sneak into a restricted area. Access denied!",
     400: "Yikes! The server couldn't understand your request. Try being clearer!",
     401: "Hey, who goes there? You need proper credentials to enter!",
     405: "Oops! You knocked on the wrong door with the wrong key. Method not allowed!",
     408: "Well, this is awkward. Your request took too long. Let's try again?",
-    502: "Looks like the gateway had a hiccup. It’s not you, it’s us!",
-    503: "We’re taking a quick nap. Please try again later!",
-    418: "I’m a teapot, not a coffee maker! Why would you ask me to do that?",
+    502: "Looks like the gateway had a hiccup. It's not you, it's us!",
+    503: "We're taking a quick nap. Please try again later!",
+    418: "I'm a teapot, not a coffee maker! Why would you ask me to do that?",
 }
 
 
@@ -357,46 +366,86 @@ class BaseHandler(RequestHandler):
 
 
 async def refresh_archive_data():
-    global archive_data_cache
+    global audio_archive_cache
     try:
         updated_data = await fetch_audio_archives()
-        archive_data_cache["data"] = updated_data
-        archive_data_cache["last_updated"] = datetime.now()
+        audio_archive_cache["data"] = updated_data
+        audio_archive_cache["grouped_data"] = get_grouped_data(updated_data)
+        audio_archive_cache["last_updated"] = datetime.now()
     except Exception as e:
         print(f"Error refreshing archive data: {e}")
 
+
+async def refresh_active_broadcasts_data():
+    global active_broadcasts_chache
+    try:
+        updated_data = await get_active_icecast_broadcasts()
+        active_broadcasts_chache["data"] = updated_data
+        active_broadcasts_chache["active_broadcasts_count"] = get_active_broadcast_count(updated_data)
+        active_broadcasts_chache["last_updated"] = datetime.now()
+    except Exception as e:
+        print(f"Error refreshing active broadcasts data: {e}")
+
+
+def refresh_scedule_data():
+    global schedule_chache
+    try:
+        with open("schedule.json", "r") as f:
+            updated_data = json.load(f)
+        schedule_chache["data"] = updated_data
+        schedule_chache["last_updated"] = datetime.now()
+    except Exception as e:
+        print(f"Error refreshing schedule data: {e}")
+
+
+async def refresh_recording_status_data():
+    global recording_status_chache
+    try:
+        path = os.getenv(
+            "RECORDING_STATUS_PATH",
+            r"\\Pinecone\web\HBNI Audio Stream Recorder\static\recording_status.json",
+        )
+        with open(path, "r", encoding="utf-8") as f:
+            updated_data = json.load(f)
+        recording_status_chache["data"] = updated_data
+        recording_status_chache["recording_status_count"] = len(updated_data)
+        recording_status_chache["last_updated"] = datetime.now()
+    except Exception as e:
+        print(f"Error refreshing recording status data: {e}")
+
+
+async def refresh_love_taps_cache():
+    global love_taps_cache
+    async with db_pool.acquire() as conn:
+        row = await conn.fetchrow(
+            "SELECT SUM(tap_count) as total_taps FROM love_taps"
+        )
+        total_taps = row["total_taps"] or 0
+        love_taps_cache["data"] = total_taps
+        love_taps_cache["last_updated"] = datetime.now()
+
+
 class GetArchiveDataHandler(BaseHandler):
-    async def get(self):
+    def get(self):
         try:
-            audio_data = await fetch_audio_archives()
-            broadcast_data = get_grouped_data(audio_data)
             self.set_header("Content-Type", "application/json")
-            self.write(json.dumps(broadcast_data, cls=DateTimeEncoder))
+            self.write(json.dumps(audio_archive_cache["grouped_data"], cls=DateTimeEncoder))
         except Exception as e:
             self.set_status(500)
             self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
 
 
 class GetEventCountHandler(BaseHandler):
-    async def get(self):
-        try:
-            broadcast_data = await get_active_icecast_broadcasts()
-            broadcast_count = get_active_broadcast_count(broadcast_data)
-            scheduled_broadcast_count = get_scheduled_broadcast_count()
-
-            self.set_header("Content-Type", "application/json")
-            self.write(
-                json.dumps(
-                    {
-                        "broadcast_count": broadcast_count,
-                        "scheduled_broadcast_count": scheduled_broadcast_count,
-                    }
-                )
+    def get(self):
+        self.set_header("Content-Type", "application/json")
+        self.write(
+            json.dumps(
+                {
+                    "broadcast_count": active_broadcasts_chache["active_broadcasts_count"],
+                    "scheduled_broadcast_count": recording_status_chache["recording_status_count"],
+                }
             )
-        except Exception as e:
-            self.set_status(500)
-            self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
-
+        )
 
 class LoveTapsUpdateHandler(tornado.web.RequestHandler):
     async def post(self):
@@ -420,18 +469,13 @@ class LoveTapsUpdateHandler(tornado.web.RequestHandler):
             self.write({"status": "error", "message": str(e)})
 
 
-class LoveTapsFetchHandler(tornado.web.RequestHandler):
-    async def get(self):
+class LoveTapsFetchHandler(BaseHandler):
+    def get(self):
         try:
-            async with db_pool.acquire() as conn:
-                row = await conn.fetchrow(
-                    "SELECT SUM(tap_count) as total_taps FROM love_taps"
-                )
-                total_taps = row["total_taps"] or 0
-                self.write({"count": total_taps})
+            self.write({"count": love_taps_cache["data"]})
         except Exception as e:
             self.set_status(500)
-            self.write({"status": "error", "message": str(e)})
+            self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
 
 
 class MainHandler(BaseHandler):
@@ -447,8 +491,12 @@ class MainHandler(BaseHandler):
 
 class FaviconHandler(BaseHandler):
     def get(self):
-        self.set_header("Content-Type", "image/png")
-        self.write(open("static/icon.png", "rb").read())
+        try:
+            self.set_header("Content-Type", "image/png")
+            self.write(open("static/icon.png", "rb").read())
+        except Exception as e:
+            self.set_status(500)
+            self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
 
 
 class FaqHandler(BaseHandler):
@@ -476,17 +524,11 @@ class BroadcastingGuideHandler(BaseHandler):
 class GetRecordingStatusHandler(BaseHandler):
     def get(self):
         try:
-            path = os.getenv(
-                "RECORDING_STATUS_PATH",
-                r"\\Pinecone\web\HBNI Audio Stream Recorder\static\recording_status.json",
-            )
-            with open(path, "r", encoding="utf-8") as f:
-                recording_status = json.load(f)
-        except Exception:
-            recording_status = {"ERROR": "Could not load recording status JSON file."}
-
-        self.set_header("Content-Type", "application/json")
-        self.write(json.dumps(recording_status, indent=4))
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps(recording_status_chache["data"], indent=4))
+        except Exception as e:
+            self.set_status(500)
+            self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
 
 
 class AudioArchivesHandler(BaseHandler):
@@ -510,26 +552,24 @@ def url_for_static(filename):
 
 
 class RecordingStatsHandler(BaseHandler):
-    async def get(self, file_name):
-        result = await execute_query(
-            """
-            SELECT visit_count, latest_visit
-            FROM audioarchives
-            WHERE filename = $1
-            """,
-            file_name,
-        )
+    def get(self, file_name):
+        matching_archive = None
+        for archive in audio_archive_cache["data"]:
+            if archive["filename"] == file_name:
+                matching_archive = archive
+                break
 
         self.set_header("Content-Type", "application/json")
-        if result:
+        if matching_archive:
             self.write(
                 json.dumps(
                     {
-                        "visit_count": result["visit_count"] or 0,
-                        "latest_visit": result["latest_visit"].strftime(
+                        "visit_count": matching_archive["visit_count"] or 0,
+                        "latest_visit": matching_archive["latest_visit"].strftime(
                             "%B %d %A %Y %I:%M %p"
                         )
-                        or "N/A",
+                        if matching_archive["latest_visit"]
+                        else "N/A",
                     }
                 )
             )
@@ -539,34 +579,30 @@ class RecordingStatsHandler(BaseHandler):
 
 class PlayRecordingHandler(BaseHandler):
     async def get(self, file_name):
-        await update_visit(file_name)  # Await the async database update
+        await update_visit(file_name)  # Keep the visit count update
 
-        result = await execute_query(
-            """
-            SELECT visit_count, latest_visit, date, description, length
-            FROM audioarchives
-            WHERE filename = $1
-            """,
-            file_name,
-        )
+        matching_archive = None
+        for archive in audio_archive_cache["data"]:
+            if archive["filename"] == file_name:
+                matching_archive = archive
+                break
 
-        if result:
-            visit_count = result["visit_count"] or 0
+        if matching_archive:
+            visit_count = matching_archive["visit_count"] or 0
             latest_visit = (
-                result["latest_visit"].strftime("%B %d %A %Y %I:%M %p") or "N/A"
+                matching_archive["latest_visit"].strftime("%B %d %A %Y %I:%M %p")
+                if matching_archive["latest_visit"]
+                else "N/A"
             )
-            date = result["date"] or "N/A"
-            description = result["description"] or "N/A"
-            length = format_length(result["length"]) or "N/A"
+            date = matching_archive["date"] or "N/A"
+            description = matching_archive["description"] or "N/A"
+            length = format_length(matching_archive["length"]) or "N/A"
         else:
             visit_count = 0
             latest_visit = "N/A"
             date = "N/A"
             description = "N/A"
             length = format_length(0)
-
-        audio_data = await fetch_audio_archives()
-        grouped_data = get_grouped_data(audio_data)
 
         template = env.get_template("play_recording.html")
         rendered_template = template.render(
@@ -577,14 +613,14 @@ class PlayRecordingHandler(BaseHandler):
             date=date,
             description=description,
             length=length,
-            downloadableRecordings=grouped_data,
+            downloadableRecordings=audio_archive_cache["grouped_data"],
             url_for=url_for_static,
         )
         self.write(rendered_template)
 
 
 class ValidatePasswordHandler(RequestHandler):
-    async def post(self):
+    def post(self):
         try:
             data: dict[str, str] = tornado.escape.json_decode(self.request.body)
             password = data.get("password")
@@ -592,17 +628,7 @@ class ValidatePasswordHandler(RequestHandler):
             correct_password = os.getenv("ICECAST_BROADCASTING_PASSWORD")
 
             if password == correct_password:
-                # Generate a token valid for a limited time
-                token = jwt.encode(
-                    {
-                        "exp": datetime.now() + timedelta(hours=1),
-                        "iat": datetime.now(),
-                        "scope": "broadcast",
-                    },
-                    os.getenv("SECRET_KEY"),
-                    algorithm="HS256",
-                )
-                self.write({"success": True, "token": token})
+                self.write({"success": True})
             else:
                 self.set_status(401)
                 self.write({"success": False, "error": "Invalid password"})
@@ -632,6 +658,8 @@ def cleanup_old_schedules():
         # Save the updated schedule
         with open("schedule.json", "w") as f:
             json.dump(updated_schedule, f, indent=4)
+
+        refresh_scedule_data()
 
     except Exception as e:
         print(f"Error during schedule cleanup: {e}")
@@ -667,6 +695,8 @@ class ScheduleBroadcastHandler(BaseHandler):
 
             with open("schedule.json", "w") as f:
                 json.dump(schedule, f, indent=4)
+
+            refresh_scedule_data()
 
             self.set_status(200)
             self.write({"success": True})
@@ -860,32 +890,24 @@ class BroadcastHandler(BaseHandler):
 
 
 class CurrentBroadcastStatsHandler(RequestHandler):
-    async def get(self):
+    def get(self):
         try:
-            broadcast_data = await get_active_icecast_broadcasts()
             self.set_header("Content-Type", "application/json")
-            self.write(json.dumps(broadcast_data if broadcast_data else []))
+            self.write(json.dumps(active_broadcasts_chache["data"]))
         except Exception as e:
             self.set_status(500)
             self.write_error(json.dumps({"error": str(e)}))
 
 
 class ListenHandler(BaseHandler):
-    async def get(self):
+    def get(self):
         try:
-            broadcast_data = await get_active_icecast_broadcasts()
-            broadcast_count = get_active_broadcast_count(broadcast_data)
-            scheduled_broadcast_count = get_scheduled_broadcast_count()
-
-            with open("schedule.json", "r") as f:
-                schedule = json.load(f)
-
             template = env.get_template("listeners_page.html")
             rendered_template = template.render(
-                broadcast_status=broadcast_data,
-                schedule=schedule,
-                broadcast_count=broadcast_count,
-                scheduled_broadcast_count=scheduled_broadcast_count,
+                broadcast_status=active_broadcasts_chache["data"],
+                schedule=schedule_chache["data"],
+                broadcast_count=active_broadcasts_chache["active_broadcasts_count"],
+                scheduled_broadcast_count=recording_status_chache["recording_status_count"],
             )
             self.write(rendered_template)
         except Exception as e:
@@ -893,47 +915,44 @@ class ListenHandler(BaseHandler):
             self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
 
 
-class DownloadLinksJSONHandler(RequestHandler):
-    async def get(self):
-        audio_data = await fetch_audio_archives()
-
-        json_response = {}
-        for row in audio_data:
-            file_name = row["filename"]
-            file_description = row["description"]
-            file_date = row["date"]
-            file_length = row["length"]
-            host = row["host"]
-            file_id = row["id"]
-            download_link = row["download_link"]
-
-            json_response[file_name] = {
-                "date": file_date,
-                "description": file_description,
-                "downloadLink": download_link,
-                "length": file_length,
-                "host": host,
-                "id": file_id,
-            }
-
-        self.set_header("Content-Type", "application/json")
-        self.write(json.dumps(json_response, indent=4))
-
-
-class RecordingStatusJSONHandler(RequestHandler):
+class DownloadLinksJSONHandler(BaseHandler):
     def get(self):
         try:
-            path = os.getenv(
-                "RECORDING_STATUS_PATH",
-                r"\\Pinecone\web\HBNI Audio Stream Recorder\static\recording_status.json",
-            )
-            with open(path, "r", encoding="utf-8") as f:
-                recording_status = json.load(f)
-        except Exception:
-            recording_status = {"ERROR": "Could not load recording status JSON file."}
+            json_response = {}
+            for row in audio_archive_cache["data"]:
+                file_name = row["filename"]
+                file_description = row["description"]
+                file_date = row["date"]
+                file_length = row["length"]
+                host = row["host"]
+                file_id = row["id"]
+                download_link = row["download_link"]
 
-        self.set_header("Content-Type", "application/json")
-        self.write(json.dumps(recording_status, indent=4))
+                json_response[file_name] = {
+                    "date": file_date,
+                    "description": file_description,
+                    "downloadLink": download_link,
+                    "length": file_length,
+                    "host": host,
+                    "id": file_id,
+                }
+
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps(json_response, indent=4))
+        except Exception as e:
+            self.set_status(500)
+            self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
+
+
+
+class RecordingStatusJSONHandler(BaseHandler):
+    def get(self):
+        try:
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps(recording_status_chache["data"], indent=4))
+        except Exception as e:
+            self.set_status(500)
+            self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
 
 
 def make_app():
@@ -977,11 +996,20 @@ def make_app():
 
 if __name__ == "__main__":
     app = tornado.httpserver.HTTPServer(make_app())
-    # app.listen(int(os.getenv("PORT", default=5053)))
     app.bind(int(os.getenv("PORT", default=5053)))
     app.start(1)
+    # Run at startup
     tornado.ioloop.IOLoop.current().run_sync(initialize_db_pool)
     tornado.ioloop.IOLoop.current().run_sync(refresh_archive_data)
+    tornado.ioloop.IOLoop.current().run_sync(refresh_active_broadcasts_data)
+    tornado.ioloop.IOLoop.current().run_sync(refresh_scedule_data)
+    tornado.ioloop.IOLoop.current().run_sync(refresh_recording_status_data)
+    tornado.ioloop.IOLoop.current().run_sync(refresh_love_taps_cache)
+    # Run every 5 minutes
     tornado.ioloop.PeriodicCallback(refresh_archive_data, 5 * 60 * 1000).start()
+    tornado.ioloop.PeriodicCallback(refresh_active_broadcasts_data, 5 * 60 * 1000).start()
+    tornado.ioloop.PeriodicCallback(refresh_recording_status_data, 5 * 60 * 1000).start()
+    tornado.ioloop.PeriodicCallback(refresh_scedule_data, 5 * 60 * 1000).start()
+    tornado.ioloop.PeriodicCallback(refresh_love_taps_cache, 5 * 60 * 1000).start()
     tornado.ioloop.PeriodicCallback(cleanup_old_schedules, 5 * 60 * 1000).start()
     tornado.ioloop.IOLoop.instance().start()
