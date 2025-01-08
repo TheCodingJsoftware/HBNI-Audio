@@ -629,12 +629,13 @@ class ScheduleBroadcastHandler(BaseHandler):
     def post(self):
         try:
             data: dict[str, str] = tornado.escape.json_decode(self.request.body)
-            print(data)
             host = data.get("host")
             description = data.get("description")
             start_time = data.get("startTime")
+            parsed_time = datetime.strptime(start_time, "%Y-%m-%d %H:%M")
+            formatted_time = parsed_time.strftime("%A, %B %d, %Y at %I:%M %p")
 
-            if not host or not description or not start_time:
+            if not (host and description and start_time):
                 self.set_status(400)
                 self.write({"success": False, "error": "Missing required fields"})
                 return
@@ -649,7 +650,7 @@ class ScheduleBroadcastHandler(BaseHandler):
             schedule[datetime.now().isoformat()] = {
                 "host": host,
                 "description": description,
-                "start_time": start_time,
+                "start_time": formatted_time,
             }
 
             with open("schedule.json", "w") as f:
