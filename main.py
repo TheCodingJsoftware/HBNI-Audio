@@ -1005,11 +1005,43 @@ if __name__ == "__main__":
     tornado.ioloop.IOLoop.current().run_sync(refresh_scedule_data)
     tornado.ioloop.IOLoop.current().run_sync(refresh_recording_status_data)
     tornado.ioloop.IOLoop.current().run_sync(refresh_love_taps_cache)
-    # Run every 5 minutes
-    tornado.ioloop.PeriodicCallback(refresh_archive_data, 5 * 60 * 1000).start()
-    tornado.ioloop.PeriodicCallback(refresh_active_broadcasts_data, 5 * 60 * 1000).start()
-    tornado.ioloop.PeriodicCallback(refresh_recording_status_data, 5 * 60 * 1000).start()
-    tornado.ioloop.PeriodicCallback(refresh_scedule_data, 5 * 60 * 1000).start()
-    tornado.ioloop.PeriodicCallback(refresh_love_taps_cache, 5 * 60 * 1000).start()
-    tornado.ioloop.PeriodicCallback(cleanup_old_schedules, 5 * 60 * 1000).start()
+
+    # Stagger the periodic callbacks by 1 minute each
+    # First callback starts immediately (0 minutes offset)
+    tornado.ioloop.PeriodicCallback(
+        refresh_archive_data,
+        int(os.getenv("REFRESH_ARCHIVE_DATA_INTERVAL_MINUTES", default=5)) * 60 * 1000
+    ).start()
+
+    # Second callback starts after 1 minute
+    loop = tornado.ioloop.IOLoop.instance()
+    loop.call_later(60, lambda: tornado.ioloop.PeriodicCallback(
+        refresh_active_broadcasts_data,
+        int(os.getenv("REFRESH_ACTIVE_BROADCASTS_DATA_INTERVAL_MINUTES", default=5)) * 60 * 1000
+    ).start())
+
+    # Third callback starts after 2 minutes
+    loop.call_later(120, lambda: tornado.ioloop.PeriodicCallback(
+        refresh_recording_status_data,
+        int(os.getenv("REFRESH_RECORDING_STATUS_DATA_INTERVAL_MINUTES", default=1)) * 60 * 1000
+    ).start())
+
+    # Fourth callback starts after 3 minutes
+    loop.call_later(180, lambda: tornado.ioloop.PeriodicCallback(
+        refresh_scedule_data,
+        int(os.getenv("REFRESH_SCHEDULE_DATA_INTERVAL_MINUTES", default=5)) * 60 * 1000
+    ).start())
+
+    # Fifth callback starts after 4 minutes
+    loop.call_later(240, lambda: tornado.ioloop.PeriodicCallback(
+        refresh_love_taps_cache,
+        int(os.getenv("REFRESH_LOVE_TAPS_CACHE_INTERVAL_MINUTES", default=5)) * 60 * 1000
+    ).start())
+
+    # Sixth callback starts after 5 minutes
+    loop.call_later(300, lambda: tornado.ioloop.PeriodicCallback(
+        cleanup_old_schedules,
+        int(os.getenv("CLEANUP_OLD_SCHEDULES_INTERVAL_MINUTES", default=5)) * 60 * 1000
+    ).start())
+
     tornado.ioloop.IOLoop.instance().start()
