@@ -45,7 +45,10 @@ class Broadcast:
 
 active_broadcasts: dict[str, Broadcast] = {}
 db_pool: asyncpg.Pool = None
-
+archive_data_cache = {
+    "data": [],
+    "last_updated": datetime.min,
+}
 
 async def initialize_db_pool():
     global db_pool
@@ -55,8 +58,8 @@ async def initialize_db_pool():
         database=os.getenv("POSTGRES_DB"),
         user=os.getenv("POSTGRES_USER"),
         password=os.getenv("POSTGRES_PASSWORD"),
-        min_size=10,  # Minimum number of connections
-        max_size=100,  # Adjust based on expected load
+        min_size=int(os.getenv("POSTGRES_MIN_SIZE", default=5)),  # Minimum number of connections
+        max_size=int(os.getenv("POSTGRES_MAX_SIZE", default=20)),  # Adjust based on expected load
     )
 
 
@@ -352,6 +355,15 @@ class BaseHandler(RequestHandler):
         )
         self.write(rendered_template)
 
+
+async def refresh_archive_data():
+    global archive_data_cache
+    try:
+        updated_data = await fetch_audio_archives()
+        archive_data_cache["data"] = updated_data
+        archive_data_cache["last_updated"] = datetime.now()
+    except Exception as e:
+        print(f"Error refreshing archive data: {e}")
 
 class GetArchiveDataHandler(BaseHandler):
     async def get(self):
@@ -928,8 +940,8 @@ def make_app():
     return Application(
         [
             url(r"/", MainHandler),
-            (r"/update-love-taps", LoveTapsUpdateHandler),
-            (r"/fetch-love-taps", LoveTapsFetchHandler),
+            url(r"/update-love-taps", LoveTapsUpdateHandler),
+            url(r"/fetch-love-taps", LoveTapsFetchHandler),
             url(r"/favicon.ico", FaviconHandler),
             url(r"/faq", FaqHandler),
             url(r"/frequently_asked_questions", FaqHandler),
@@ -965,8 +977,11 @@ def make_app():
 
 if __name__ == "__main__":
     app = tornado.httpserver.HTTPServer(make_app())
-    app.listen(int(os.getenv("PORT", default=5053)))
+    # app.listen(int(os.getenv("PORT", default=5053)))
+    app.bind(int(os.getenv("PORT", default=5053)))
+    app.start(1)
     tornado.ioloop.IOLoop.current().run_sync(initialize_db_pool)
+    tornado.ioloop.IOLoop.current().run_sync(refresh_archive_data)
+    tornado.ioloop.PeriodicCallback(refresh_archive_data, 5 * 60 * 1000).start()
     tornado.ioloop.PeriodicCallback(cleanup_old_schedules, 5 * 60 * 1000).start()
-
     tornado.ioloop.IOLoop.instance().start()

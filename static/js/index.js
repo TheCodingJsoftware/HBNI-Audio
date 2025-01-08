@@ -89,6 +89,7 @@ async function sendLoveTaps(count) {
 }
 
 async function fetchLoveTaps() {
+    return
     try {
         const response = await fetch("/fetch-love-taps");
         if (!response.ok) return;
