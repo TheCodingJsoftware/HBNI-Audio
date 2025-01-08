@@ -28,7 +28,7 @@ async function updateEventCount() {
     if (scheduledBroadcastCount >= 1)
         message += `${scheduledBroadcastCount} scheduled broadcast${scheduledBroadcastCount > 1 ? "s" : ""}`;
     if (broadcastCount + scheduledBroadcastCount === 0)
-        message = "No broadcasts currently<br>online or events schedulded.";
+        message = "No broadcasts currently<br>online or events scheduled.";
 
     eventTooltipStatus.innerHTML = message;
 

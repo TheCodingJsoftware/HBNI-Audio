@@ -86,14 +86,14 @@ document.addEventListener('DOMContentLoaded', function () {
             alert('The audio stream is unavailable because it is served over an insecure connection. Please contact support for assistance.');
         };
     });
-    const scheduledBroadcastsContainer = document.getElementById('schedulded-broadcasts-container');
+    const scheduledBroadcastsContainer = document.getElementById('scheduled-broadcasts-container');
     if (scheduledBroadcastsContainer) { // There might not be any scheduled broadcasts
         scheduledBroadcastsContainer.querySelectorAll('[id^=\'article\']').forEach(article => {
             const title = article.getAttribute('data-title');
             const description = article.getAttribute('data-description');
             const startTime = article.getAttribute('data-start-time');
 
-            const copyMessage = `${title} schedulded a broadcast with the description, ${description} and is schedulded to start at ${startTime}.`;
+            const copyMessage = `${title} scheduled a broadcast with the description, ${description} and is scheduled to start at ${startTime}.`;
 
             const shareButton = article.querySelector(`#share-button`);
             const copyButton = article.querySelector(`#copy-button`);

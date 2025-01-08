@@ -36,7 +36,7 @@
     <main class="responsive">
         {% if scheduled_broadcast_count %}
         <h5 class="center-align">Scheduled Broadcasts</h5>
-        <div class="small-padding grid border round" id="schedulded-broadcasts-container">
+        <div class="small-padding grid border round" id="scheduled-broadcasts-container">
             {% for scheduled_date, scheduled_broadcast in schedule.items()
             %}
             <article class="s12 m12 l6 round" id="article-{{ scheduled_broadcast.host }}" data-title="{{ scheduled_broadcast.host.title() }}" data-description="{{ scheduled_broadcast.description }}" data-start-time="{{ scheduled_broadcast.start_time }}">
@@ -57,9 +57,9 @@
                 </div>
                 <div><i>event</i> {{ scheduled_broadcast.start_time }}</div>
                 <blockquote class="no-line">
-                    {{ scheduled_broadcast.host.title() }} schedulded a
+                    {{ scheduled_broadcast.host.title() }} scheduled a
                     broadcast with the description, "{{
-                    scheduled_broadcast.description }}" and is schedulded to
+                    scheduled_broadcast.description }}" and is scheduled to
                     start at {{ scheduled_broadcast.start_time }}.
                 </blockquote>
             </article>
@@ -112,7 +112,7 @@
         {% endif %}
         {% if scheduled_broadcast_count == 0 and broadcast_count == 0 %}
         <h6 class="absolute padding center middle medium-width center-align">
-            No broadcasts currently online or events schedulded.
+            No broadcasts currently online or events scheduled.
         </h6>
         {% endif %}
         <div class="snackbar" id="copied-to-clipboard">
