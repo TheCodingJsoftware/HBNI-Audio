@@ -57,10 +57,9 @@
                 </div>
                 <div><i>event</i> {{ scheduled_broadcast.start_time }}</div>
                 <blockquote class="no-line">
-                    {{ scheduled_broadcast.host.title() }} scheduled a
-                    broadcast with the description, "{{
-                    scheduled_broadcast.description }}" and is scheduled to
-                    start at {{ scheduled_broadcast.start_time }}.
+                    {{ scheduled_broadcast.host.title() }} has scheduled a broadcast with the description:
+                    "{{ scheduled_broadcast.description }}".
+                    The broadcast is set to begin at {{ scheduled_broadcast.start_time }}.
                 </blockquote>
             </article>
             {% endfor %}

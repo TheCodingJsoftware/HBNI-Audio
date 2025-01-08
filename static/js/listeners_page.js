@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const description = article.getAttribute('data-description');
             const startTime = article.getAttribute('data-start-time');
 
-            const copyMessage = `${title} scheduled a broadcast with the description, ${description} and is scheduled to start at ${startTime}.`;
+            const copyMessage = `${title} has scheduled a broadcast with the description: "${description}". The broadcast is set to begin at ${startTime}.`;
 
             const shareButton = article.querySelector(`#share-button`);
             const copyButton = article.querySelector(`#copy-button`);
@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const title = article.getAttribute('data-title');
             const description = article.getAttribute('data-description');
 
-            const copyMessage = `${title} started a broadcast with the description, ${description}.`;
+            const copyMessage = `${title} has scheduled a broadcast with the description: "${description}". The broadcast is set to begin at ${startTime}.`;
 
             const shareButton = article.querySelector(`#share-button`);
             const copyButton = article.querySelector(`#copy-button`);

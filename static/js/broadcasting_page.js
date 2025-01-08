@@ -51,7 +51,9 @@ function share() {
             url: url
         });
     } else {
-        navigator.clipboard.writeText(`${host} just started a broadcast with the description, ${description}. - Visit here: ${url}`)
+        const copyMessage = `${title} has scheduled a broadcast with the description: "${description}". The broadcast is set to begin at ${startTime}.`;
+
+        navigator.clipboard.writeText(`${copyMessage} Listen here: ${url}`)
             .then(() => {
                 const snackbar = document.getElementById("copied-to-clipboard");
                 snackbar.classList.add("show");
