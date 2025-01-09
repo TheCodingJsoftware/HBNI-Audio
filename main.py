@@ -387,11 +387,25 @@ async def refresh_active_broadcasts_data():
         print(f"Error refreshing active broadcasts data: {e}")
 
 
-def refresh_scedule_data():
+async def refresh_scedule_data():
     global schedule_chache
     try:
-        with open("schedule.json", "r") as f:
-            updated_data = json.load(f)
+        async with db_pool.acquire() as conn:
+            rows = await conn.fetch("""
+                SELECT scheduled_date, host, description, speakers, start_time
+                FROM scheduledbroadcasts
+                ORDER BY created_at DESC
+            """)
+
+            updated_data = {}
+            for row in rows:
+                updated_data[row['scheduled_date']] = {
+                    'host': row['host'],
+                    'description': row['description'],
+                    'speakers': row['speakers'],
+                    'start_time': row['start_time']
+                }
+
         schedule_chache["data"] = updated_data
         schedule_chache["last_updated"] = datetime.now()
     except Exception as e:
@@ -430,6 +444,44 @@ class GetArchiveDataHandler(BaseHandler):
         try:
             self.set_header("Content-Type", "application/json")
             self.write(json.dumps(audio_archive_cache["grouped_data"], cls=DateTimeEncoder))
+        except Exception as e:
+            self.set_status(500)
+            self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
+
+
+class GetScheduleDataHandler(BaseHandler):
+    def get(self):
+        try:
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps(schedule_chache["data"], cls=DateTimeEncoder))
+        except Exception as e:
+            self.set_status(500)
+            self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
+
+
+class GetActiveSchedulesDataHandler(BaseHandler):
+    def get(self):
+        try:
+            current_time = datetime.now()
+            active_schedules = {}
+
+            # Filter schedules where start_time is in the future
+            for scheduled_date, schedule in schedule_chache["data"].items():
+                try:
+                    start_time = datetime.strptime(
+                        schedule["start_time"],
+                        "%A, %B %d, %Y at %I:%M %p"
+                    )
+
+                    # Only include schedules that haven't started yet
+                    if start_time > current_time:
+                        active_schedules[scheduled_date] = schedule
+                except ValueError as e:
+                    print(f"Error parsing date for schedule {scheduled_date}: {e}")
+                    continue
+
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps(active_schedules, cls=DateTimeEncoder))
         except Exception as e:
             self.set_status(500)
             self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
@@ -665,36 +717,46 @@ def cleanup_old_schedules():
         print(f"Error during schedule cleanup: {e}")
 
 
+async def initialize_scheduled_broadcasts_table():
+    async with db_pool.acquire() as conn:
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS scheduledbroadcasts (
+                id SERIAL PRIMARY KEY,
+                scheduled_date TEXT NOT NULL,
+                host TEXT NOT NULL,
+                description TEXT NOT NULL,
+                speakers TEXT NOT NULL DEFAULT '',
+                start_time TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+
 class ScheduleBroadcastHandler(BaseHandler):
-    def post(self):
+    async def post(self):
         try:
             data: dict[str, str] = tornado.escape.json_decode(self.request.body)
             host = data.get("host")
             description = data.get("description")
+            speakers = data.get("speakers", "")  # Optional field
             start_time = data.get("startTime")
-            parsed_time = datetime.strptime(start_time, "%Y-%m-%d %H:%M")
-            formatted_time = parsed_time.strftime("%A, %B %d, %Y at %I:%M %p")
 
             if not (host and description and start_time):
                 self.set_status(400)
                 self.write({"success": False, "error": "Missing required fields"})
                 return
 
-            if not os.path.exists("schedule.json"):
-                with open("schedule.json", "w") as f:
-                    json.dump({}, f)
+            parsed_time = datetime.strptime(start_time, "%Y-%m-%d %H:%M")
+            formatted_time = parsed_time.strftime("%A, %B %d, %Y at %I:%M %p")
+            scheduled_date = datetime.now().isoformat()
 
-            with open("schedule.json", "r") as f:
-                schedule = json.load(f)
-
-            schedule[datetime.now().isoformat()] = {
-                "host": host,
-                "description": description,
-                "start_time": formatted_time,
-            }
-
-            with open("schedule.json", "w") as f:
-                json.dump(schedule, f, indent=4)
+            # Insert into database
+            async with db_pool.acquire() as conn:
+                await conn.execute("""
+                    INSERT INTO scheduledbroadcasts
+                    (scheduled_date, host, description, speakers, start_time)
+                    VALUES ($1, $2, $3, $4, $5)
+                """, scheduled_date, host, description, speakers, formatted_time)
 
             refresh_scedule_data()
 
@@ -979,6 +1041,8 @@ def make_app():
             url(r"/validate-password", ValidatePasswordHandler),
             url(r"/get_broadcast_data", CurrentBroadcastStatsHandler),
             url(r"/get_archive_data", GetArchiveDataHandler),
+            url(r"/get_schedule_data", GetScheduleDataHandler),
+            url(r"/get_active_schedules_data", GetActiveSchedulesDataHandler),
             url(r"/get_event_count", GetEventCountHandler),
             url(r"/get_recording_status", GetRecordingStatusHandler),
             url(r"/download_links.json", DownloadLinksJSONHandler),
@@ -1000,6 +1064,7 @@ if __name__ == "__main__":
     app.start(1)
     # Run at startup
     tornado.ioloop.IOLoop.current().run_sync(initialize_db_pool)
+    tornado.ioloop.IOLoop.current().run_sync(initialize_scheduled_broadcasts_table)
     tornado.ioloop.IOLoop.current().run_sync(refresh_archive_data)
     tornado.ioloop.IOLoop.current().run_sync(refresh_active_broadcasts_data)
     tornado.ioloop.IOLoop.current().run_sync(refresh_scedule_data)
