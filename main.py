@@ -937,7 +937,6 @@ class CurrentBroadcastStatsHandler(RequestHandler):
 class ListenHandler(BaseHandler):
     def get(self):
         try:
-            print(schedule_chache)
             template = env.get_template("listeners_page.html")
             rendered_template = template.render(
                 broadcast_status=active_broadcasts_chache["data"],
