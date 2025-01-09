@@ -89,8 +89,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const scheduledBroadcastsContainer = document.getElementById('scheduled-broadcasts-container');
     if (scheduledBroadcastsContainer) { // There might not be any scheduled broadcasts
         scheduledBroadcastsContainer.querySelectorAll('[id^=\'article\']').forEach(article => {
-            const title = article.getAttribute('data-title');
-            const scheduledDescription = article.querySelector(`#scheduled-description-${title}`);
+            const host = article.getAttribute('data-host');
+            const scheduledDescription = article.querySelector(`#scheduled-description-${host}`);
             const copyMessage = scheduledDescription.textContent;
 
             const shareButton = article.querySelector(`#share-button`);

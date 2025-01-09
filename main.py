@@ -64,8 +64,8 @@ active_broadcasts_chache = {
 }
 
 schedule_chache = {
-    "all_schedules": {},
-    "active_schedules": {},
+    "all_schedules": [],
+    "active_schedules": [],
     "last_updated": datetime.min,
 }
 
@@ -394,14 +394,14 @@ async def refresh_scedule_data():
     try:
         async with db_pool.acquire() as conn:
             rows = await conn.fetch("""
-                SELECT scheduled_date, host, description, speakers, start_time
+                SELECT id, host, description, speakers, start_time
                 FROM scheduledbroadcasts
                 ORDER BY created_at DESC
             """)
 
             updated_data = {}
             for row in rows:
-                updated_data[row['scheduled_date']] = {
+                updated_data[row['id']] = {
                     'host': row['host'],
                     'description': row['description'],
                     'speakers': row['speakers'],
@@ -697,7 +697,6 @@ async def initialize_scheduled_broadcasts_table():
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS scheduledbroadcasts (
                 id SERIAL PRIMARY KEY,
-                scheduled_date TEXT NOT NULL,
                 host TEXT NOT NULL,
                 description TEXT NOT NULL,
                 speakers TEXT NOT NULL DEFAULT '',
@@ -723,17 +722,16 @@ class ScheduleBroadcastHandler(BaseHandler):
 
             parsed_time = datetime.strptime(start_time, "%Y-%m-%d %H:%M")
             formatted_time = parsed_time.strftime("%A, %B %d, %Y at %I:%M %p")
-            scheduled_date = datetime.now().isoformat()
 
             # Insert into database
             async with db_pool.acquire() as conn:
                 await conn.execute("""
                     INSERT INTO scheduledbroadcasts
-                    (scheduled_date, host, description, speakers, start_time)
-                    VALUES ($1, $2, $3, $4, $5)
-                """, scheduled_date, host, description, speakers, formatted_time)
+                    (host, description, speakers, start_time)
+                    VALUES ($1, $2, $3, $4)
+                """, host, description, speakers, formatted_time)
 
-            refresh_scedule_data()
+            await refresh_scedule_data()
 
             self.set_status(200)
             self.write({"success": True})
@@ -939,12 +937,13 @@ class CurrentBroadcastStatsHandler(RequestHandler):
 class ListenHandler(BaseHandler):
     def get(self):
         try:
+            print(schedule_chache)
             template = env.get_template("listeners_page.html")
             rendered_template = template.render(
                 broadcast_status=active_broadcasts_chache["data"],
                 schedule=schedule_chache["active_schedules"],
                 broadcast_count=active_broadcasts_chache["active_broadcasts_count"],
-                scheduled_broadcast_count=recording_status_chache["recording_status_count"],
+                scheduled_broadcast_count=get_scheduled_broadcast_count(),
             )
             self.write(rendered_template)
         except Exception as e:
@@ -1039,7 +1038,7 @@ if __name__ == "__main__":
     app.start(1)
     # Run at startup
     tornado.ioloop.IOLoop.current().run_sync(initialize_db_pool)
-    tornado.ioloop.IOLoop.current().run_sync(initialize_scheduled_broadcasts_table)
+    # tornado.ioloop.IOLoop.current().run_sync(initialize_scheduled_broadcasts_table)
     tornado.ioloop.IOLoop.current().run_sync(refresh_archive_data)
     tornado.ioloop.IOLoop.current().run_sync(refresh_active_broadcasts_data)
     tornado.ioloop.IOLoop.current().run_sync(refresh_scedule_data)

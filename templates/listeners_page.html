@@ -39,7 +39,7 @@
         <div class="small-padding grid border round" id="scheduled-broadcasts-container">
             {% for scheduled_date, scheduled_broadcast in schedule.items()
             %}
-            <article class="s12 m12 l6 round" id="article-{{ scheduled_broadcast.host }}" data-title="{{ scheduled_broadcast.host.title() }}" data-description="{{ scheduled_broadcast.description }}" data-start-time="{{ scheduled_broadcast.start_time }}">
+            <article class="s12 m12 l6 round" id="article-{{ scheduled_broadcast.host }}" data-host="{{ scheduled_broadcast.host }}" data-title="{{ scheduled_broadcast.host.title() }}" data-description="{{ scheduled_broadcast.description }}" data-start-time="{{ scheduled_broadcast.start_time }}">
                 <div class="row no-space">
                     <h6 class="bottom-margin max">
                         {{ scheduled_broadcast.description }}
