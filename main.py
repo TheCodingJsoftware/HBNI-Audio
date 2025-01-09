@@ -692,33 +692,6 @@ class ValidatePasswordHandler(RequestHandler):
             self.write({"success": False, "error": str(e)})
 
 
-def cleanup_old_schedules():
-    try:
-        if not os.path.exists("schedule.json"):
-            return
-
-        with open("schedule.json", "r") as f:
-            schedule: dict[str, dict[str, str]] = json.load(f)
-
-        now = datetime.now()
-
-        # Parse the schedule dates and remove old entries
-        updated_schedule = {
-            key: value
-            for key, value in schedule.items()
-            if datetime.strptime(value["start_time"], "%Y-%m-%d %H:%M") > now
-        }
-
-        # Save the updated schedule
-        with open("schedule.json", "w") as f:
-            json.dump(updated_schedule, f, indent=4)
-
-        refresh_scedule_data()
-
-    except Exception as e:
-        print(f"Error during schedule cleanup: {e}")
-
-
 async def initialize_scheduled_broadcasts_table():
     async with db_pool.acquire() as conn:
         await conn.execute("""
@@ -1104,11 +1077,4 @@ if __name__ == "__main__":
         refresh_love_taps_cache,
         int(os.getenv("REFRESH_LOVE_TAPS_CACHE_INTERVAL_MINUTES", default=5)) * 60 * 1000
     ).start())
-
-    # Sixth callback starts after 5 minutes
-    loop.call_later(300, lambda: tornado.ioloop.PeriodicCallback(
-        cleanup_old_schedules,
-        int(os.getenv("CLEANUP_OLD_SCHEDULES_INTERVAL_MINUTES", default=5)) * 60 * 1000
-    ).start())
-
     tornado.ioloop.IOLoop.instance().start()
