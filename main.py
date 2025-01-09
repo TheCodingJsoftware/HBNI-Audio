@@ -63,7 +63,8 @@ active_broadcasts_chache = {
 }
 
 schedule_chache = {
-    "data": {},
+    "all_schedules": {},
+    "active_schedules": {},
     "last_updated": datetime.min,
 }
 
@@ -338,7 +339,7 @@ def get_active_broadcast_count(broadcast_data) -> int:
 
 
 def get_scheduled_broadcast_count() -> int:
-    return len(schedule_chache["data"])
+    return len(schedule_chache["active_schedules"])
 
 
 error_messages = {
@@ -406,7 +407,27 @@ async def refresh_scedule_data():
                     'start_time': row['start_time']
                 }
 
-        schedule_chache["data"] = updated_data
+        schedule_chache["all_schedules"] = updated_data
+
+        current_time = datetime.now()
+        active_schedules = {}
+
+        # Filter schedules where start_time is in the future
+        for scheduled_date, schedule in updated_data.items():
+            try:
+                start_time = datetime.strptime(
+                    schedule["start_time"],
+                    "%A, %B %d, %Y at %I:%M %p"
+                )
+
+                # Only include schedules that haven't started yet
+                if start_time > current_time:
+                    active_schedules[scheduled_date] = schedule
+            except ValueError as e:
+                print(f"Error parsing date for schedule {scheduled_date}: {e}")
+                continue
+
+        schedule_chache["active_schedules"] = active_schedules
         schedule_chache["last_updated"] = datetime.now()
     except Exception as e:
         print(f"Error refreshing schedule data: {e}")
@@ -453,7 +474,7 @@ class GetScheduleDataHandler(BaseHandler):
     def get(self):
         try:
             self.set_header("Content-Type", "application/json")
-            self.write(json.dumps(schedule_chache["data"], cls=DateTimeEncoder))
+            self.write(json.dumps(schedule_chache["all_schedules"], cls=DateTimeEncoder))
         except Exception as e:
             self.set_status(500)
             self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
@@ -462,26 +483,8 @@ class GetScheduleDataHandler(BaseHandler):
 class GetActiveSchedulesDataHandler(BaseHandler):
     def get(self):
         try:
-            current_time = datetime.now()
-            active_schedules = {}
-
-            # Filter schedules where start_time is in the future
-            for scheduled_date, schedule in schedule_chache["data"].items():
-                try:
-                    start_time = datetime.strptime(
-                        schedule["start_time"],
-                        "%A, %B %d, %Y at %I:%M %p"
-                    )
-
-                    # Only include schedules that haven't started yet
-                    if start_time > current_time:
-                        active_schedules[scheduled_date] = schedule
-                except ValueError as e:
-                    print(f"Error parsing date for schedule {scheduled_date}: {e}")
-                    continue
-
             self.set_header("Content-Type", "application/json")
-            self.write(json.dumps(active_schedules, cls=DateTimeEncoder))
+            self.write(json.dumps(schedule_chache["active_schedules"], cls=DateTimeEncoder))
         except Exception as e:
             self.set_status(500)
             self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
@@ -967,7 +970,7 @@ class ListenHandler(BaseHandler):
             template = env.get_template("listeners_page.html")
             rendered_template = template.render(
                 broadcast_status=active_broadcasts_chache["data"],
-                schedule=schedule_chache["data"],
+                schedule=schedule_chache["active_schedules"],
                 broadcast_count=active_broadcasts_chache["active_broadcasts_count"],
                 scheduled_broadcast_count=recording_status_chache["recording_status_count"],
             )
