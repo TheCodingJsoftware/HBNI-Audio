@@ -68,6 +68,7 @@ async function submitSchedule() {
     const host = document.getElementById("schedule-host").value;
     const description = document.getElementById("schedule-description").value;
     const startTime = document.getElementById("date-time-picker").value;
+    const speakers = document.getElementById("schedule-speakers").value;
 
     if (!host || !description || !startTime) {
         alert("Please provide all the required fields.");
@@ -80,7 +81,7 @@ async function submitSchedule() {
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({ host, description, startTime })
+        body: JSON.stringify({ host, description, startTime, speakers })
     });
 
     if (response.ok) {

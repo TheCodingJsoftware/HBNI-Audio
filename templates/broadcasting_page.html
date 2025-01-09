@@ -12,9 +12,9 @@
     <script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css"/>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script type="module" src="/static/js/broadcasting_page.js?v=1.5" ></script>
-    <link rel="stylesheet" type="text/css" href="/static/css/theme.css?v=1.5" />
-    <link rel="stylesheet" type="text/css" href="/static/css/style.css?v=1.5" />
+    <script type="module" src="/static/js/broadcasting_page.js?v=1.6" ></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/theme.css?v=1.6" />
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css?v=1.6" />
     <link rel="icon" href="/static/icon.png" />
     <title>HBNI Audio Broadcasting</title>
     <meta property="og:title" content="HBNI Audio Broadcasting" />
@@ -173,29 +173,31 @@
     </div>
     <div class="overlay blur"></div>
     <dialog id="schedule-dialog">
-        <h5 class="center-align">Schedule Broadcast</h5>
+        <h5 class="center-align">Schedule Event</h5>
         <p class="no-line medium-width">
-            Schedule a broadcast to display an event on the
-            <a class="link" target="_blank" href="/listeners_page">listeners' page</a>
-            with details like the colony name, description, and date. It
-            will remain visible until the scheduled date passes, then be
-            automatically removed.
+            Events will remain visible for up to 2 hours after the scheduled date.
         </p>
         <div class="grid">
             <div class="field label prefix border s12">
                 <i>artist</i>
-                <input type="text" id="schedule-host" name="schedule-host" />
+                <input type="text" id="schedule-host" name="schedule-host" required/>
                 <label>Colony Name</label>
+            </div>
+            <div class="field label prefix border s12">
+                <i>record_voice_over</i>
+                <input type="text" id="schedule-speakers" name="schedule-speakers" required/>
+                <label>Speaker(s)</label>
+                <span class="helper no-line">For multiple speakers, separate with commas.</span>
             </div>
             <div class="field border label textarea s12 bottom-margin">
                 <textarea
                     type="text"
                     id="schedule-description"
                     name="schedule-description"
-                    required="required"
+                    required
                 ></textarea>
                 <label>Description</label>
-                <span class="helper no-line">Explain what the broadcast is about</span>
+                <span class="helper no-line">Explain what the event is about.</span>
             </div>
             <div class="field label prefix border s12">
                 <i>event</i>

@@ -9,9 +9,9 @@
     <link href="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.css" rel="stylesheet" />
     <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.js"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
-    <script type="module" src="/static/js/listeners_page.js?v=1.5"></script>
-    <link rel="stylesheet" type="text/css" href="/static/css/theme.css?v=1.5" />
-    <link rel="stylesheet" type="text/css" href="/static/css/style.css?v=1.5" />
+    <script type="module" src="/static/js/listeners_page.js?v=1.6"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/theme.css?v=1.6" />
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css?v=1.6" />
     <link rel="icon" href="/static/icon.png" />
     <title>HBNI Audio Listeners Page</title>
     <meta property="og:title" content="HBNI Audio Listeners Page" />
@@ -52,13 +52,22 @@
                     </button>
                 </div>
                 <div>
-                    <i>artist</i> {{ scheduled_broadcast.host.replace('/',
-                    '').title() }}
+                    <i>artist</i> {{ scheduled_broadcast.host.replace('/', '').title() }}
                 </div>
-                <div><i>event</i> {{ scheduled_broadcast.start_time }}</div>
-                <blockquote class="no-line">
+                <div>
+                    <i>record_voice_over</i> {{ scheduled_broadcast.speakers if scheduled_broadcast.speakers else "No speakers listed" }}
+                </div>
+                <div>
+                    <i>event</i> {{ scheduled_broadcast.start_time }}
+                </div>
+                <blockquote class="no-line" id="scheduled-description-{{ scheduled_broadcast.host }}">
                     {{ scheduled_broadcast.host.title() }} has scheduled a broadcast with the description:
                     "{{ scheduled_broadcast.description }}".
+                    {% if scheduled_broadcast.speakers %}
+                        This broadcast will feature {{ scheduled_broadcast.speakers }}.
+                    {% else %}
+                        No speakers have been specified for this broadcast.
+                    {% endif %}
                     The broadcast is set to begin at {{ scheduled_broadcast.start_time }}.
                 </blockquote>
             </article>

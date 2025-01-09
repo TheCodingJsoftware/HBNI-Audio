@@ -90,10 +90,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (scheduledBroadcastsContainer) { // There might not be any scheduled broadcasts
         scheduledBroadcastsContainer.querySelectorAll('[id^=\'article\']').forEach(article => {
             const title = article.getAttribute('data-title');
-            const description = article.getAttribute('data-description');
-            const startTime = article.getAttribute('data-start-time');
-
-            const copyMessage = `${title} has scheduled a broadcast with the description: "${description}". The broadcast is set to begin at ${startTime}.`;
+            const scheduledDescription = article.querySelector(`#scheduled-description-${title}`);
+            const copyMessage = scheduledDescription.textContent;
 
             const shareButton = article.querySelector(`#share-button`);
             const copyButton = article.querySelector(`#copy-button`);

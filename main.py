@@ -1,3 +1,4 @@
+import contextlib
 import json
 import os
 import shutil
@@ -411,8 +412,7 @@ async def refresh_scedule_data():
 
         current_time = datetime.now()
         active_schedules = {}
-
-        # Filter schedules where start_time is in the future
+        # Filter schedules where start_time is in the future or within the next couple of hours
         for scheduled_date, schedule in updated_data.items():
             try:
                 start_time = datetime.strptime(
@@ -420,8 +420,7 @@ async def refresh_scedule_data():
                     "%A, %B %d, %Y at %I:%M %p"
                 )
 
-                # Only include schedules that haven't started yet
-                if start_time > current_time:
+                if start_time > current_time or (start_time - current_time).total_seconds() <= 7200:  # 2 hours in seconds
                     active_schedules[scheduled_date] = schedule
             except ValueError as e:
                 print(f"Error parsing date for schedule {scheduled_date}: {e}")
