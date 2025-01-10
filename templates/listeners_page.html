@@ -52,13 +52,16 @@
                     </button>
                 </div>
                 <div>
-                    <i>artist</i> {{ scheduled_broadcast.host.replace('/', '').title() }}
+                    <i>home_pin</i> {{ scheduled_broadcast.host.replace('/', '').title() }}
                 </div>
                 <div>
                     <i>record_voice_over</i> {{ scheduled_broadcast.speakers if scheduled_broadcast.speakers else "No speakers listed" }}
                 </div>
                 <div>
                     <i>event</i> {{ scheduled_broadcast.start_time }}
+                </div>
+                <div>
+                    <i>timer</i> {{ scheduled_broadcast.duration }}
                 </div>
                 <blockquote class="no-line" id="scheduled-description-{{ scheduled_broadcast.host }}">
                     {{ scheduled_broadcast.host.title() }} has scheduled a broadcast with the description:
@@ -68,7 +71,7 @@
                     {% else %}
                         No speakers have been specified for this broadcast.
                     {% endif %}
-                    The broadcast is set to begin at {{ scheduled_broadcast.start_time }}.
+                    The broadcast is set to begin at {{ scheduled_broadcast.start_time }} and expected to last {{ scheduled_broadcast.duration }}.
                 </blockquote>
             </article>
             {% endfor %}
@@ -94,7 +97,7 @@
                     </button><div id="recording-status-{{ broadcast.host }}" class="badge min none hidden"></div>
                 </div>
                 <div>
-                    <i>artist</i> <span id="artist-{{ broadcast.host }}">{{ broadcast.host.replace('/', '').title() }} </span>
+                    <i>home_pin</i> <span id="artist-{{ broadcast.host }}">{{ broadcast.host.replace('/', '').title() }} </span>
                 </div>
                 <div>
                     <i>event</i> <span id="event-{{ broadcast.host }}">{{ broadcast.stream_start.replace('_', ':') }}</span>

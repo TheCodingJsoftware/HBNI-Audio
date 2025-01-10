@@ -394,7 +394,7 @@ async def refresh_scedule_data():
     try:
         async with db_pool.acquire() as conn:
             rows = await conn.fetch("""
-                SELECT id, host, description, speakers, start_time
+                SELECT id, host, description, duration, speakers, start_time
                 FROM scheduledbroadcasts
                 ORDER BY created_at DESC
             """)
@@ -405,6 +405,7 @@ async def refresh_scedule_data():
                     'host': row['host'],
                     'description': row['description'],
                     'speakers': row['speakers'],
+                    'duration': row['duration'],
                     'start_time': row['start_time']
                 }
 
@@ -699,6 +700,7 @@ async def initialize_scheduled_broadcasts_table():
                 id SERIAL PRIMARY KEY,
                 host TEXT NOT NULL,
                 description TEXT NOT NULL,
+                duration TEXT NOT NULL,
                 speakers TEXT NOT NULL DEFAULT '',
                 start_time TEXT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -714,6 +716,7 @@ class ScheduleBroadcastHandler(BaseHandler):
             description = data.get("description")
             speakers = data.get("speakers", "")  # Optional field
             start_time = data.get("startTime")
+            duration = data.get("duration")
 
             if not (host and description and start_time):
                 self.set_status(400)
@@ -727,9 +730,9 @@ class ScheduleBroadcastHandler(BaseHandler):
             async with db_pool.acquire() as conn:
                 await conn.execute("""
                     INSERT INTO scheduledbroadcasts
-                    (host, description, speakers, start_time)
-                    VALUES ($1, $2, $3, $4)
-                """, host, description, speakers, formatted_time)
+                    (host, description, duration, speakers, start_time)
+                    VALUES ($1, $2, $3, $4, $5)
+                """, host, description, duration, speakers, formatted_time)
 
             await refresh_scedule_data()
 

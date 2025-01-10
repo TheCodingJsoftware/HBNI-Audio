@@ -69,8 +69,9 @@ async function submitSchedule() {
     const description = document.getElementById("schedule-description").value;
     const startTime = document.getElementById("date-time-picker").value;
     const speakers = document.getElementById("schedule-speakers").value;
+    const duration = document.getElementById("schedule-duration").value;
 
-    if (!host || !description || !startTime) {
+    if (!host || !description || !startTime || !duration) {
         alert("Please provide all the required fields.");
         return;
     }
@@ -81,7 +82,7 @@ async function submitSchedule() {
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({ host, description, startTime, speakers })
+        body: JSON.stringify({ host, description, startTime, speakers, duration })
     });
 
     if (response.ok) {

@@ -38,7 +38,7 @@
 <body class="dark hidden">
     <main class="responsive">
         <div class="grid">
-            <article class="s12 m12 l6 round no-padding" style="height: fit-content !important;">
+            <article class="s12 m12 l12 round no-padding" style="height: fit-content !important;">
                 <details id="broadcast-details">
                     <summary class=" padding" style="font-size: 18px;">
                     Broadcast Details
@@ -103,7 +103,7 @@
                     </div>
                 </details>
             </article>
-            <article class="s12 m12 l6 round no-padding" id="main-article" style="height: fit-content !important;">
+            <article class="s12 m12 l12 round no-padding" id="main-article" style="height: fit-content !important;">
                 <details id="broadcast-controls">
                     <summary class=" padding" style="font-size: 18px;">
                     Broadcast Controls
@@ -179,7 +179,7 @@
         </p>
         <div class="grid">
             <div class="field label prefix border s12">
-                <i>artist</i>
+                <i>home_pin</i>
                 <input type="text" id="schedule-host" name="schedule-host" required/>
                 <label>Colony Name</label>
             </div>
@@ -189,6 +189,25 @@
                 <label>Speaker(s)</label>
                 <span class="helper no-line">For multiple speakers, separate with commas.</span>
             </div>
+            <div class="field suffix border label s12">
+                <select id="schedule-duration" name="schedule-duration">
+                    <option disabled selected>Select a duration</option>
+                    <option>approximately 30 minutes</option>
+                    <option>approximately 45 minutes</option>
+                    <option>approximately 1 hour</option>
+                    <option>approximately 1 hour 30 minutes</option>
+                    <option>approximately 2 hours</option>
+                    <option>approximately 2 hours 30 minutes</option>
+                    <option>approximately 3 hours</option>
+                    <option>approximately 3 hours 30 minutes</option>
+                    <option>approximately 4 hours</option>
+                    <option>approximately 4 hours 30 minutes</option>
+                    <option>approximately 5 hours</option>
+                </select>
+                <label>Duration</label>
+                <i>timer</i>
+            </div>
+
             <div class="field border label textarea s12 bottom-margin">
                 <textarea
                     type="text"
