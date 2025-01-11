@@ -60,6 +60,7 @@ love_taps_cache = {
 
 active_broadcasts_chache = {
     "data": {},
+    "active_broadcasts_count": 0,
     "last_updated": datetime.min,
 }
 
@@ -279,7 +280,7 @@ def is_broadcast_private(host: str) -> bool:
     return False
 
 
-async def get_active_icecast_broadcasts() -> list[dict[str, Union[str, int]]]:
+def get_active_icecast_broadcasts() -> list[dict[str, Union[str, int]]]:
     broadcast_data = []
 
     icecast_urls = [
@@ -288,13 +289,14 @@ async def get_active_icecast_broadcasts() -> list[dict[str, Union[str, int]]]:
     ]
     for icecast_url in icecast_urls:
         try:
-            response = requests.get(f'{icecast_url}/status-json.xsl', timeout=5)
+            response = requests.get(f'{icecast_url}/status-json.xsl', timeout=60)
             if response.status_code == 200:
                 json_content = response.text.replace('"title": - ,', '"title": null,') # Some broadcasts are weird
                 json_data = json.loads(json_content)
             else:
                 return []
         except requests.exceptions.RequestException as e:
+            print(e)
             return []
 
         # Extract relevant data for rendering
@@ -380,10 +382,12 @@ async def refresh_archive_data():
         print(f"Error refreshing archive data: {e}")
 
 
-async def refresh_active_broadcasts_data():
+def refresh_active_broadcasts_data():
     global active_broadcasts_chache
     try:
-        updated_data = await get_active_icecast_broadcasts()
+        updated_data = get_active_icecast_broadcasts()
+        if not updated_data:
+            return
         active_broadcasts_chache["data"] = updated_data
         active_broadcasts_chache["active_broadcasts_count"] = get_active_broadcast_count(updated_data)
         active_broadcasts_chache["last_updated"] = datetime.now()
