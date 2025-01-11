@@ -66,11 +66,13 @@ active_broadcasts_chache = {
 schedule_chache = {
     "all_schedules": [],
     "active_schedules": [],
+    "active_schedules_count": 0,
     "last_updated": datetime.min,
 }
 
 recording_status_chache = {
     "data": {},
+    "recording_status_count": 0,
     "last_updated": datetime.min,
 }
 
@@ -413,6 +415,7 @@ async def refresh_scedule_data():
 
         current_time = datetime.now()
         active_schedules = {}
+        active_schedules_count = 0
         # Filter schedules where start_time is in the future or within the next couple of hours
         for scheduled_date, schedule in updated_data.items():
             try:
@@ -423,11 +426,13 @@ async def refresh_scedule_data():
 
                 if start_time > current_time or (start_time - current_time).total_seconds() <= 7200:  # 2 hours in seconds
                     active_schedules[scheduled_date] = schedule
+                    active_schedules_count += 1
             except ValueError as e:
                 print(f"Error parsing date for schedule {scheduled_date}: {e}")
                 continue
 
         schedule_chache["active_schedules"] = active_schedules
+        schedule_chache["active_schedules_count"] = active_schedules_count
         schedule_chache["last_updated"] = datetime.now()
     except Exception as e:
         print(f"Error refreshing schedule data: {e}")
@@ -497,7 +502,7 @@ class GetEventCountHandler(BaseHandler):
             json.dumps(
                 {
                     "broadcast_count": active_broadcasts_chache["active_broadcasts_count"],
-                    "scheduled_broadcast_count": recording_status_chache["recording_status_count"],
+                    "scheduled_broadcast_count": schedule_chache["active_schedules_count"],
                 }
             )
         )
@@ -945,7 +950,7 @@ class ListenHandler(BaseHandler):
                 broadcast_status=active_broadcasts_chache["data"],
                 schedule=schedule_chache["active_schedules"],
                 broadcast_count=active_broadcasts_chache["active_broadcasts_count"],
-                scheduled_broadcast_count=get_scheduled_broadcast_count(),
+                scheduled_broadcast_count=schedule_chache["active_schedules_count"],
             )
             self.write(rendered_template)
         except Exception as e:
