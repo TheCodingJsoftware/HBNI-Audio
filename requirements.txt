@@ -15,3 +15,4 @@ requests==2.32.3
 tornado==6.4.1
 urllib3==2.2.3
 websockets==13.1
+firebase-admin==6.2.0
