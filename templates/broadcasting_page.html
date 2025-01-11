@@ -6,15 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <meta name="google" content="notranslate" />
-    <link href="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.css" rel="stylesheet"/>
-    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.13/dist/umd/ffmpeg.min.js"></script>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.js"></script>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css"/>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script type="module" src="/static/js/broadcasting_page.js?v=1.7" ></script>
-    <link rel="stylesheet" type="text/css" href="/static/css/theme.css?v=1.7" />
-    <link rel="stylesheet" type="text/css" href="/static/css/style.css?v=1.7" />
     <link rel="icon" href="/static/icon.png" />
     <title>HBNI Audio Broadcasting</title>
     <meta property="og:title" content="HBNI Audio Broadcasting" />
@@ -40,15 +31,13 @@
         <div class="grid">
             <article class="s12 m12 l12 round no-padding" style="height: fit-content !important;">
                 <details id="broadcast-details">
-                    <summary class=" padding" style="font-size: 18px;">
-                    Broadcast Details
-                    </summary>
-                    <nav class="center-align">
-                        <button onclick="window.location.href='/broadcasting_guide';">
+                    <summary class="padding row" style="font-size: 18px;">
+                        <span class="max">Broadcast Details</span>
+                        <button class="link transparent no-border" onclick="window.open('/broadcasting_guide', '_blank');">
                             <i>developer_guide</i>
                             <span>Broadcasting Guide</span>
                         </button>
-                    </nav>
+                    </summary>
                     <form class="padding" id="metadataForm">
                         <div class="field label border">
                             <input type="text" id="host" name="host" required/>
@@ -91,22 +80,16 @@
                             </nav>
                         </div>
                     </form>
-                    <div class="row center-align padding">
-                        <button id="scheduleBroadcast" class="max" onclick="ui('#schedule-dialog');" disabled>
-                            <i>schedule</i>
-                            <span>Schedule Event</span>
-                        </button>
-                        <button class="link transparent no-border" id="share-button">
-                            <i>share</i>
-                            <span>Share</span>
-                        </button>
-                    </div>
                 </details>
             </article>
             <article class="s12 m12 l12 round no-padding" id="main-article" style="height: fit-content !important;">
                 <details id="broadcast-controls">
-                    <summary class=" padding" style="font-size: 18px;">
-                    Broadcast Controls
+                    <summary class="padding row" style="font-size: 18px;">
+                        <span class="max">Broadcast Controls</span>
+                        <button class="link transparent no-border" id="share-button">
+                            <i>share</i>
+                            <span>Share</span>
+                        </button>
                     </summary>
                     <nav class="center-align padding">
                         <i>volume_down</i>
@@ -157,13 +140,6 @@
     <div class="snackbar green" id="correct-password">
         Password Validated
     </div>
-    <div class="snackbar error" id="schedule-error">
-        Error Submitting Schedule
-    </div>
-    <div class="snackbar" id="schedule-success">
-        <div class="max">Schedule Submitted</div>
-        <a class="inverse-link" href="/listeners_page" target="_blank">View</a>
-    </div>
     <div class="snackbar" id="broadcast-started">
         <div class="max">Broadcast Started</div>
         <a class="inverse-link" href="/listeners_page" target="_blank">View</a>
@@ -171,68 +147,6 @@
     <div class="snackbar" id="copied-to-clipboard">
         Copied to Clipboard
     </div>
-    <div class="overlay blur"></div>
-    <dialog id="schedule-dialog">
-        <h5 class="center-align">Schedule Event</h5>
-        <p class="no-line medium-width">
-            Events will remain visible for up to 2 hours after the scheduled date.
-        </p>
-        <div class="grid">
-            <div class="field label prefix border s12">
-                <i>home_pin</i>
-                <input type="text" id="schedule-host" name="schedule-host" required/>
-                <label>Colony Name</label>
-            </div>
-            <div class="field label prefix border s12 bottom-margin">
-                <i>record_voice_over</i>
-                <input type="text" id="schedule-speakers" name="schedule-speakers" required/>
-                <label>Speaker(s)</label>
-                <span class="helper no-line">For multiple speakers, separate with commas.</span>
-            </div>
-            <div class="field suffix border label s12">
-                <select id="schedule-duration" name="schedule-duration">
-                    <option disabled selected>Select a duration</option>
-                    <option>approximately 30 minutes</option>
-                    <option>approximately 45 minutes</option>
-                    <option>approximately 1 hour</option>
-                    <option>approximately 1 hour 30 minutes</option>
-                    <option>approximately 2 hours</option>
-                    <option>approximately 2 hours 30 minutes</option>
-                    <option>approximately 3 hours</option>
-                    <option>approximately 3 hours 30 minutes</option>
-                    <option>approximately 4 hours</option>
-                    <option>approximately 4 hours 30 minutes</option>
-                    <option>approximately 5 hours</option>
-                </select>
-                <label>Duration</label>
-                <i>timer</i>
-            </div>
-
-            <div class="field border label textarea s12 bottom-margin">
-                <textarea
-                    type="text"
-                    id="schedule-description"
-                    name="schedule-description"
-                    required
-                ></textarea>
-                <label>Description</label>
-                <span class="helper no-line">Explain what the event is about.</span>
-            </div>
-            <div class="field label prefix border s12">
-                <i>event</i>
-                <input type="date" id="date-time-picker" name="date" />
-                <label>Date</label>
-            </div>
-            <button id="submit-schedule-button" class="s6">
-                <i>send</i>
-                <span>Submit</span>
-            </button>
-            <button class=" s6" onclick="ui('#schedule-dialog');">
-                <i>close</i>
-                <span>Cancel</span>
-            </button>
-        </div>
-    </dialog>
     <dialog class="bottom" id="save-broadcast-dialog">
         <h5 class="center-align">Save Broadcast</h5>
         <p class="center-align">File Name: <code id="broadcast-file-name"></code></p>

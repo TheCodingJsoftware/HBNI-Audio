@@ -1,3 +1,8 @@
+import "beercss";
+import "material-dynamic-colors";
+import "../css/theme.css";
+import "../css/style.css";
+
 export function toggleMode() {
     let currentMode = localStorage.getItem("mode") || "dark";
     let newMode = currentMode === "dark" ? "light" : "dark";

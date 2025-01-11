@@ -40,7 +40,6 @@ This is a web application that allows users to browse and listen to archived bro
      - (Default: /app/static/Recordings)
    - `RECORDINGS_STATUS_PATH`: The path to the file where the recording status is stored.
      - (Default: /app/static/recording_statis.json)
-   - `SECRET_KEY`: A secret key used for session management.
    - `ICECAST_BROADCASTING_IP`: The username used to access the HBNI Audio Streaming Service.
      - (Default: 172.17.0.1)
    - `ICECAST_BROADCASTING_PORT`: The port number used to access the HBNI Audio Streaming Service.

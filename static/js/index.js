@@ -1,4 +1,65 @@
 import { loadTheme, toggleMode } from "/static/js/theme.js";
+import "flatpickr";
+require("flatpickr/dist/themes/dark.css");
+
+if ('serviceWorker' in navigator && 'Notification' in window) {
+    import("firebase/app").then(({ initializeApp }) => {
+        import("firebase/messaging").then(({ getMessaging, getToken, onMessage }) => {
+            import('./config').then(({ firebaseConfig, vapidKey }) => {
+                const app = initializeApp(firebaseConfig);
+                const messaging = getMessaging(app);
+
+                // Listen for incoming messages
+                onMessage(messaging, (payload) => {
+                    const firebaseSnackbar = document.getElementById('firebase-notification-snackbar');
+                    firebaseSnackbar.querySelector('#title').textContent = payload.notification.title;
+                    firebaseSnackbar.querySelector('#text').textContent = payload.notification.body;
+                    ui('#firebase-notification-snackbar');
+                });
+
+                // Get the registration token and handle subscription
+                getToken(messaging, { vapidKey }).then((currentToken) => {
+                    if (currentToken) {
+                        console.log('Retrieved token:', currentToken);
+
+                        const storedToken = localStorage.getItem('firebaseToken');
+
+                        if (storedToken !== currentToken) {
+                            fetch('/subscribe-to-topic', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ token: currentToken, topic: 'broadcasts' }),
+                            })
+                            .then((response) => response.json())
+                            .then((data) => {
+                                console.log('Successfully subscribed to topic:', data);
+                                localStorage.setItem('firebaseToken', currentToken); // Store the new token
+                                Notification.requestPermission().then((permission) => {
+                                    if (permission === 'granted') {
+                                        console.log('Notification permission granted.');
+                                    } else {
+                                        console.log('Unable to get permission to notify.');
+                                    }
+                                });
+                            })
+                            .catch((error) => {
+                                console.error('Error subscribing to topic:', error);
+                            });
+                        } else {
+                            console.log('Token already subscribed.');
+                        }
+                    } else {
+                        console.log('No registration token available.');
+                    }
+                }).catch((err) => {
+                    console.log('An error occurred while retrieving token: ', err);
+                });
+            });
+        });
+    });
+} else {
+    console.warn('Service workers or notifications are not supported in this browser. Firebase features are disabled.');
+}
 
 function adjustDialogForScreenSize() {
     const infoDialog = document.getElementById('info-dialog');
@@ -35,7 +96,7 @@ async function updateEventCount() {
     if (broadcastCount + scheduledBroadcastCount === 0) {
         eventCount.classList.add('hidden');
         return;
-    }else{
+    } else {
         eventCount.classList.remove('hidden');
     }
     eventCount.textContent = broadcastCount + scheduledBroadcastCount;
@@ -101,6 +162,51 @@ async function fetchLoveTaps() {
     }
 }
 
+async function submitSchedule() {
+    const host = document.getElementById("schedule-host").value;
+    const description = document.getElementById("schedule-description").value;
+    const startTime = document.getElementById("date-time-picker").value;
+    const speakers = document.getElementById("schedule-speakers").value;
+    const duration = document.getElementById("schedule-duration").value;
+
+    if (!host || !description || !startTime || !duration) {
+        alert("Please provide all the required fields.");
+        return;
+    }
+
+    // Send the data to the server
+    const response = await fetch("/schedule_broadcast", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ host, description, startTime, speakers, duration })
+    });
+
+    if (response.ok) {
+        ui("#schedule-dialog");
+    } else {
+        ui("#schedule-error");
+    }
+}
+
+async function isCorrectPassword(password) {
+    try {
+        const response = await fetch("/validate-password", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ password })
+        });
+
+        const result = await response.json();
+        return result.success;
+    } catch (error) {
+        return false;
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async function () {
     Promise.all([updateEventCount(), showNotification(), fetchLoveTaps()]);
 });
@@ -136,5 +242,44 @@ document.addEventListener('DOMContentLoaded', function () {
         }, debounceTime);
     });
 
+    const scheduleBroadcastButton = document.getElementById('schedule-broadcast-button');
+    scheduleBroadcastButton.addEventListener('click', async function () {
+        const openScheduleDialog = () => {
+            ui("#schedule-dialog");
+        };
+
+        let password = localStorage.getItem('password');
+
+        if (password && await isCorrectPassword(password)) {
+            openScheduleDialog();
+            return;
+        }
+
+        password = prompt("Please enter your password to schedule an event.");
+        if (!password) {
+            alert("Password is required to proceed.");
+            return;
+        }
+
+        if (await isCorrectPassword(password)) {
+            localStorage.setItem('password', password);
+            openScheduleDialog();
+        } else {
+            alert("The password is incorrect or not set. Please contact support for assistance.");
+        }
+    });
+
+    const submitScheduleButton = document.getElementById('submit-schedule-button');
+    submitScheduleButton.addEventListener('click', function () {
+        submitSchedule();
+    });
+
+    flatpickr("#date-time-picker", {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        altInput: true,
+        altFormat: "F j, Y H:i",
+        defaultDate: new Date(),
+    });
     setInterval(fetchLoveTaps, 1000 * 60); // Fetch every minute
 });

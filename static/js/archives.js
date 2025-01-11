@@ -76,7 +76,7 @@ function getArchiveBroadcastElement(itemData, index){
     article.innerHTML = `
     <div class="padding">
         <h6 class="bottom-margin">${itemData.description}</h6>
-        <div><i>artist</i>
+        <div><i>home_pin</i>
             ${itemData.host.replace(/\//g, '')
             .replace(/^./, char => char.toUpperCase())}
         </div>

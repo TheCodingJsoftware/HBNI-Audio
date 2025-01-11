@@ -1,15 +1,13 @@
-import contextlib
 import json
 import os
 import shutil
 import subprocess
 import traceback
-from datetime import datetime, timedelta
-from typing import Any, Union
+from datetime import datetime
 
 import asyncpg
+import firebase_admin
 import jinja2
-import jwt  # PyJWT
 import requests
 import tornado.escape
 import tornado.gen
@@ -18,13 +16,17 @@ import tornado.ioloop
 import tornado.web
 import tornado.websocket
 from dotenv import load_dotenv
+from firebase_admin import credentials, messaging
 from tornado.web import Application, RequestHandler, url
 
 import synology_uploader
 
+cred = credentials.Certificate("hbni-audio-1c43f2c03734.json")
+firebase_admin.initialize_app(cred)
+
 load_dotenv()
 
-loader = jinja2.FileSystemLoader("templates")
+loader = jinja2.FileSystemLoader("dist/html")
 env = jinja2.Environment(loader=loader)
 
 
@@ -46,6 +48,19 @@ class Broadcast:
 
 active_broadcasts: dict[str, Broadcast] = {}
 db_pool: asyncpg.Pool = None
+
+error_messages = {
+    500: "Oooops! Internal Server Error. That is, something went terribly wrong.",
+    404: "Uh-oh! You seem to have ventured into the void. This page doesn't exist!",
+    403: "Hold up! You're trying to sneak into a restricted area. Access denied!",
+    400: "Yikes! The server couldn't understand your request. Try being clearer!",
+    401: "Hey, who goes there? You need proper credentials to enter!",
+    405: "Oops! You knocked on the wrong door with the wrong key. Method not allowed!",
+    408: "Well, this is awkward. Your request took too long. Let's try again?",
+    502: "Looks like the gateway had a hiccup. It's not you, it's us!",
+    503: "We're taking a quick nap. Please try again later!",
+    418: "I'm a teapot, not a coffee maker! Why would you ask me to do that?",
+}
 
 audio_archive_cache = {
     "data": {},
@@ -280,7 +295,7 @@ def is_broadcast_private(host: str) -> bool:
     return False
 
 
-def get_active_icecast_broadcasts() -> list[dict[str, Union[str, int]]]:
+def get_active_icecast_broadcasts() -> list[dict[str, str | int]] | None:
     broadcast_data = []
 
     icecast_urls = [
@@ -294,10 +309,10 @@ def get_active_icecast_broadcasts() -> list[dict[str, Union[str, int]]]:
                 json_content = response.text.replace('"title": - ,', '"title": null,') # Some broadcasts are weird
                 json_data = json.loads(json_content)
             else:
-                return []
+                return None
         except requests.exceptions.RequestException as e:
             print(e)
-            return []
+            return None
 
         # Extract relevant data for rendering
         icestats = json_data.get("icestats", {})
@@ -343,23 +358,6 @@ def get_active_broadcast_count(broadcast_data) -> int:
     return active_broadcast_count
 
 
-def get_scheduled_broadcast_count() -> int:
-    return len(schedule_chache["active_schedules"])
-
-
-error_messages = {
-    500: "Oooops! Internal Server Error. That is, something went terribly wrong.",
-    404: "Uh-oh! You seem to have ventured into the void. This page doesn't exist!",
-    403: "Hold up! You're trying to sneak into a restricted area. Access denied!",
-    400: "Yikes! The server couldn't understand your request. Try being clearer!",
-    401: "Hey, who goes there? You need proper credentials to enter!",
-    405: "Oops! You knocked on the wrong door with the wrong key. Method not allowed!",
-    408: "Well, this is awkward. Your request took too long. Let's try again?",
-    502: "Looks like the gateway had a hiccup. It's not you, it's us!",
-    503: "We're taking a quick nap. Please try again later!",
-    418: "I'm a teapot, not a coffee maker! Why would you ask me to do that?",
-}
-
 
 class BaseHandler(RequestHandler):
     def write_error(self, status_code: int, stack_trace: str = "", **kwargs):
@@ -374,10 +372,12 @@ class BaseHandler(RequestHandler):
 async def refresh_archive_data():
     global audio_archive_cache
     try:
-        updated_data = await fetch_audio_archives()
-        audio_archive_cache["data"] = updated_data
-        audio_archive_cache["grouped_data"] = get_grouped_data(updated_data)
-        audio_archive_cache["last_updated"] = datetime.now()
+        async with db_pool.acquire() as conn:
+            rows = await conn.fetch("SELECT * FROM audioarchives")
+            updated_data = [dict(row) for row in rows]
+            audio_archive_cache["data"] = updated_data
+            audio_archive_cache["grouped_data"] = get_grouped_data(updated_data)
+            audio_archive_cache["last_updated"] = datetime.now()
     except Exception as e:
         print(f"Error refreshing archive data: {e}")
 
@@ -386,7 +386,7 @@ def refresh_active_broadcasts_data():
     global active_broadcasts_chache
     try:
         updated_data = get_active_icecast_broadcasts()
-        if not updated_data:
+        if updated_data is None:
             return
         active_broadcasts_chache["data"] = updated_data
         active_broadcasts_chache["active_broadcasts_count"] = get_active_broadcast_count(updated_data)
@@ -407,12 +407,16 @@ async def refresh_scedule_data():
 
             updated_data = {}
             for row in rows:
+                parsed_time = datetime.strptime(row['start_time'], "%Y-%m-%d %H:%M")
+                formatted_time = parsed_time.strftime("%A, %B %d, %Y at %I:%M %p")
                 updated_data[row['id']] = {
+                    'id': row['id'],
                     'host': row['host'],
                     'description': row['description'],
                     'speakers': row['speakers'],
                     'duration': row['duration'],
-                    'start_time': row['start_time']
+                    'start_time': row['start_time'],
+                    'formatted_time': formatted_time
                 }
 
         schedule_chache["all_schedules"] = updated_data
@@ -425,7 +429,7 @@ async def refresh_scedule_data():
             try:
                 start_time = datetime.strptime(
                     schedule["start_time"],
-                    "%A, %B %d, %Y at %I:%M %p"
+                    "%Y-%m-%d %H:%M"
                 )
 
                 if start_time > current_time or (start_time - current_time).total_seconds() <= 7200:  # 2 hours in seconds
@@ -541,12 +545,61 @@ class LoveTapsFetchHandler(BaseHandler):
             self.set_status(500)
             self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
 
+class SubscribeToTopicHandler(BaseHandler):
+    def post(self):
+        try:
+            data = json.loads(self.request.body)
+            token = data.get("token")
+            topic = data.get("topic", "broadcasts")  # Default topic if not provided
+
+            if not token:
+                self.set_status(400)
+                self.write({"error": "Token is required"})
+                return
+
+            # Subscribe the token to the topic
+            response = messaging.subscribe_to_topic([token], topic)
+
+            # Extract relevant fields from the response
+            result = {
+                "success_count": response.success_count,
+                "failure_count": response.failure_count,
+                "errors": [str(error) for error in response.errors],
+            }
+
+            self.set_status(200)
+            self.write({
+                "success": True,
+                "message": f"Successfully subscribed to topic {topic}",
+                "response": result,  # Include extracted information
+            })
+        except Exception as e:
+            self.set_status(500)
+            self.write({"error": f"An error occurred: {str(e)}"})
+
+
+def send_notification_to_topic(topic, title, body):
+    try:
+        message = messaging.Message(
+            notification=messaging.Notification(
+                title=title,
+                body=body,
+            ),
+            topic=topic,
+        )
+        response = messaging.send(message)
+        print(f"Successfully sent message to topic {topic}: {response}")
+    except Exception as e:
+        print(f"Failed to send message: {e}")
+
 
 class MainHandler(BaseHandler):
     def get(self):
         try:
             template = env.get_template("index.html")
             rendered_template = template.render()
+            self.set_header("Cache-Control", "max-age=3600")
+            self.set_header("Content-Type", "text/html")
             self.write(rendered_template)
         except Exception as e:
             self.set_status(500)
@@ -568,6 +621,8 @@ class FaqHandler(BaseHandler):
         try:
             template = env.get_template("faq.html")
             rendered_template = template.render()
+            self.set_header("Cache-Control", "max-age=3600")
+            self.set_header("Content-Type", "text/html")
             self.write(rendered_template)
         except Exception as e:
             self.set_status(500)
@@ -579,6 +634,8 @@ class BroadcastingGuideHandler(BaseHandler):
         try:
             template = env.get_template("broadcasting_guide.html")
             rendered_template = template.render()
+            self.set_header("Cache-Control", "max-age=3600")
+            self.set_header("Content-Type", "text/html")
             self.write(rendered_template)
         except Exception as e:
             self.set_status(500)
@@ -602,6 +659,8 @@ class AudioArchivesHandler(BaseHandler):
             rendered_template = template.render(
                 url_for=url_for_static,
             )
+            self.set_header("Cache-Control", "max-age=3600")
+            self.set_header("Content-Type", "text/html")
             self.write(rendered_template)
         except Exception as e:
             self.set_status(500)
@@ -727,13 +786,10 @@ class ScheduleBroadcastHandler(BaseHandler):
             start_time = data.get("startTime")
             duration = data.get("duration")
 
-            if not (host and description and start_time):
+            if not (host and description and start_time and duration):
                 self.set_status(400)
                 self.write({"success": False, "error": "Missing required fields"})
                 return
-
-            parsed_time = datetime.strptime(start_time, "%Y-%m-%d %H:%M")
-            formatted_time = parsed_time.strftime("%A, %B %d, %Y at %I:%M %p")
 
             # Insert into database
             async with db_pool.acquire() as conn:
@@ -741,7 +797,66 @@ class ScheduleBroadcastHandler(BaseHandler):
                     INSERT INTO scheduledbroadcasts
                     (host, description, duration, speakers, start_time)
                     VALUES ($1, $2, $3, $4, $5)
-                """, host, description, duration, speakers, formatted_time)
+                """, host, description, duration, speakers, start_time)
+
+            await refresh_scedule_data()
+
+            send_notification_to_topic("broadcasts", f"{host} scheduled a broadcast", description)
+
+            self.set_status(200)
+            self.write({"success": True})
+        except Exception as e:
+            self.set_status(500)
+            self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
+
+class GetScheduleHandler(BaseHandler):
+    async def get(self, schedule_id: int):
+        try:
+            await refresh_scedule_data()
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps(schedule_chache["all_schedules"][int(schedule_id)], cls=DateTimeEncoder))
+        except Exception as e:
+            self.set_status(500)
+            self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
+
+class EditScheduleHandler(BaseHandler):
+    async def post(self, schedule_id):
+        try:
+            data: dict[str, str] = tornado.escape.json_decode(self.request.body)
+            host = data.get("host")
+            description = data.get("description")
+            speakers = data.get("speakers", "")  # Optional field
+            start_time = data.get("startTime")
+            duration = data.get("duration")
+
+            if not (host and description and start_time and duration):
+                self.set_status(400)
+                self.write({"success": False, "error": "Missing required fields"})
+                return
+
+            # Insert into database
+            async with db_pool.acquire() as conn:
+                await conn.execute("""
+                    UPDATE scheduledbroadcasts
+                    SET host = $1, description = $2, speakers = $3, duration = $4, start_time = $5
+                    WHERE id = $6
+                """, host, description, speakers, duration, start_time, int(schedule_id))
+
+            await refresh_scedule_data()
+
+            self.set_status(200)
+            self.write({"success": True})
+        except Exception as e:
+            self.set_status(500)
+            self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
+
+    async def delete(self, schedule_id):
+        try:
+            async with db_pool.acquire() as conn:
+                await conn.execute("""
+                    DELETE FROM scheduledbroadcasts
+                    WHERE id = $1
+                """, int(schedule_id))
 
             await refresh_scedule_data()
 
@@ -933,6 +1048,8 @@ class BroadcastHandler(BaseHandler):
     def get(self):
         template = env.get_template("broadcasting_page.html")
         rendered_template = template.render()
+        self.set_header("Cache-Control", "max-age=3600")
+        self.set_header("Content-Type", "text/html")
         self.write(rendered_template)
 
 
@@ -956,6 +1073,7 @@ class ListenHandler(BaseHandler):
                 broadcast_count=active_broadcasts_chache["active_broadcasts_count"],
                 scheduled_broadcast_count=schedule_chache["active_schedules_count"],
             )
+            self.set_header("Content-Type", "text/html")
             self.write(rendered_template)
         except Exception as e:
             self.set_status(500)
@@ -1002,12 +1120,29 @@ class RecordingStatusJSONHandler(BaseHandler):
             self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
 
 
+class FirebaseServiceWorkerHandler(BaseHandler):
+    def get(self):
+        try:
+            file_path = "firebase-messaging-sw.js"
+            if os.path.exists(file_path):
+                self.set_header("Content-Type", "application/javascript")
+                with open(file_path, "r", encoding="utf-8") as f:
+                    self.write(f.read())
+            else:
+                self.set_status(404)
+                self.write("Service Worker file not found.")
+        except Exception as e:
+            self.set_status(500)
+            self.write(f"An error occurred: {str(e)}")
+
+
 def make_app():
     return Application(
         [
             url(r"/", MainHandler),
             url(r"/update-love-taps", LoveTapsUpdateHandler),
             url(r"/fetch-love-taps", LoveTapsFetchHandler),
+            url(r"/subscribe-to-topic", SubscribeToTopicHandler),
             url(r"/favicon.ico", FaviconHandler),
             url(r"/faq", FaqHandler),
             url(r"/frequently_asked_questions", FaqHandler),
@@ -1015,6 +1150,8 @@ def make_app():
             url(r"/play_recording/(.*)", PlayRecordingHandler),
             url(r"/broadcast_ws", BroadcastWSHandler),
             url(r"/schedule_broadcast", ScheduleBroadcastHandler),
+            url(r"/get_schedule/(.*)", GetScheduleHandler),
+            url(r"/edit_schedule/(.*)", EditScheduleHandler),
             url(r"/listeners_page", ListenHandler),
             url(r"/listening", ListenHandler),
             url(r"/events", ListenHandler),
@@ -1031,6 +1168,8 @@ def make_app():
             url(r"/get_event_count", GetEventCountHandler),
             url(r"/get_recording_status", GetRecordingStatusHandler),
             url(r"/download_links.json", DownloadLinksJSONHandler),
+            url(r"/firebase-messaging-sw.js", FirebaseServiceWorkerHandler),
+            url(r"/dist/(.*)", tornado.web.StaticFileHandler, {"path": "dist"}),
             url(
                 r"/app/static/Recordings/(.*)",
                 tornado.web.StaticFileHandler,

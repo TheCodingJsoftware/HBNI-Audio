@@ -1,11 +1,13 @@
 import { loadTheme, toggleMode } from "/static/js/theme.js";
+import "flatpickr";
+require("flatpickr/dist/themes/dark.css");
 
 let fetchInterval = null;
 
 function shareUpcomingBroadcast(text) {
     // Check if the Web Share API is available
     if (navigator.share) {
-        const url = window.location.origin + "/listeners_page";
+        const url = window.location.origin + "/events";
         const shareData = {
             title: "HBNI Audio Listeners Page",
             text: text,
@@ -20,7 +22,7 @@ function shareUpcomingBroadcast(text) {
             });
     } else {
         // Fallback to clipboard if Web Share API is not supported
-        navigator.clipboard.writeText(`${text}\n\nVisit here: ${window.location.origin}/listeners_page`)
+        navigator.clipboard.writeText(`${text}\n\nVisit here: ${window.location.origin}/events`)
             .then(() => {
                 const snackbar = document.getElementById("copied-to-clipboard");
                 snackbar.classList.add("show");
@@ -32,7 +34,7 @@ function shareUpcomingBroadcast(text) {
 }
 
 function copyUpcomingBroadcastToClipboard(text) {
-    navigator.clipboard.writeText(`${text}\n\nVisit here: ${window.location.origin}/listeners_page`);
+    navigator.clipboard.writeText(`${text}\n\nVisit here: ${window.location.origin}/events`);
     ui("#copied-to-clipboard");
 }
 
@@ -77,24 +79,118 @@ async function fetchBroadcastData() {
     }
 }
 
+async function isCorrectPassword(password) {
+    try {
+        const response = await fetch("/validate-password", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ password })
+        });
+
+        const result = await response.json();
+        return result.success;
+    } catch (error) {
+        return false;
+    }
+}
+
+async function editSchedule(scheduleId) {
+    const response = await fetch(`/get_schedule/${scheduleId}`);
+    if (!response.ok) throw new Error('Failed to fetch schedule data');
+    const data = await response.json();
+
+    document.getElementById("schedule-host").value = data.host;
+    document.getElementById("schedule-description").value = data.description;
+    document.getElementById("date-time-picker").value = data.start_time;
+    document.getElementById("schedule-speakers").value = data.speakers;
+    document.getElementById("schedule-duration").value = data.duration;
+
+    const submitScheduleButton = document.getElementById('submit-schedule-button');
+    submitScheduleButton.addEventListener('click', function () {
+        submitEditedSchedule(scheduleId);
+    });
+
+    const deleteScheduleButton = document.getElementById('delete-schedule-button');
+    deleteScheduleButton.addEventListener('click', function () {
+        deleteSchedule(scheduleId);
+    });
+
+    ui("#edit-schedule-dialog");
+}
+
+async function submitEditedSchedule(scheduleId) {
+    const host = document.getElementById("schedule-host").value;
+    const description = document.getElementById("schedule-description").value;
+    const startTime = document.getElementById("date-time-picker").value;
+    const speakers = document.getElementById("schedule-speakers").value;
+    const duration = document.getElementById("schedule-duration").value;
+
+    if (!host || !description || !startTime || !duration) {
+        alert("Please provide all the required fields.");
+        return;
+    }
+
+    // Send the data to the server
+    const response = await fetch(`/edit_schedule/${scheduleId}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ host, description, startTime, speakers, duration })
+    });
+
+    if (response.ok) {
+        ui("#edit-schedule-dialog");
+        ui("#edit-schedule-success");
+    } else {
+        ui("#edit-schedule-error");
+    }
+}
+
+async function deleteSchedule(scheduleId) {
+    const response = await fetch(`/edit_schedule/${scheduleId}`, {
+        method: "DELETE"
+    });
+
+    if (response.ok) {
+        ui("#edit-schedule-dialog");
+        ui("#edit-schedule-success");
+    } else {
+        ui("#edit-schedule-error");
+    }
+}
+
 // Periodically fetch updates
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
     loadTheme();
+    const shouldShowEditButton = await isCorrectPassword(localStorage.getItem('password') || '') || false;
     document.getElementById('toggle-theme').addEventListener('click', toggleMode);
     document.querySelectorAll('audio').forEach(audioElement => {
         audioElement.onerror = function () {
             alert('The audio stream is unavailable because it is served over an insecure connection. Please contact support for assistance.');
         };
     });
+
     const scheduledBroadcastsContainer = document.getElementById('scheduled-broadcasts-container');
     if (scheduledBroadcastsContainer) { // There might not be any scheduled broadcasts
         scheduledBroadcastsContainer.querySelectorAll('[id^=\'article\']').forEach(article => {
+            const scheduleId = article.getAttribute('data-id');
             const host = article.getAttribute('data-host');
             const scheduledDescription = article.querySelector(`#scheduled-description-${host}`);
             const copyMessage = scheduledDescription.textContent;
 
             const shareButton = article.querySelector(`#share-button`);
             const copyButton = article.querySelector(`#copy-button`);
+            const editButton = article.querySelector(`#edit-button`);
+            if (shouldShowEditButton){
+                editButton.classList.remove('hidden');
+            }
+
+            editButton.addEventListener('click', function () {
+                editSchedule(scheduleId);
+            });
             shareButton.addEventListener('click', function () {
                 shareUpcomingBroadcast(copyMessage);
             });
@@ -121,9 +217,15 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
-});
 
-document.addEventListener('DOMContentLoaded', async function () {
+    flatpickr("#date-time-picker", {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        altInput: true,
+        altFormat: "F j, Y H:i",
+        defaultDate: new Date(),
+    });
+
     try {
         const response = await fetch('/get_broadcast_data');
         if (!response.ok) throw new Error('Failed to fetch broadcast stats');

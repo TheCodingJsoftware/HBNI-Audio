@@ -64,40 +64,10 @@ function share() {
     }
 }
 
-async function submitSchedule() {
-    const host = document.getElementById("schedule-host").value;
-    const description = document.getElementById("schedule-description").value;
-    const startTime = document.getElementById("date-time-picker").value;
-    const speakers = document.getElementById("schedule-speakers").value;
-    const duration = document.getElementById("schedule-duration").value;
-
-    if (!host || !description || !startTime || !duration) {
-        alert("Please provide all the required fields.");
-        return;
-    }
-
-    // Send the data to the server
-    const response = await fetch("/schedule_broadcast", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ host, description, startTime, speakers, duration })
-    });
-
-    if (response.ok) {
-        ui("#schedule-dialog");
-        ui("#schedule-success");
-    } else {
-        ui("#schedule-error");
-    }
-}
-
 document.getElementById("startBroadcast").disabled = true;
 
-async function checkPassword() {
+async function isCorrectPassword() {
     const password = document.getElementById("password").value;
-
     try {
         const response = await fetch("/validate-password", {
             method: "POST",
@@ -108,15 +78,20 @@ async function checkPassword() {
         });
 
         const result = await response.json();
+        return result.success;
+    } catch (error) {
+        return false;
+    }
+}
 
-        if (result.success) {
+async function checkPassword() {
+    try {
+        if (await isCorrectPassword()) {
             document.getElementById("startBroadcast").disabled = false;
-            document.getElementById("scheduleBroadcast").disabled = false;
             ui("#correct-password");
         } else {
             ui("#incorrect-password");
             document.getElementById("startBroadcast").disabled = true;
-            document.getElementById("scheduleBroadcast").disabled = true;
         }
     } catch (error) {
         console.error("Error validating password:", error);
@@ -401,11 +376,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.getElementById('toggle-theme').addEventListener('click', toggleMode);
 
-    const submitScheduleButton = document.getElementById('submit-schedule-button');
-    submitScheduleButton.addEventListener('click', function () {
-        submitSchedule();
-    });
-
     const shareButton = document.getElementById('share-button');
     shareButton.addEventListener('click', function () {
         share();
@@ -451,11 +421,4 @@ document.addEventListener('DOMContentLoaded', function () {
     if (document.getElementById('password').value !== "") {
         checkPassword();
     }
-    flatpickr("#date-time-picker", {
-        enableTime: true,
-        dateFormat: "Y-m-d H:i",
-        altInput: true,
-        altFormat: "F j, Y H:i",
-        defaultDate: new Date(),
-    });
 });

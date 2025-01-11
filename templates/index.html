@@ -6,12 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="google" content="notranslate">
-    <link href="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.css" rel="stylesheet" />
-    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.js"></script>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
-    <script type="module" src="/static/js/index.js?v=1.7"></script>
-    <link rel="stylesheet" type="text/css" href="/static/css/theme.css?v=1.7">
-    <link rel="stylesheet" type="text/css" href="/static/css/style.css?v=1.7">
+    <meta name="description" content="Browse archived broadcasts, schedule events, broadcast live audio, and view live broadcasts and scheduled events.">
     <link rel="icon" href="/static/icon.png">
     <title>HBNI Audio</title>
     <meta property="og:title" content="HBNI Audio" />
@@ -19,7 +14,6 @@
     <meta property="og:image" content="https://broadcasting.hbni.net/static/icon.png" />
     <meta property="og:description" content="Browse archived broadcasts, schedule events, broadcast live audio, and view live broadcasts and scheduled events." />
 </head>
-
 <div class="overlay blur"></div>
 <dialog id="download-dialog">
     <h3 class="center-align">Apps</h3>
@@ -67,6 +61,69 @@
     </article>
 </dialog>
 
+<div class="overlay blur"></div>
+<dialog id="schedule-dialog">
+    <h5 class="center-align">Schedule Event</h5>
+    <p class="no-line medium-width">
+        Events will remain visible for up to 2 hours after the scheduled date.
+    </p>
+    <div class="grid">
+        <div class="field label prefix border s12">
+            <i>home_pin</i>
+            <input type="text" id="schedule-host" name="schedule-host" required/>
+            <label>Colony Name</label>
+        </div>
+        <div class="field label prefix border s12 bottom-margin">
+            <i>record_voice_over</i>
+            <input type="text" id="schedule-speakers" name="schedule-speakers" required/>
+            <label>Speaker(s)</label>
+            <span class="helper no-line">For multiple speakers, separate with commas.</span>
+        </div>
+        <div class="field suffix border label s12">
+            <select id="schedule-duration" name="schedule-duration">
+                <option disabled selected>Select a duration</option>
+                <option>approximately 30 minutes</option>
+                <option>approximately 45 minutes</option>
+                <option>approximately 1 hour</option>
+                <option>approximately 1 hour 30 minutes</option>
+                <option>approximately 2 hours</option>
+                <option>approximately 2 hours 30 minutes</option>
+                <option>approximately 3 hours</option>
+                <option>approximately 3 hours 30 minutes</option>
+                <option>approximately 4 hours</option>
+                <option>approximately 4 hours 30 minutes</option>
+                <option>approximately 5 hours</option>
+            </select>
+            <label>Duration</label>
+            <i>timer</i>
+        </div>
+
+        <div class="field border label textarea s12 bottom-margin">
+            <textarea
+                type="text"
+                id="schedule-description"
+                name="schedule-description"
+                required
+            ></textarea>
+            <label>Description</label>
+            <span class="helper no-line">Explain what the event is about.</span>
+        </div>
+        <div class="field label prefix border s12">
+            <i>event</i>
+            <input type="date" id="date-time-picker" name="date" />
+            <label>Date</label>
+        </div>
+        <button id="submit-schedule-button" class="s6">
+            <i>send</i>
+            <span>Submit</span>
+        </button>
+        <button class=" s6" onclick="ui('#schedule-dialog');">
+            <i>close</i>
+            <span>Cancel</span>
+        </button>
+    </div>
+</dialog>
+
 <header class="fixed primary" id="main-header">
     <nav>
         <button class="circle transparent" onclick="ui('#info-dialog');">
@@ -89,6 +146,10 @@
             <button class="border small-round left-align extra s6 m4 l4" onclick="window.location.href='/broadcasting_page';">
                 <i>adaptive_audio_mic</i>
                 <span>Broadcast Audio</span>
+            </button>
+            <button id="schedule-broadcast-button" class="border small-round left-align extra s6 m4 l4">
+                <i>event</i>
+                <span>Schedule Event</span>
             </button>
             <button class="border small-round left-align extra s6 m4 l4" onclick="window.location.href='/events';">
                 <i>record_voice_over</i>
@@ -116,10 +177,24 @@
         </div>
         <div class="snackbar" id="notification-snackbar">
             <div class="max" id="text"></div>
-            <a class="inverse-link" href="/listeners_page">View</a>
+            <a class="inverse-link" href="/events">View</a>
+        </div>
+        <div class="snackbar" id="firebase-notification-snackbar">
+            <div class="grid no-space max">
+                <div class="s12 bold" id="title"></div>
+                <div class="s12" id="text"></div>
+            </div>
+            <a class="inverse-link" href="/events">View</a>
         </div>
         <div class="snackbar" id="no-broadcasts-or-events-scheduled">
             <p class="no-line no-margin">No broadcasts currently online or events scheduled.</p>
+        </div>
+        <div class="snackbar error" id="schedule-error">
+            Error Submitting Schedule
+        </div>
+        <div class="snackbar" id="schedule-success">
+            <div class="max">Schedule Submitted</div>
+            <a class="inverse-link" href="/listeners_page" target="_blank">View</a>
         </div>
     </main>
 </body>
