@@ -1,0 +1,35 @@
+{
+  "name": "npm",
+  "version": "1.0.0",
+  "description": "Browse archived broadcasts, schedule events, broadcast live audio, and view live broadcasts and scheduled events.",
+  "main": "main.py",
+  "scripts": {
+    "run": "python main.py",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TheCodingJsoftware/HBNI-Audio.git"
+  },
+  "author": "Jared Gross",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/TheCodingJsoftware/HBNI-Audio/issues"
+  },
+  "homepage": "https://github.com/TheCodingJsoftware/HBNI-Audio#readme",
+  "dependencies": {
+    "beercss": "^3.8.0",
+    "firebase": "^11.1.0",
+    "flatpickr": "^4.6.13",
+    "material-dynamic-colors": "^1.1.2"
+  },
+  "devDependencies": {
+    "babel-loader": "^9.2.1",
+    "css-loader": "^7.1.2",
+    "html-webpack-plugin": "^5.6.3",
+    "mini-css-extract-plugin": "^2.9.2",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.0"
+  }
+}

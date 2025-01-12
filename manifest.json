@@ -1,0 +1,69 @@
+{
+    "short_name": "HBNI Audio",
+    "name": "HBNI Audio",
+    "icons": [
+        {
+            "src": "/static/icon-512.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        },
+        {
+            "src": "/static/icon-192.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        }
+    ],
+    "id": "/?source=pwa",
+    "start_url": "/?source=pwa",
+    "background_color": "#191c1b",
+    "display": "standalone",
+    "scope": "/",
+    "theme_color": "#191c1b",
+    "shortcuts": [
+        {
+            "name": "Current Events",
+            "short_name": "Events",
+            "description": "View active broadcasts and scheduled events",
+            "url": "/events?source=pwa",
+            "icons": [
+                { "src": "/static/icon-192.png", "sizes": "192x192" }
+            ]
+        },
+        {
+            "name": "Audio Archives",
+            "short_name": "Archives",
+            "description": "Browse past broadcast archives",
+            "url": "/archives?source=pwa",
+            "icons": [
+                { "src": "/static/icon-192.png", "sizes": "192x192" }
+            ]
+        }
+    ],
+    "description": "Stream, schedule, and access audio broadcasts with HBNI Audio.",
+    "screenshots": [
+        {
+            "src": "/static/screenshots/home.png",
+            "type": "image/png",
+            "sizes": "370x680",
+            "form_factor": "narrow"
+        },
+        {
+            "src": "/static/screenshots/home-wide.png",
+            "type": "image/png",
+            "sizes": "1545x1132",
+            "form_factor": "wide"
+        },
+        {
+            "src": "/static/screenshots/audioarchives.png",
+            "type": "image/png",
+            "sizes": "370x680",
+            "form_factor": "narrow"
+        },
+        {
+            "src": "/static/screenshots/events.png",
+            "type": "image/png",
+            "sizes": "370x680",
+            "form_factor": "narrow"
+        }
+    ]
+}

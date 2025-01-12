@@ -162,7 +162,6 @@ node_modules
 .vscode
 .env
 *.mp3
-*.json
 *.txt
 *.wav
 
@@ -179,3 +178,8 @@ gradlew.bat
 local.properties
 gradle.properties
 store_icon.png
+hbni-audio-1c43f2c03734.json
+recording_status.json
+schedule.json
+example1.json
+example2.json

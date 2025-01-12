@@ -1,0 +1,55 @@
+{
+  "packageId": "net.hbni.broadcasting.twa",
+  "host": "broadcasting.hbni.net",
+  "name": "HBNI Audio",
+  "launcherName": "HBNI Audio",
+  "display": "fullscreen-sticky",
+  "themeColor": "#1E1E2F",
+  "themeColorDark": "#000000",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#1E1E2F",
+  "enableNotifications": true,
+  "startUrl": "/?source=pwa",
+  "iconUrl": "https://broadcasting.hbni.net/static/icon-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "C:\\Users\\Jared\\Documents\\Code\\Python-Projects\\HBNI-Audio-Archive\\android.keystore",
+    "alias": "android"
+  },
+  "appVersionName": "1",
+  "appVersionCode": 1,
+  "shortcuts": [
+    {
+      "name": "Current Events",
+      "shortName": "Events",
+      "url": "https://broadcasting.hbni.net/events?source=pwa",
+      "chosenIconUrl": "https://broadcasting.hbni.net/static/icon-192.png"
+    },
+    {
+      "name": "Audio Archives",
+      "shortName": "Archives",
+      "url": "https://broadcasting.hbni.net/archives?source=pwa",
+      "chosenIconUrl": "https://broadcasting.hbni.net/static/icon-192.png"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://broadcasting.hbni.net/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://broadcasting.hbni.net/",
+  "minSdkVersion": 21,
+  "orientation": "default",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "appVersion": "1"
+}
