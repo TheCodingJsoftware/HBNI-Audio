@@ -61,14 +61,16 @@ if ('serviceWorker' in navigator && 'Notification' in window) {
     console.warn('Service workers or notifications are not supported in this browser. Firebase features are disabled.');
 }
 
+let installPrompt = null;
+
 function adjustDialogForScreenSize() {
     const infoDialog = document.getElementById('info-dialog');
-    const downloadDialog = document.getElementById('download-dialog');
+    const scheduleDialog = document.getElementById('schedule-dialog');
     if (window.innerWidth <= 600) {
         infoDialog.classList.add('max');
-        downloadDialog.classList.add('bottom');
+        scheduleDialog.classList.add('max');
     } else {
-        downloadDialog.classList.remove('bottom');
+        scheduleDialog.classList.remove('max');
         infoDialog.classList.remove('max');
     }
 }
@@ -207,12 +209,63 @@ async function isCorrectPassword(password) {
     }
 }
 
+
+function checkIfAppInstalled() {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    if (isStandalone) {
+        const installButton = document.getElementById("install");
+        installButton.classList.add("hidden");
+    }
+}
+
+window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    installPrompt = event;
+    if (!window.matchMedia('(display-mode: standalone)').matches && !window.navigator.standalone) {
+        const installButton = document.getElementById("install");
+        installButton.classList.remove("hidden");
+    }
+});
+
+function disableInAppInstallPrompt() {
+    installPrompt = null;
+    const installButton = document.getElementById("install");
+    installButton.classList.add("hidden");
+}
+
+// Event listener for when the app is installed
+window.addEventListener("appinstalled", () => {
+    disableInAppInstallPrompt();
+});
+
 document.addEventListener('DOMContentLoaded', async function () {
     Promise.all([updateEventCount(), showNotification(), fetchLoveTaps()]);
 });
 
 document.addEventListener('DOMContentLoaded', function () {
     loadTheme();
+    checkIfAppInstalled();
+
+    const installButton = document.getElementById("install");
+    installButton.addEventListener("click", async () => {
+        if (!installPrompt) {
+            console.error("Install prompt is not available.");
+            return;
+        }
+        try {
+            const result = await installPrompt.prompt();
+            console.log(`Install prompt outcome: ${result.outcome}`);
+            if (result.outcome === "accepted") {
+                disableInAppInstallPrompt();
+            }
+        } catch (err) {
+            console.error("Error triggering install prompt:", err);
+        }
+    });
+
+    if (!("beforeinstallprompt" in window)) {
+        installButton.classList.add("hidden");
+    }
 
     let lastWidth = window.innerWidth;
 

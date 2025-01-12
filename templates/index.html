@@ -13,25 +13,8 @@
     <meta property="og:url" content="https://broadcasting.hbni.net" />
     <meta property="og:image" content="https://broadcasting.hbni.net/static/icon.png" />
     <meta property="og:description" content="Browse archived broadcasts, schedule events, broadcast live audio, and view live broadcasts and scheduled events." />
+    <link rel="manifest" href="manifest.json" />
 </head>
-<div class="overlay blur"></div>
-<dialog id="download-dialog">
-    <h3 class="center-align">Apps</h3>
-    <div class="grid">
-        <button class="s4" onclick="location.href='https://github.com/TheCodingJsoftware/HBNI-Audio-Stream-Listener/releases';">
-            <i>desktop_windows</i>
-            <span>Desktop</span>
-        </button>
-        <button class="s4" onclick="location.href='https://apps.apple.com/ca/app/hbni-audio-streaming/id1611672333';">
-            <i>ios</i>
-            <span>Apple</span>
-        </button>
-        <button class="s4" onclick="location.href='https://play.google.com/store/apps/details?id=com.thecodingjsoftware.hutteritechurch';">
-            <i>android</i>
-            <span>Android</span>
-        </button>
-    </div>
-</dialog>
 
 <div class="overlay blur"></div>
 <dialog id="info-dialog">
@@ -161,10 +144,6 @@
                 <i>developer_guide</i>
                 <span>Broadcasting Guide</span>
             </button>
-            <button class="border small-round left-align extra s6 m4 l4" onclick="ui('#download-dialog');">
-                <i>apps</i>
-                <span>Apps</span>
-            </button>
             <button class="border small-round left-align extra s6 m4 l4" onclick="window.location.href='/faq';">
                 <i>help</i>
                 <span>FAQ</span>
@@ -173,6 +152,10 @@
             <button class="border small-round left-align extra s6 m4 l4" onclick="ui('#info-dialog');">
                 <i>info</i>
                 <span>Info</span>
+            </button>
+            <button class="border small-round left-align extra s6 m4 l4" id="install">
+                <i>download</i>
+                <span>Install</span>
             </button>
         </div>
         <div class="snackbar" id="notification-snackbar">

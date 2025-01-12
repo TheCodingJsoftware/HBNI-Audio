@@ -1136,6 +1136,16 @@ class FirebaseServiceWorkerHandler(BaseHandler):
             self.write(f"An error occurred: {str(e)}")
 
 
+class ManifestHandler(BaseHandler):
+    def get(self):
+        try:
+            self.set_header("Content-Type", "application/json")
+            self.write(open("manifest.json", "rb").read())
+        except Exception as e:
+            self.set_status(500)
+            self.write(f"An error occurred: {str(e)}")
+
+
 def make_app():
     return Application(
         [
@@ -1169,6 +1179,7 @@ def make_app():
             url(r"/get_recording_status", GetRecordingStatusHandler),
             url(r"/download_links.json", DownloadLinksJSONHandler),
             url(r"/firebase-messaging-sw.js", FirebaseServiceWorkerHandler),
+            url(r"/manifest.json", ManifestHandler),
             url(r"/dist/(.*)", tornado.web.StaticFileHandler, {"path": "dist"}),
             url(
                 r"/app/static/Recordings/(.*)",
