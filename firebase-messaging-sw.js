@@ -14,10 +14,10 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage(function (payload) {
-    const notificationTitle = payload.notification.title || 'Background Message Title';
+    const notificationTitle = payload.notification.title;
     const notificationOptions = {
-        body: payload.notification.body || 'Background Message body.',
-        icon: payload.notification.icon || '/favicon.ico'
+        body: payload.notification.body,
+        icon: '/static/icon.png'
     };
     self.registration.showNotification(notificationTitle, notificationOptions);
 });
