@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         scheduledBroadcastsContainer.querySelectorAll('[id^=\'article\']').forEach(article => {
             const scheduleId = article.getAttribute('data-id');
             const host = article.getAttribute('data-host');
-            const scheduledDescription = article.querySelector(`#scheduled-description-${host}`);
+            const scheduledDescription = article.querySelector(`#scheduled-description-${scheduleId}`);
             const copyMessage = scheduledDescription.textContent;
 
             const shareButton = article.querySelector(`#share-button`);

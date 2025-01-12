@@ -165,3 +165,17 @@ node_modules
 *.json
 *.txt
 *.wav
+
+# Android Studio
+*.bin
+*.gradle
+*.keystore
+gradlew
+*.xml
+/app
+gradle-wrapper.jar
+gradle-wrapper.properties
+gradlew.bat
+local.properties
+gradle.properties
+store_icon.png

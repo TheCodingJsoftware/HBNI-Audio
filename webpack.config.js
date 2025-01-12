@@ -12,6 +12,7 @@ const entries = {
     broadcasting_page: '/static/js/broadcasting_page.js',
     broadcasting_guide: '/static/js/broadcasting_guide.js',
     listeners_page: '/static/js/listeners_page.js',
+    privacy: '/static/js/privacy.js',
     faq: '/static/js/faq.js',
     error: '/static/js/error.js',
 };

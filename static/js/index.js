@@ -11,6 +11,8 @@ if ('serviceWorker' in navigator && 'Notification' in window) {
 
                 // Listen for incoming messages
                 onMessage(messaging, (payload) => {
+                    console.log('Foreground notification received:', payload);
+
                     const firebaseSnackbar = document.getElementById('firebase-notification-snackbar');
                     firebaseSnackbar.querySelector('#title').textContent = payload.notification.title;
                     firebaseSnackbar.querySelector('#text').textContent = payload.notification.body;

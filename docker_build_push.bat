@@ -7,10 +7,10 @@ for /f "tokens=2 delims==" %%I in ('"wmic os get localdatetime /value | findstr 
 set VERSION=%datetime:~0,4%.%datetime:~4,2%.%datetime:~6,2%.%datetime:~8,2%
 
 :: Build the Docker image with the versioned tag
-docker build -t hbni-audio-archive:%VERSION% .
+docker build -t jarebear/hbni-audio-archive:%VERSION% .
 
 :: Tag the Docker image as "latest"
-docker tag hbni-audio-archive:%VERSION% jarebear/hbni-audio-archive:latest
+docker tag jarebear/hbni-audio-archive:%VERSION% jarebear/hbni-audio-archive:latest
 
 :: Push both the versioned tag and the "latest" tag
 docker push jarebear/hbni-audio-archive:%VERSION%

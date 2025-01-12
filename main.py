@@ -584,6 +584,7 @@ def send_notification_to_topic(topic, title, body):
             notification=messaging.Notification(
                 title=title,
                 body=body,
+                image="/static/logo.png",
             ),
             topic=topic,
         )
@@ -633,6 +634,19 @@ class BroadcastingGuideHandler(BaseHandler):
     def get(self):
         try:
             template = env.get_template("broadcasting_guide.html")
+            rendered_template = template.render()
+            self.set_header("Cache-Control", "max-age=3600")
+            self.set_header("Content-Type", "text/html")
+            self.write(rendered_template)
+        except Exception as e:
+            self.set_status(500)
+            self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
+
+
+class PrivacyHandler(BaseHandler):
+    def get(self):
+        try:
+            template = env.get_template("privacy.html")
             rendered_template = template.render()
             self.set_header("Cache-Control", "max-age=3600")
             self.set_header("Content-Type", "text/html")
@@ -1180,6 +1194,7 @@ def make_app():
             url(r"/download_links.json", DownloadLinksJSONHandler),
             url(r"/firebase-messaging-sw.js", FirebaseServiceWorkerHandler),
             url(r"/manifest.json", ManifestHandler),
+            url(r"/privacy", PrivacyHandler),
             url(r"/dist/(.*)", tornado.web.StaticFileHandler, {"path": "dist"}),
             url(
                 r"/app/static/Recordings/(.*)",
