@@ -127,7 +127,7 @@
                 <div>
                     <i>timer</i> {{ scheduled_broadcast.duration }}
                 </div>
-                <blockquote class="no-line" id="scheduled-description-{{ scheduled_broadcast.scheduleId }}">
+                <blockquote class="no-line" id="scheduled-description-{{ scheduled_broadcast.id }}">
                     {{ scheduled_broadcast.host.title() }} has scheduled a broadcast with the description:
                     "{{ scheduled_broadcast.description }}".
                     {% if scheduled_broadcast.speakers %}
