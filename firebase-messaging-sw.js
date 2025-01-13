@@ -14,12 +14,20 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage(function (payload) {
-    // const notificationTitle = payload.notification.title;
-    // const notificationOptions = {
-    //     body: payload.notification.body,
-    //     icon: '/static/icon.png'
-    // };
-    // self.registration.showNotification(notificationTitle, notificationOptions);
+    clients.matchAll({
+        type: 'window',
+        includeUncontrolled: true
+    }).then(function(windowClients) {
+        const isAppActive = windowClients.some(client => client.visibilityState === 'visible');
+        if (!isAppActive) {
+            const notificationTitle = payload.notification.title;
+            const notificationOptions = {
+                body: payload.notification.body,
+                icon: '/static/icon.png'
+            };
+            self.registration.showNotification(notificationTitle, notificationOptions);
+        }
+    });
 });
 
 self.addEventListener('notificationclick', (event) => {
