@@ -194,7 +194,13 @@ async function submitSchedule() {
     }
 }
 
+// Add password validation caching
+let cachedPasswordValid = false;
+
 async function isCorrectPassword(password) {
+    // Return cached result if available
+    if (cachedPasswordValid) return true;
+
     try {
         const response = await fetch("/validate-password", {
             method: "POST",
@@ -205,12 +211,14 @@ async function isCorrectPassword(password) {
         });
 
         const result = await response.json();
+        if (result.success) {
+            cachedPasswordValid = true;
+        }
         return result.success;
     } catch (error) {
         return false;
     }
 }
-
 
 function checkIfAppInstalled() {
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;

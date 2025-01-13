@@ -12,6 +12,8 @@ let canvas;
 let canvasCtx;
 let timeout;
 let recordedChunks = [];
+let isPasswordValidated = false;
+let lastPassword = '';
 
 function validateHostName() {
     const hostInput = document.getElementById('host');
@@ -86,21 +88,28 @@ async function isCorrectPassword() {
 
 async function checkPassword() {
     try {
-        if (await isCorrectPassword()) {
-            document.getElementById("startBroadcast").disabled = false;
-            ui("#correct-password");
-        } else {
-            ui("#incorrect-password");
-            document.getElementById("startBroadcast").disabled = true;
+        if (!isPasswordValidated) {
+            if (await isCorrectPassword()) {
+                isPasswordValidated = true;
+                document.getElementById("startBroadcast").disabled = false;
+                ui("#correct-password");
+            } else {
+                document.getElementById("startBroadcast").disabled = true;
+                ui("#incorrect-password");
+            }
         }
     } catch (error) {
         console.error("Error validating password:", error);
     }
 }
 
-document.getElementById("password").addEventListener("input", async () => {
-    clearTimeout(timeout);
-    timeout = setTimeout(checkPassword, 3000);
+document.getElementById("password").addEventListener("input", async (e) => {
+    if (e.target.value !== lastPassword) {
+        isPasswordValidated = false;
+        lastPassword = e.target.value;
+        clearTimeout(timeout);
+        timeout = setTimeout(checkPassword, 5000);
+    }
 });
 
 document.getElementById("host").addEventListener("input", () => {
