@@ -358,8 +358,28 @@ def get_active_broadcast_count(broadcast_data) -> int:
     return active_broadcast_count
 
 
+class AnalyticsMixin:
+    async def track_visit(self):
+        try:
+            path = self.request.path
+            user_agent = self.request.headers.get('User-Agent', 'Unknown')
+            ip_address = self.request.remote_ip
+            referrer = self.request.headers.get('Referer', 'Direct')
 
-class BaseHandler(RequestHandler):
+            async with db_pool.acquire() as conn:
+                await conn.execute("""
+                    INSERT INTO page_analytics
+                    (path, user_agent, ip_address, referrer)
+                    VALUES ($1, $2, $3, $4)
+                """, path, user_agent, ip_address, referrer)
+        except Exception as e:
+            print(f"Error tracking analytics: {e}")
+
+
+class BaseHandler(RequestHandler, AnalyticsMixin):
+    async def prepare(self):
+        await self.track_visit()
+
     def write_error(self, status_code: int, stack_trace: str = "", **kwargs):
         error_message = error_messages.get(status_code, "Something went majorly wrong.")
         template = env.get_template("error.html")
@@ -1159,6 +1179,82 @@ class ManifestHandler(BaseHandler):
             self.write(f"An error occurred: {str(e)}")
 
 
+class AssetLinksHandler(BaseHandler):
+    def get(self):
+        try:
+            self.set_header("Content-Type", "application/json")
+            self.write(open(".well-known/assetlinks.json", "rb").read())
+        except Exception as e:
+            self.set_status(500)
+            self.write(f"An error occurred: {str(e)}")
+
+
+async def initialize_analytics_table():
+    async with db_pool.acquire() as conn:
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS page_analytics (
+                id SERIAL PRIMARY KEY,
+                path TEXT NOT NULL,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                user_agent TEXT,
+                ip_address TEXT,
+                referrer TEXT,
+                day_bucket DATE GENERATED ALWAYS AS (DATE(timestamp)) STORED
+            );
+
+            -- Create an index on the day_bucket for faster querying
+            CREATE INDEX IF NOT EXISTS idx_page_analytics_day_bucket
+            ON page_analytics(day_bucket);
+        """)
+
+
+class AnalyticsHandler(BaseHandler):
+    async def get(self):
+        try:
+            async with db_pool.acquire() as conn:
+                # Get visits per day for the last 30 days
+                daily_visits = await conn.fetch("""
+                    SELECT
+                        day_bucket,
+                        COUNT(*) as visit_count
+                    FROM page_analytics
+                    WHERE day_bucket >= CURRENT_DATE - INTERVAL '30 days'
+                    GROUP BY day_bucket
+                    ORDER BY day_bucket DESC
+                """)
+
+                # Get most visited pages
+                popular_pages = await conn.fetch("""
+                    SELECT
+                        path,
+                        COUNT(*) as visit_count
+                    FROM page_analytics
+                    WHERE timestamp >= CURRENT_DATE - INTERVAL '30 days'
+                    GROUP BY path
+                    ORDER BY visit_count DESC
+                    LIMIT 10
+                """)
+
+                self.write({
+                    "daily_visits": [dict(row) for row in daily_visits],
+                    "popular_pages": [dict(row) for row in popular_pages],
+                })
+        except Exception as e:
+            self.set_status(500)
+            self.write({"error": str(e)})
+
+
+async def cleanup_old_analytics():
+    try:
+        async with db_pool.acquire() as conn:
+            await conn.execute("""
+                DELETE FROM page_analytics
+                WHERE timestamp < CURRENT_DATE - INTERVAL '90 days'
+            """)
+    except Exception as e:
+        print(f"Error cleaning analytics: {e}")
+
+
 def make_app():
     return Application(
         [
@@ -1193,6 +1289,7 @@ def make_app():
             url(r"/download_links.json", DownloadLinksJSONHandler),
             url(r"/firebase-messaging-sw.js", FirebaseServiceWorkerHandler),
             url(r"/manifest.json", ManifestHandler),
+            url(r"/.well-known/assetlinks.json", AssetLinksHandler),
             url(r"/privacy", PrivacyHandler),
             url(r"/dist/(.*)", tornado.web.StaticFileHandler, {"path": "dist"}),
             url(
@@ -1201,6 +1298,7 @@ def make_app():
                 {"path": os.getenv("STATIC_RECORDINGS_PATH", "/app/static/Recordings")},
             ),
             url(r"/recording_status.json", RecordingStatusJSONHandler),
+            url(r"/analytics", AnalyticsHandler),
             url(r"/.*", BaseHandler),
         ],
         static_path=os.path.join(os.path.dirname(__file__), "static"),
@@ -1214,6 +1312,7 @@ if __name__ == "__main__":
     # Run at startup
     tornado.ioloop.IOLoop.current().run_sync(initialize_db_pool)
     # tornado.ioloop.IOLoop.current().run_sync(initialize_scheduled_broadcasts_table)
+    tornado.ioloop.IOLoop.current().run_sync(initialize_analytics_table)
     tornado.ioloop.IOLoop.current().run_sync(refresh_archive_data)
     tornado.ioloop.IOLoop.current().run_sync(refresh_active_broadcasts_data)
     tornado.ioloop.IOLoop.current().run_sync(refresh_scedule_data)
@@ -1251,4 +1350,11 @@ if __name__ == "__main__":
         refresh_love_taps_cache,
         int(os.getenv("REFRESH_LOVE_TAPS_CACHE_INTERVAL_MINUTES", default=5)) * 60 * 1000
     ).start())
+
+    # Add this with your other periodic callbacks
+    loop.call_later(360, lambda: tornado.ioloop.PeriodicCallback(
+        cleanup_old_analytics,
+        24 * 60 * 60 * 1000  # Run once per day
+    ).start())
+
     tornado.ioloop.IOLoop.instance().start()

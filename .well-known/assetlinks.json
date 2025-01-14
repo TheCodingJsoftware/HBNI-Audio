@@ -1,0 +1,15 @@
+[
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls",
+            "delegate_permission/common.get_login_creds"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "net.hbni.broadcasting.twa",
+            "sha256_cert_fingerprints": [
+                "23:A5:CF:45:50:EC:7F:E0:1B:72:31:4B:24:5B:F2:05:64:C8:AC:8E:2B:07:3F:2F:8F:71:47:8F:98:AD:96:E3"
+            ]
+        }
+    }
+]
