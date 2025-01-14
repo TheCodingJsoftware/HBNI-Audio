@@ -583,7 +583,7 @@ def send_notification_to_topic(topic, title, body):
             notification=messaging.Notification(
                 title=title,
                 body=body,
-                image="/static/logo.png",
+                image="/static/icon.png",
             ),
             topic=topic,
         )
