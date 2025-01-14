@@ -1234,9 +1234,17 @@ class AnalyticsHandler(BaseHandler):
                     ORDER BY visit_count DESC
                     LIMIT 10
                 """)
+                # Convert date objects to strings for JSON serialization
+                daily_visits_data = [
+                    {
+                        **dict(row),
+                        'day_bucket': row['day_bucket'].isoformat() if row['day_bucket'] else None
+                    }
+                    for row in daily_visits
+                ]
 
                 self.write({
-                    "daily_visits": [dict(row) for row in daily_visits],
+                    "daily_visits": daily_visits_data,
                     "popular_pages": [dict(row) for row in popular_pages],
                 })
         except Exception as e:
