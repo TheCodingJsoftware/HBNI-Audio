@@ -129,6 +129,42 @@ function getArchiveBroadcastElement(itemData, index){
     return article;
 }
 
+async function loadTrendingArchives() {
+    try {
+        const response = await fetch('/trending_archives');
+        if (!response.ok) throw new Error('Failed to fetch trending archives');
+        const trendingArchives = await response.json();
+        const trandingDivContainer = document.getElementById('trending-container');
+        if (!trendingArchives || trendingArchives.length === 0){
+            trandingDivContainer.classList.add("hidden");
+            return;
+        } else {
+            trandingDivContainer.classList.remove("hidden");
+        }
+
+        const container = document.getElementById('trending-archives-container');
+        container.innerHTML = '';
+        trendingArchives.forEach((archive, index) => {
+            const archiveWithAnalytics = {
+                ...archive,
+                groupName: "Trending",  // Add groupName for the getArchiveBroadcastElement function
+            };
+
+            const article = getArchiveBroadcastElement(archiveWithAnalytics, index);
+            container.appendChild(article);
+        });
+    } catch (error) {
+        console.error('Error loading trending archives:', error);
+        const container = document.getElementById('trending-archives-container');
+        if (container) {
+            container.innerHTML = `
+                <h6 class="absolute padding center middle medium-width center-align">
+                    Error loading trending broadcasts.
+                </h6>`;
+        }
+    }
+}
+
 async function loadArchiveData() {
     try {
       const response = await fetch('/get_archive_data');
@@ -288,12 +324,14 @@ document.addEventListener('DOMContentLoaded', async function () {
     // Hook up prev/next
     prevPageBtn.addEventListener('click', goToPreviousPage);
     nextPageBtn.addEventListener('click', goToNextPage);
-    await loadArchiveData();
-});
+    await Promise.all([
+        loadArchiveData(),
+        updateEventCount(),
+        loadTrendingArchives()
+    ]);
 
-document.addEventListener('DOMContentLoaded', async function () {
-    await updateEventCount();
     setInterval(updateEventCount, 1000 * 60);
+    setInterval(loadTrendingArchives, 5000 * 60);
 });
 
 document.addEventListener('DOMContentLoaded', function () {

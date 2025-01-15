@@ -86,6 +86,11 @@ schedule_chache = {
     "last_updated": datetime.min,
 }
 
+trending_archives_cache = {
+    "data": {},
+    "last_update": datetime.min
+}
+
 recording_status_chache = {
     "data": {},
     "recording_status_count": 0,
@@ -490,6 +495,59 @@ async def refresh_love_taps_cache():
         total_taps = row["total_taps"] or 0
         love_taps_cache["data"] = total_taps
         love_taps_cache["last_updated"] = datetime.now()
+
+
+async def refresh_trending_archives():
+    global trending_archives_cache
+    try:
+        async with db_pool.acquire() as conn:
+            # Get the most visited recording_stats pages from the last 24 hours
+            trending_recordings = await conn.fetch("""
+                SELECT
+                    path,
+                    COUNT(*) as visit_count
+                FROM page_analytics
+                WHERE
+                    path LIKE '/recording_stats/%'
+                    AND timestamp >= CURRENT_TIMESTAMP - INTERVAL '24 hours'
+                GROUP BY path
+                ORDER BY visit_count DESC
+                LIMIT 10
+            """)
+
+            trending_archives = []
+            for record in trending_recordings:
+                filename = record['path'].replace('/recording_stats/', '')
+                filename = tornado.escape.url_unescape(filename)
+
+                matching_archive = None
+                for archive in audio_archive_cache["data"]:
+                    if archive["filename"] == filename:
+                        item_date = datetime.strptime(archive["date"], "%B %d %A %Y %I_%M %p")
+                        diff_days = (datetime.today().date() - item_date.date()).days
+                        uploaded_days_ago = f"{diff_days} days ago"
+
+                        if diff_days == 0:
+                            uploaded_days_ago = "Today"
+                        elif diff_days == 1:
+                            uploaded_days_ago = "Yesterday"
+
+                        matching_archive = {
+                            **archive,
+                            "analytic_visit_count": record["visit_count"],
+                            "trending_rank": len(trending_archives) + 1,
+                            "formatted_length": format_length(archive["length"]),
+                            "uploaded_days_ago": uploaded_days_ago,
+                        }
+                        break
+
+                if matching_archive:
+                    trending_archives.append(matching_archive)
+
+            trending_archives_cache["data"] = trending_archives
+            trending_archives_cache["last_updated"] = datetime.now()
+    except Exception as e:
+        print(f"Error refreshing trending archives: {e}")
 
 
 class GetArchiveDataHandler(BaseHandler):
@@ -1263,6 +1321,16 @@ async def cleanup_old_analytics():
         print(f"Error cleaning analytics: {e}")
 
 
+class TrendingArchivesHandler(BaseHandler):
+    async def get(self):
+        try:
+            self.set_header("Content-Type", "application/json")
+            self.write(json.dumps(trending_archives_cache["data"], cls=DateTimeEncoder))
+        except Exception as e:
+            self.set_status(500)
+            self.write({"error": str(e)})
+
+
 def make_app():
     return Application(
         [
@@ -1307,6 +1375,7 @@ def make_app():
             ),
             url(r"/recording_status.json", RecordingStatusJSONHandler),
             url(r"/analytics", AnalyticsHandler),
+            url(r"/trending_archives", TrendingArchivesHandler),
             url(r"/.*", BaseHandler),
         ],
         static_path=os.path.join(os.path.dirname(__file__), "static"),
@@ -1363,6 +1432,15 @@ if __name__ == "__main__":
     loop.call_later(360, lambda: tornado.ioloop.PeriodicCallback(
         cleanup_old_analytics,
         24 * 60 * 60 * 1000  # Run once per day
+    ).start())
+
+    # Add initial refresh of trending archives
+    tornado.ioloop.IOLoop.current().run_sync(refresh_trending_archives)
+
+    # Add periodic refresh (after 5 minutes)
+    loop.call_later(300, lambda: tornado.ioloop.PeriodicCallback(
+        refresh_trending_archives,
+        int(os.getenv("REFRESH_TRENDING_ARCHIVES_INTERVAL_MINUTES", default=5)) * 60 * 1000
     ).start())
 
     tornado.ioloop.IOLoop.instance().start()

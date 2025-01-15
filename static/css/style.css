@@ -23,6 +23,10 @@ article {
     overflow-x: hidden;
 }
 
+#trending-archives-container{
+    max-height: 400px;
+}
+
 @media (max-width: 600px) {
     #contents{
         height: 450px;
