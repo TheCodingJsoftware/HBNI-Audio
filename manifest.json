@@ -15,10 +15,10 @@
     ],
     "id": "/?source=pwa",
     "start_url": "/?source=pwa",
-    "background_color": "#191c1b",
+    "background_color": "#101413",
     "display": "standalone",
     "scope": "/",
-    "theme_color": "#191c1b",
+    "theme_color": "#101413",
     "shortcuts": [
         {
             "name": "Current Events",
