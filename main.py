@@ -314,10 +314,10 @@ def get_active_icecast_broadcasts() -> list[dict[str, str | int]] | None:
                 json_content = response.text.replace('"title": - ,', '"title": null,') # Some broadcasts are weird
                 json_data = json.loads(json_content)
             else:
-                return None
+                continue
         except requests.exceptions.RequestException as e:
             print(e)
-            return None
+            continue
 
         # Extract relevant data for rendering
         icestats = json_data.get("icestats", {})
