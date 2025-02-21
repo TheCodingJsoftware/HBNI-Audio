@@ -316,7 +316,7 @@ def get_active_icecast_broadcasts() -> list[dict[str, str | int]] | None:
                 json_data = json.loads(json_content)
             else:
                 continue
-        except requests.exceptions.RequestException as e:
+        except Exception as e:
             print(e)
             continue
 
