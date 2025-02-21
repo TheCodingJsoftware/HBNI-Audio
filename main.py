@@ -310,7 +310,7 @@ def get_active_icecast_broadcasts() -> list[dict[str, str | int]] | None:
     ]
     for icecast_url in icecast_urls:
         try:
-            response = requests.get(f'{icecast_url}/status-json.xsl', timeout=60)
+            response = requests.get(f'{icecast_url}/status-json.xsl', timeout=10)
             if response.status_code == 200:
                 json_content = response.text.replace('"title": - ,', '"title": null,') # Some broadcasts are weird
                 json_data = json.loads(json_content)
