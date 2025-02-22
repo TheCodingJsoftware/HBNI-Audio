@@ -150,15 +150,12 @@
                     <h6 class="bottom-margin max" id="server-description-{{ broadcast.host }}">
                         {{ broadcast.server_description }}
                     </h6>
-                    <button class=" circle link transparent wave" onclick="window.open('{{ broadcast.source_url }}/{{ broadcast.host }}')">
+                    {% if "https" in broadcast.source_url %}
+                    <button class="circle link transparent" onclick="window.open('{{ broadcast.source_url }}/{{ broadcast.host }}')">
                         <i>open_in_new</i>
                     </button>
-                    <button id="share-button" class="circle link transparent">
-                        <i>share</i>
-                    </button>
-                    <button id="copy-button" class="circle link transparent">
-                        <i>content_copy</i>
-                    </button><div id="recording-status-{{ broadcast.host }}" class="badge min none hidden"></div>
+                    {% endif %}
+                    <div id="recording-status-{{ broadcast.host }}" class="badge min none hidden"></div>
                 </div>
                 <div>
                     <i>home_pin</i> <span id="artist-{{ broadcast.host }}">{{ broadcast.host.replace('/', '').title() }} </span>
@@ -176,10 +173,23 @@
                     <i>trending_up</i> <span>Listener Peak:</span> <span id="listener-peak-{{ broadcast.host }}">{{ broadcast.listener_peak }}</span>
                 </div>
                 <div class="top-margin center-align middle-align">
+                    <button id="copy-button" class="circle link transparent">
+                        <i>content_copy</i>
+                    </button>
+                    {% if "https" in broadcast.source_url %}
                     <audio controls id="audio-{{ broadcast.host }}" class="s12 m8 l8" title="{{ broadcast.server_description }}" preload="auto">
                         <source src="{{ broadcast.source_url }}/{{ broadcast.host }}" type="audio/mpeg" />
                         Your browser does not support the audio element.
                     </audio>
+                    {% else %}
+                    <button class="primary round extra" onclick="window.open('{{ broadcast.source_url }}/{{ broadcast.host }}')">
+                        <i>open_in_new</i>
+                        <span>Play in New Tab</span>
+                    </button>
+                    {% endif %}
+                    <button id="share-button" class="circle link transparent">
+                        <i>share</i>
+                    </button>
                 </div>
             </article>
             {% endif %} {% endfor %}
