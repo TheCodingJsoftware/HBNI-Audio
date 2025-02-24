@@ -25,7 +25,7 @@ messaging.onBackgroundMessage(function (payload) {
                 body: payload.notification.body,
                 icon: '/static/icon.png'
             };
-            self.registration.showNotification(notificationTitle, notificationOptions);
+            // self.registration.showNotification(notificationTitle, notificationOptions);
         }
     });
 });

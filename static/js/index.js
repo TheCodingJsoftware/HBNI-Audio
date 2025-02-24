@@ -22,8 +22,6 @@ if ('serviceWorker' in navigator && 'Notification' in window) {
                 // Get the registration token and handle subscription
                 getToken(messaging, { vapidKey }).then((currentToken) => {
                     if (currentToken) {
-                        console.log('Retrieved token:', currentToken);
-
                         const storedToken = localStorage.getItem('firebaseToken');
 
                         if (storedToken !== currentToken) {

@@ -2,7 +2,7 @@ import { loadTheme, toggleMode } from "/static/js/theme.js";
 
 let allItems = [];
 let currentPage = 1;
-const itemsPerPage = 50;
+const itemsPerPage = 20;
 
 // references to pagination elements
 let contentsContainer;
