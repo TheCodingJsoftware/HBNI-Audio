@@ -35,14 +35,6 @@ function searchAndFilter() {
     }
 }
 
-const adjustPaginationForScreenSize = () => {
-    if (window.innerWidth <= 600) {
-        pageNumbersContainer.classList.remove("center-align");
-    } else {
-        pageNumbersContainer.classList.add("center-align");
-    }
-}
-
 function closeAllDetails() {
     const detailsElements = document.querySelectorAll('details');
     detailsElements.forEach(details => details.removeAttribute('open'));
@@ -223,7 +215,6 @@ function renderPage(pageNumber) {
 
     // Update pagination controls
     updatePaginationButtons();
-    adjustPaginationForScreenSize();
     searchAndFilter();
 }
 
@@ -348,12 +339,9 @@ document.addEventListener('DOMContentLoaded', function () {
         renderPage(currentPage);
     });
 
-    adjustPaginationForScreenSize();
-
     window.addEventListener('resize', () => {
         const currentWidth = window.innerWidth;
         if (currentWidth !== lastWidth) {
-            adjustPaginationForScreenSize();
             lastWidth = currentWidth; // Update the last known width
         }
     });
