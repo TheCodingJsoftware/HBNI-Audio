@@ -304,6 +304,7 @@ def get_active_icecast_broadcasts() -> list[dict[str, str | int]] | None:
     broadcast_data = []
 
     icecast_urls = [
+        "http://hbniaudio.hbni.net:443",
         "https://hbniaudio.hbni.net",
         "http://hbniaudio.hbni.net:8000",
         "https://broadcast.hbni.net",
