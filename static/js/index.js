@@ -83,7 +83,6 @@ async function updateEventCount() {
     const scheduledBroadcastCount = data.scheduled_broadcast_count;
 
     const eventCount = document.getElementById('event-count');
-    const eventTooltipStatus = document.getElementById('event-tooltip-status');
     let message = "";
 
     if (broadcastCount >= 1)
@@ -91,9 +90,10 @@ async function updateEventCount() {
     if (scheduledBroadcastCount >= 1)
         message += `${scheduledBroadcastCount} scheduled broadcast${scheduledBroadcastCount > 1 ? "s" : ""}`;
     if (broadcastCount + scheduledBroadcastCount === 0)
-        message = "No broadcasts currently<br>online or events scheduled.";
+        message = "No broadcasts currently online or events scheduled.";
 
-    eventTooltipStatus.innerHTML = message;
+    const eventStatus = document.getElementById('event-status');
+    eventStatus.innerHTML = message;
 
     if (broadcastCount + scheduledBroadcastCount === 0) {
         eventCount.classList.add('hidden');
@@ -110,7 +110,6 @@ async function showNotification() {
     const recordingStatus = await response.json();
 
     if (recordingStatus.broadcast_count + recordingStatus.scheduled_broadcast_count === 0) {
-        ui("#no-broadcasts-or-events-scheduled");
         return;
     }
 
@@ -132,6 +131,9 @@ async function showNotification() {
     } else if (messages.length > 1) {
         message = messages.slice(0, -1).join(", ") + " and " + messages.slice(-1);
     }
+
+    const eventStatus = document.getElementById('event-status');
+    eventStatus.innerHTML = message;
 
     const snackbar = document.getElementById('notification-snackbar');
     snackbar.querySelector('#text').textContent = message;

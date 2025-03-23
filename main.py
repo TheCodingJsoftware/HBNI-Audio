@@ -5,6 +5,7 @@ import subprocess
 import traceback
 from datetime import datetime
 
+import aiohttp
 import asyncpg
 import firebase_admin
 import jinja2
@@ -19,6 +20,7 @@ from dotenv import load_dotenv
 from firebase_admin import credentials, messaging
 from tornado.web import Application, RequestHandler, url
 
+import filebrowser_uploader
 import synology_uploader
 
 cred = credentials.Certificate("hbni-audio-1c43f2c03734.json")
@@ -96,6 +98,8 @@ recording_status_chache = {
     "recording_status_count": 0,
     "last_updated": datetime.min,
 }
+
+recording_files_share_hashes = {}
 
 async def initialize_db_pool():
     global db_pool
@@ -357,6 +361,36 @@ def get_active_icecast_broadcasts() -> list[dict[str, str | int]] | None:
     return broadcast_data
 
 
+async def get_filebrowser_token():
+    async with aiohttp.ClientSession() as session:
+        async with session.post(f"{os.getenv('FILEBROWSER_URL')}/api/login", json={
+            "username": os.getenv("FILEBROWSER_USERNAME"),
+            "password": os.getenv("FILEBROWSER_PASSWORD")
+        }) as response:
+            token = await response.text()
+            return token.strip()
+
+async def get_recording_files_share_hashes():
+    global recording_files_share_hashes
+    token = await get_filebrowser_token()
+    headers = {
+        "X-Auth": token.strip(),
+        "accept": "*/*"
+    }
+    async with aiohttp.ClientSession() as session:
+        async with session.get(
+            f"{os.getenv("FILEBROWSER_URL")}/api/shares",
+            headers=headers,
+        ) as response:
+            if response.status != 200:
+                body = await response.text()
+                raise Exception(f"Failed to create share link: {response.status} - {body}")
+            data = await response.json()
+
+    for shared_file in data:
+        recording_files_share_hashes.update({shared_file["hash"]: shared_file["path"].split("/")[-1]})
+
+
 def get_active_broadcast_count(broadcast_data) -> int:
     active_broadcast_count = 0
     for broadcast in broadcast_data:
@@ -397,7 +431,7 @@ class BaseHandler(RequestHandler, AnalyticsMixin):
 
 
 async def refresh_archive_data():
-    global audio_archive_cache
+    global audio_archive_cache, recording_files_share_hashes
     try:
         async with db_pool.acquire() as conn:
             rows = await conn.fetch("SELECT * FROM audioarchives")
@@ -594,6 +628,7 @@ class GetEventCountHandler(BaseHandler):
             )
         )
 
+
 class LoveTapsUpdateHandler(tornado.web.RequestHandler):
     async def post(self):
         try:
@@ -623,6 +658,7 @@ class LoveTapsFetchHandler(BaseHandler):
         except Exception as e:
             self.set_status(500)
             self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
+
 
 class SubscribeToTopicHandler(BaseHandler):
     def post(self):
@@ -793,6 +829,29 @@ class RecordingStatsHandler(BaseHandler):
             self.write(json.dumps({"visit_count": 0, "latest_visit": "N/A"}))
 
 
+class LoadRecordingHandler(BaseHandler):
+    async def get(self, hash):
+        url = f"{os.getenv('FILEBROWSER_URL')}/api/public/dl/{hash}"
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as resp:
+                if resp.status != 200:
+                    self.set_status(resp.status)
+                    self.finish(f"Failed to load recording: {resp.reason}")
+                    return
+
+                content = await resp.read()
+                self.set_header("Access-Control-Allow-Origin", "*")
+                self.set_header("Content-Type", resp.headers.get("Content-Type", "audio/mp3"))
+                self.set_header("Content-Length", str(len(content)))
+                self.set_header("Accept-Ranges", "bytes")
+                self.set_header("content-Range", f'bytes 0-{len(content)}/{len(content)}')  # For resuming downloads
+                self.set_header("Content-Disposition", f'inline; filename="{recording_files_share_hashes[hash]}.mp3"')
+                self.set_header("Cache-Control", "public, max-age=86400")
+                self.write(content)
+                self.finish()
+
+
 class PlayRecordingHandler(BaseHandler):
     async def get(self, file_name):
         await update_visit(file_name)  # Keep the visit count update
@@ -805,6 +864,7 @@ class PlayRecordingHandler(BaseHandler):
 
         if matching_archive:
             visit_count = matching_archive["visit_count"] or 0
+            share_hash = matching_archive["share_hash"] or ""
             latest_visit = (
                 matching_archive["latest_visit"].strftime("%B %d %A %Y %I:%M %p")
                 if matching_archive["latest_visit"]
@@ -818,6 +878,7 @@ class PlayRecordingHandler(BaseHandler):
             latest_visit = "N/A"
             date = "N/A"
             description = "N/A"
+            share_hash = ""
             length = format_length(0)
 
         template = env.get_template("play_recording.html")
@@ -830,7 +891,7 @@ class PlayRecordingHandler(BaseHandler):
             description=description,
             length=length,
             downloadableRecordings=audio_archive_cache["grouped_data"],
-            url_for=url_for_static,
+            share_hash=share_hash,
         )
         self.write(rendered_template)
 
@@ -902,6 +963,7 @@ class ScheduleBroadcastHandler(BaseHandler):
             self.set_status(500)
             self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
 
+
 class GetScheduleHandler(BaseHandler):
     async def get(self, schedule_id: int):
         try:
@@ -911,6 +973,7 @@ class GetScheduleHandler(BaseHandler):
         except Exception as e:
             self.set_status(500)
             self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
+
 
 class EditScheduleHandler(BaseHandler):
     async def post(self, schedule_id):
@@ -1110,31 +1173,33 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
             new_output_filename = self.output_filename.replace(
                 "BROADCAST_LENGTH", formated_length
             )
-            static_recordings_path = (
-                os.getenv("STATIC_RECORDINGS_PATH", "/app/static/Recordings")
-                .replace("\\", "/")
-                .replace("//", "/")
-                .replace("//", "\\\\")
-                .replace("/", "\\")
-            )
+            # static_recordings_path = (
+            #     os.getenv("STATIC_RECORDINGS_PATH", "/app/static/Recordings")
+            #     .replace("\\", "/")
+            #     .replace("//", "/")
+            #     .replace("//", "\\\\")
+            #     .replace("/", "\\")
+            # )
             if total_minutes >= 10.0 and not (self.is_private or self.host == "test"):
                 shutil.move(
                     self.output_filename,
-                    f"{static_recordings_path}\\{new_output_filename}",
-                )
-                synology_uploader.upload(
                     new_output_filename,
-                    f"{static_recordings_path}\\{new_output_filename}",
+                )
+                filebrowser_uploader.upload(
+                    new_output_filename,
+                    new_output_filename,
                     self.host,
                     self.description,
                     self.starting_time.strftime("%B %d %A %Y %I_%M %p"),
                     total_minutes,
                 )
-            elif not self.is_private:
-                shutil.move(
-                    self.output_filename,
-                    f"{static_recordings_path}\\TESTS\\{new_output_filename}",
-                )
+            else:
+                os.remove(self.output_filename)
+            # elif not self.is_private:
+            #     shutil.move(
+            #         self.output_filename,
+            #         f"{static_recordings_path}\\TESTS\\{new_output_filename}",
+            #     )
 
 
 class BroadcastHandler(BaseHandler):
@@ -1200,7 +1265,6 @@ class DownloadLinksJSONHandler(BaseHandler):
         except Exception as e:
             self.set_status(500)
             self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
-
 
 
 class RecordingStatusJSONHandler(BaseHandler):
@@ -1345,6 +1409,7 @@ def make_app():
             url(r"/frequently_asked_questions", FaqHandler),
             url(r"/recording_stats/(.*)", RecordingStatsHandler),
             url(r"/play_recording/(.*)", PlayRecordingHandler),
+            url(r"/load_recording/(.*)", LoadRecordingHandler),
             url(r"/broadcast_ws", BroadcastWSHandler),
             url(r"/schedule_broadcast", ScheduleBroadcastHandler),
             url(r"/get_schedule/(.*)", GetScheduleHandler),
@@ -1393,6 +1458,7 @@ if __name__ == "__main__":
     # tornado.ioloop.IOLoop.current().run_sync(initialize_scheduled_broadcasts_table)
     tornado.ioloop.IOLoop.current().run_sync(initialize_analytics_table)
     tornado.ioloop.IOLoop.current().run_sync(refresh_archive_data)
+    tornado.ioloop.IOLoop.current().run_sync(get_recording_files_share_hashes)
     tornado.ioloop.IOLoop.current().run_sync(refresh_active_broadcasts_data)
     tornado.ioloop.IOLoop.current().run_sync(refresh_scedule_data)
     tornado.ioloop.IOLoop.current().run_sync(refresh_recording_status_data)
@@ -1411,7 +1477,10 @@ if __name__ == "__main__":
         refresh_active_broadcasts_data,
         int(os.getenv("REFRESH_ACTIVE_BROADCASTS_DATA_INTERVAL_MINUTES", default=5)) * 60 * 1000
     ).start())
-
+    loop.call_later(60, lambda: tornado.ioloop.PeriodicCallback(
+        get_recording_files_share_hashes,
+        int(os.getenv("REFRESH_ACTIVE_BROADCASTS_DATA_INTERVAL_MINUTES", default=5)) * 60 * 1000
+    ).start())
     # Third callback starts after 2 minutes
     loop.call_later(120, lambda: tornado.ioloop.PeriodicCallback(
         refresh_recording_status_data,

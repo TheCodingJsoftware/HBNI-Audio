@@ -18,7 +18,7 @@
 
 <div class="overlay blur"></div>
 <dialog id="info-dialog">
-    <div class="right-align">
+    <div>
         <button class="transparent circle" onclick="ui('#info-dialog');">
             <i>close</i>
         </button>
@@ -125,6 +125,11 @@
 <body class="dark hidden">
     <main class="responsive">
         <div class="absolute center middle large-width padding grid">
+            <div class="s12 m12 l12">
+                <h6 class="no-line border fill small-round extra-padding center-align" id="event-status">
+                    No broadcasts currently online or events scheduled.
+                </h6>
+            </div>
             <button class="border small-round left-align extra s6 m4 l4" onclick="window.location.href='/archives';">
                 <i>library_music</i>
                 <span>Audio Archives</span>
@@ -140,7 +145,6 @@
             <button class="border small-round left-align extra s6 m4 l4" onclick="window.location.href='/events';">
                 <i>record_voice_over</i>
                 <span>Current Events</span>
-                <div id="event-tooltip-status" class="tooltip top"></div>
                 <div id="event-count" class="badge none hidden"></div>
             </button>
             <button class="border small-round left-align extra s6 m4 l4" onclick="window.location.href='/broadcasting_guide';">
@@ -149,8 +153,7 @@
             </button>
             <button class="border small-round left-align extra s6 m4 l4" onclick="window.location.href='/faq';">
                 <i>help</i>
-                <span>FAQ</span>
-                <div class="tooltip bottom">Frequently Asked Questions</div>
+                <span>Help</span>
             </button>
             <button class="border small-round left-align extra s6 m4 l4" onclick="ui('#info-dialog');">
                 <i>info</i>
@@ -171,9 +174,6 @@
                 <div class="s12" id="text"></div>
             </div>
             <a class="inverse-link" href="/events">View</a>
-        </div>
-        <div class="snackbar" id="no-broadcasts-or-events-scheduled">
-            <p class="no-line no-margin">No broadcasts currently online or events scheduled.</p>
         </div>
         <div class="snackbar error" id="schedule-error">
             Error Submitting Schedule

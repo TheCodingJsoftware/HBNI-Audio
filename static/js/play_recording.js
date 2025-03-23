@@ -16,6 +16,7 @@ function sharePage() {
     }
 }
 
+const spinner = document.getElementById("loading-spinner");
 const playerButton = document.querySelector("#play-button"),
     audio = document.querySelector("audio"),
     timeline = document.querySelector("#timeline"),
@@ -26,120 +27,111 @@ const playerButton = document.querySelector("#play-button"),
     pauseIcon = `stop`,
     volumeOn = `volume_up`,
     muteIcon = `volume_off`;
+let srcNode = null;
+var audioContext;
+
+audio.addEventListener("loadstart", (event) => {
+    spinner.style.display = "block";
+    timeline.disabled = true;
+    soundButton.disabled = true;
+    playerButton.disabled = true;
+});
+
+audio.addEventListener("seeking", (event) => {
+    spinner.style.display = "block";
+});
+
+audio.addEventListener("waiting", (event) => {
+    spinner.style.display = "block";
+});
+
+// Hide spinner once data is ready
+audio.addEventListener("canplaythrough", (event) => {
+    spinner.style.display = "none";
+    timeline.disabled = false;
+    soundButton.disabled = false;
+    playerButton.disabled = false;
+});
+
+// Also hide on error to avoid infinite spin
+audio.addEventListener("error", (event) => {
+    spinner.style.display = "none";
+    timeline.disabled = false;
+    soundButton.disabled = false;
+    playerButton.disabled = false;
+});
 
 function updateTime() {
-    var audio = document.querySelector("audio");
     let currentMinutes = Math.floor(audio.currentTime / 60);
     let currentSeconds = Math.floor(audio.currentTime - currentMinutes * 60);
     let durationMinutes = Math.floor(audio.duration / 60);
     let durationSeconds = Math.floor(audio.duration - durationMinutes * 60);
 
-    currentMinutes =
-        currentMinutes < 10 ? "0" + currentMinutes : currentMinutes;
-    currentSeconds =
-        currentSeconds < 10 ? "0" + currentSeconds : currentSeconds;
-    durationMinutes =
-        durationMinutes < 10 ? "0" + durationMinutes : durationMinutes;
-    durationSeconds =
-        durationSeconds < 10 ? "0" + durationSeconds : durationSeconds;
+    currentMinutes = currentMinutes < 10 ? "0" + currentMinutes : currentMinutes;
+    currentSeconds = currentSeconds < 10 ? "0" + currentSeconds : currentSeconds;
+    durationMinutes = durationMinutes < 10 ? "0" + durationMinutes : durationMinutes;
+    durationSeconds = durationSeconds < 10 ? "0" + durationSeconds : durationSeconds;
 
     currentTimeDisplay.textContent = `${currentMinutes}:${currentSeconds}`;
     totalTimeDisplay.textContent = `${durationMinutes}:${durationSeconds}`;
 
-    timeline.value = (audio.currentTime / audio.duration) * 100;
+    timeline.value = parseInt((audio.currentTime / audio.duration) * 100);
 }
 
-audio.addEventListener("timeupdate", updateTime);
-
 function toggleAudio() {
-    var audio = document.querySelector("audio");
-    var canvas = document.querySelector("canvas");
-    var ctx = canvas.getContext("2d");
-
-    var soundButton = document.querySelector("#sound-button");
+    const canvas = document.querySelector("canvas");
+    const ctx = canvas.getContext("2d");
 
     soundButton.addEventListener("click", toggleSound);
+
+    if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    if (!srcNode) {
+        srcNode = audioContext.createMediaElementSource(audio);
+
+        const analyser = audioContext.createAnalyser();
+        srcNode.connect(analyser);
+        analyser.connect(audioContext.destination);
+
+        const fftSize = window.innerWidth > 800 ? 512 : 256;
+        analyser.fftSize = fftSize;
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+
+        const canvasWidth = canvas.clientWidth * window.devicePixelRatio;
+        const canvasHeight = canvas.clientHeight * window.devicePixelRatio;
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+
+        const WIDTH = canvas.width;
+        const HEIGHT = canvas.height;
+        const barWidth = (WIDTH / bufferLength) * 2.5;
+
+        function renderFrame() {
+            requestAnimationFrame(renderFrame);
+            analyser.getByteFrequencyData(dataArray);
+            const articleBackgroundColor = getComputedStyle(document.getElementById("main-article")).backgroundColor;
+            ctx.fillStyle = articleBackgroundColor;
+            ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+            let x = 0;
+            for (let i = 0; i < bufferLength; i++) {
+                const barHeight = window.innerWidth > 800 ? Math.min(dataArray[i] / 4, HEIGHT - 10) : dataArray[i] / 2;
+                ctx.fillStyle = getComputedStyle(document.getElementById("header")).backgroundColor;
+                ctx.fillRect(x, HEIGHT - barHeight, barWidth, barHeight);
+                x += barWidth + 1;
+            }
+        }
+
+        renderFrame();
+    }
 
     if (audio.paused) {
         audio.play();
     } else {
         audio.pause();
-    }
-    if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        var src = audioContext.createMediaElementSource(audio); // Fixed variable name here
-
-        var analyser = audioContext.createAnalyser();
-
-        src.connect(analyser);
-        analyser.connect(audioContext.destination);
-
-        var fftSize = 256; // Default value for mobile
-
-        // Check if the device is a PC (assuming PC if screen width > 768px)
-        if (window.innerWidth > 800) {
-            fftSize = 512; // Change to 2048 for PC
-        }
-        analyser.fftSize = fftSize;
-        var bufferLength = analyser.frequencyBinCount;
-
-        var dataArray = new Uint8Array(bufferLength);
-
-        // Get the device pixel ratio
-        var devicePixelRatio = window.devicePixelRatio || 1;
-
-        // Adjust canvas dimensions based on device pixel ratio
-        var canvasWidth = canvas.clientWidth * devicePixelRatio;
-        var canvasHeight = canvas.clientHeight * devicePixelRatio;
-
-        canvas.width = canvasWidth;
-        canvas.height = canvasHeight;
-
-        var WIDTH = canvas.width;
-        var HEIGHT = canvas.height;
-
-        var barWidth = (WIDTH / bufferLength) * 2.5;
-        var barHeight;
-        var x = 0;
-
-        function renderFrame() {
-            requestAnimationFrame(renderFrame);
-
-            x = 0;
-
-            analyser.getByteFrequencyData(dataArray);
-
-            var articleBackgroundColor = window.getComputedStyle(
-                document.getElementById("main-article")
-            ).backgroundColor;
-
-            ctx.fillStyle = articleBackgroundColor;
-            ctx.fillRect(0, 0, WIDTH, HEIGHT);
-
-            for (var i = 0; i < bufferLength; i++) {
-                if (window.innerWidth > 800) {
-                    barHeight = dataArray[i] / 4;
-                    barHeight = Math.min(barHeight, HEIGHT - 10);
-                } else {
-                    barHeight = dataArray[i] / 2;
-                }
-
-                var r = barHeight + 25 * (i / bufferLength);
-                var g = barHeight + 250 * (i / bufferLength);
-                var b = barHeight + 50 * (i / bufferLength);
-
-                var header = document.getElementById("header");
-                var headerStyle = getComputedStyle(header);
-                var headerBackgroundColor = headerStyle.backgroundColor;
-                ctx.fillStyle = headerBackgroundColor;
-                ctx.fillRect(x, HEIGHT - barHeight, barWidth, barHeight);
-
-                x += barWidth + 1;
-            }
-        }
-
-        audio.play();
-        renderFrame();
     }
 }
 
@@ -148,20 +140,25 @@ playerButton.addEventListener("click", toggleAudio);
 function changeTimelinePosition() {
     const percentagePosition = (100 * audio.currentTime) / audio.duration;
     timeline.value = percentagePosition;
+    updateTime();
 }
 
-audio.ontimeupdate = changeTimelinePosition;
+audio.addEventListener("timeupdate", (event) => {
+    updateTime();
+    changeTimelinePosition();
+});
 
-function audioEnded() { }
-audio.onended = audioEnded;
+audio.addEventListener("ended", (event) => {
+});
 
-function changeSeek() {
-    const time = (timeline.value * audio.duration) / 100;
-    audio.currentTime = time;
-}
-
-timeline.addEventListener("change", changeSeek);
-var audioContext;
+timeline.addEventListener("input", (event) => {
+    if (audio.readyState >= 2 && !isNaN(audio.duration)) {
+        const percent = parseFloat(timeline.value);
+        const time = (percent / 100.0) * audio.duration;
+        audio.currentTime = time;
+        updateTime();
+    }
+});
 
 function toggleSound() {
     audio.muted = !audio.muted;
@@ -172,10 +169,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const downloadButton = document.getElementById("download-button");
     downloadButton.addEventListener("click", function () {
         const url = this.getAttribute("data-url");
+        const name = this.getAttribute("data-name");
         const link = document.createElement("a");
         link.href = url;
-        link.setAttribute("download", "");
+        link.setAttribute("download", name);
+        document.body.appendChild(link); // Required for Firefox
         link.click();
+        document.body.removeChild(link);
     });
     this.getElementById('toggle-theme').addEventListener('click', toggleMode);
 
