@@ -506,18 +506,38 @@ async def refresh_scedule_data():
         print(f"Error refreshing schedule data: {e}")
 
 
+async def ensure_recording_status_table():
+    async with db_pool.acquire() as conn:
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS recording_status (
+                host TEXT PRIMARY KEY,
+                link TEXT NOT NULL,
+                length TEXT NOT NULL,
+                description TEXT,
+                starting_time TEXT NOT NULL,
+                last_updated TIMESTAMPTZ DEFAULT NOW()
+            );
+        """)
+
 async def refresh_recording_status_data():
     global recording_status_chache
+    # await ensure_recording_status_table()
     try:
-        path = os.getenv(
-            "RECORDING_STATUS_PATH",
-            r"\\Pinecone\web\HBNI Audio Stream Recorder\static\recording_status.json",
-        )
-        with open(path, "r", encoding="utf-8") as f:
-            updated_data = json.load(f)
-        recording_status_chache["data"] = updated_data
-        recording_status_chache["recording_status_count"] = len(updated_data)
-        recording_status_chache["last_updated"] = datetime.now()
+        async with db_pool.acquire() as conn:
+            rows = await conn.fetch("SELECT host, link, length, description, starting_time FROM recording_status")
+            updated_data = {
+                row["host"]: {
+                    "link": row["link"],
+                    "length": row["length"],
+                    "description": row["description"],
+                    "starting_time": row["starting_time"],
+                }
+                for row in rows
+            }
+
+            recording_status_chache["data"] = updated_data
+            recording_status_chache["recording_status_count"] = len(updated_data)
+            recording_status_chache["last_updated"] = datetime.now()
     except Exception as e:
         print(f"Error refreshing recording status data: {e}")
 

@@ -61,8 +61,6 @@ To access the application, open your web browser and navigate to the URL where t
 ## Docker & Synology NAS
 
 - Make sure you set port to 5053.
-- Under Volume Settings you need to add a **folder**, you need to set it to this path: `/web/HBNI Audio Stream Recorder/static/Recordings` and call the mount point `/app/static/Recordings` (It should be the same as the `STATIC_RECORDINGS_PATH` environment variable).
-- Under Volume Settings you need to add a **file**, you need to set it to this path: `/web/HBNI Audio Stream Recorder/static/recording_status.json` and call the mount point `/app/static/recording_status.json` (It should be the same as the `RECORDINGS_STATUS_PATH` environment variable).
 
 ## Contributing
 
