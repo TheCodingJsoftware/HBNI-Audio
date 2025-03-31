@@ -193,9 +193,13 @@
         </div>
         {% endif %}
         {% if scheduled_broadcast_count == 0 and broadcast_count == 0 %}
-        <h6 class="absolute padding center middle medium-width center-align">
-            No broadcasts currently online or events scheduled.
-        </h6>
+        <div class="absolute center middle large-width padding grid">
+            <div class="s12 m12 l12">
+                <h6 class="no-line border fill small-round extra-padding center-align" id="event-status">
+                    No broadcasts currently online or events scheduled.
+                </h6>
+            </div>
+        </div>
         {% endif %}
         <div class="snackbar" id="copied-to-clipboard">
             Copied to Clipboard

@@ -67,26 +67,31 @@ function getArchiveBroadcastElement(itemData, index){
 
     article.innerHTML = `
     <div class="padding">
-        <h6 class="bottom-margin">${itemData.description}</h6>
-        <div><i>home_pin</i>
-            ${itemData.host.replace(/\//g, '')
-            .replace(/^./, char => char.toUpperCase())}
-        </div>
-        <div><i>event</i>(${itemData.uploaded_days_ago})
-            ${itemData.date.replace('_', ':')}
-            <span>${newBadgeHtml}</span>
-        </div>
-        <div><i>schedule</i> ${itemData.formatted_length}</div>
-        <div class="row no-margin" style="max-height: 24.3px;">
-            <div class="max"><i>web_traffic</i> ${itemData.visit_count} visits</div>
+        <div class="row top-align">
+            <h6 class="small bold max">
+                ${itemData.description}
+            </h6>
             <button class="circle link transparent">
                 <i>info</i>
                 <div class="tooltip left">
+                    <span><i>web_traffic</i> ${itemData.visit_count} visits</sp>
+                    <br>
                     <span class="left-align">
-                    Latest Visit:<br>${itemData.latest_visit}
+                    Latest Visit: ${itemData.latest_visit}
                     </span>
                 </div>
             </button>
+        </div>
+        <div class="grid no-space">
+            <div class="s12"><i>home_pin</i>
+                ${itemData.host.replace(/\//g, '')
+                .replace(/^./, char => char.toUpperCase())}
+            </div>
+            <div class="s6"><i>schedule</i> ${itemData.formatted_length}</div>
+            <div class="s12"><i>event</i>(${itemData.uploaded_days_ago})
+                ${itemData.date.replace('_', ':')}
+                <span>${newBadgeHtml}</span>
+            </div>
         </div>
         <nav class="grid">
             <button class="${downloadLink.includes("play_recording") ? "s6" : "s12"}" target="_blank" onclick="window.location.href='${downloadLink}';">
@@ -96,7 +101,7 @@ function getArchiveBroadcastElement(itemData, index){
             <!-- if "play_recording" is in the URL -->
             ${downloadLink.includes("play_recording")
             ?`
-            <button class="s6 border" id="download-button-${index}" data-url="${itemData.static_url}">
+            <button class="s6 border" id="download-button-${index}" data-url="${itemData.share_hash}">
                 <i>download</i>
                 <span>Download</span>
             </button>
@@ -109,9 +114,9 @@ function getArchiveBroadcastElement(itemData, index){
     if (downloadButton) {
         downloadButton.addEventListener("click", function (e) {
             e.preventDefault();
-            const url = this.getAttribute("data-url");
+            const share_hash = this.getAttribute("data-url");
             const link = document.createElement("a");
-            link.href = url;
+            link.href = `/load_recording/${share_hash}`;
             link.setAttribute("download", "");
             document.body.appendChild(link);
             link.click();

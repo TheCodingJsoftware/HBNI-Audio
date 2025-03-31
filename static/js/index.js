@@ -68,10 +68,12 @@ function adjustDialogForScreenSize() {
     const scheduleDialog = document.getElementById('schedule-dialog');
     if (window.innerWidth <= 600) {
         infoDialog.classList.remove('medium-width');
+        infoDialog.classList.remove('left');
         infoDialog.classList.add('max');
         scheduleDialog.classList.add('max');
     } else {
         infoDialog.classList.add('medium-width');
+        infoDialog.classList.add('left');
         scheduleDialog.classList.remove('max');
         infoDialog.classList.remove('max');
     }

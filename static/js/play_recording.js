@@ -112,7 +112,7 @@ function toggleAudio() {
         function renderFrame() {
             requestAnimationFrame(renderFrame);
             analyser.getByteFrequencyData(dataArray);
-            const articleBackgroundColor = getComputedStyle(document.getElementById("main-article")).backgroundColor;
+            const articleBackgroundColor = getComputedStyle(document.getElementById("main-play-article")).backgroundColor;
             ctx.fillStyle = articleBackgroundColor;
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
@@ -177,7 +177,7 @@ document.addEventListener("DOMContentLoaded", function () {
         link.click();
         document.body.removeChild(link);
     });
-    this.getElementById('toggle-theme').addEventListener('click', toggleMode);
+    // this.getElementById('toggle-theme').addEventListener('click', toggleMode);
 
     const shareButton = document.getElementById("share-button");
     shareButton.addEventListener("click", function () {

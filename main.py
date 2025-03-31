@@ -746,6 +746,13 @@ class GoogleHandler(BaseHandler):
         self.write("google-site-verification: google9d968a11b4bf61f7.html")
 
 
+class SitemapHandler(BaseHandler):
+    def get(self):
+        with open("static/sitemap.xml", "r") as f:
+            self.set_header("Content-Type", "application/xml")
+            self.write(f.read())
+
+
 class SystemInfoHandler(BaseHandler):
     def get(self):
         try:
@@ -1426,6 +1433,7 @@ def make_app():
         [
             url(r"/", MainHandler),
             url(r"/google9d968a11b4bf61f7.html", GoogleHandler),
+            url(r"/sitemap.xml", SitemapHandler),
             url(r"/system-info", SystemInfoHandler),
             url(r"/update-love-taps", LoveTapsUpdateHandler),
             url(r"/fetch-love-taps", LoveTapsFetchHandler),
