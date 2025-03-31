@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <meta name="google-site-verification" content="vcOIptkKP6Vuu0YT_l22Njb7_ZvnBehM_lBXgF8RiNU" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -14,10 +15,12 @@
     <meta property="og:image" content="https://broadcasting.hbni.net/static/icon.png" />
     <meta property="og:description" content="Browse archived broadcasts, schedule events, broadcast live audio, and view live broadcasts and scheduled events." />
     <link rel="manifest" href="manifest.json" />
+    <!-- Optional: use prerender for one "most-likely" page -->
+    <link rel="prerender" href="/archives">
 </head>
 
 <div class="overlay blur"></div>
-<dialog id="info-dialog">
+<dialog id="info-dialog" class="left medium-width">
     <div>
         <button class="transparent circle" onclick="ui('#info-dialog');">
             <i>close</i>
@@ -27,7 +30,13 @@
         <img class="responsive circle border" src="/static/icon.png" style="height: auto; max-width: 150px;">
     </div>
     <div class="padding">
-        <h5 class="small center-align">HBNI Audio</h5>
+        <button class="no-border no-margin transparent center small-round ripple">
+            <h5 class="small">HBNI Audio</h5>
+            <div class="tooltip right">
+                <span class="no-line" id="system-info-host">
+                    Rootcause
+                </span>
+        </button>
         <p class="center-align">
             Browse archived broadcasts, schedule events, broadcast live audio, and view live broadcasts and scheduled events.
         </p>
@@ -39,7 +48,7 @@
         <p class="center-align">
             For questions, comments, suggestions,
             or concerns about this service please
-            email: <a class="link" href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>
+            email: <a class="link underline" href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>
         </p>
     </article>
     <nav class="center-align">
@@ -54,18 +63,18 @@
         Events will remain visible for up to 2 hours after the scheduled date.
     </p>
     <div class="grid">
-        <div class="field label prefix border s12">
+        <div class="field label prefix border small-round s12">
             <i>home_pin</i>
             <input type="text" id="schedule-host" name="schedule-host" required/>
             <label>Colony Name</label>
         </div>
-        <div class="field label prefix border s12 bottom-margin">
+        <div class="field label prefix border small-round s12 bottom-margin">
             <i>record_voice_over</i>
             <input type="text" id="schedule-speakers" name="schedule-speakers" required/>
             <label>Speaker(s)</label>
             <span class="helper no-line">For multiple speakers, separate with commas.</span>
         </div>
-        <div class="field suffix border label s12">
+        <div class="field suffix border small-round label s12">
             <select id="schedule-duration" name="schedule-duration">
                 <option disabled selected>Select a duration</option>
                 <option>approximately 30 minutes</option>
@@ -84,7 +93,7 @@
             <i>timer</i>
         </div>
 
-        <div class="field border label textarea s12 bottom-margin">
+        <div class="field border small-round label textarea s12 bottom-margin">
             <textarea
                 type="text"
                 id="schedule-description"
@@ -94,7 +103,7 @@
             <label>Description</label>
             <span class="helper no-line">Explain what the event is about.</span>
         </div>
-        <div class="field label prefix border s12">
+        <div class="field label prefix border small-round s12">
             <i>event</i>
             <input type="date" id="date-time-picker" name="date" />
             <label>Date</label>
@@ -113,11 +122,11 @@
 <header class="fixed primary" id="main-header">
     <nav>
         <button class="circle transparent" onclick="ui('#info-dialog');">
-            <img src="/static/icon.png" class="responsive">
+            <i>menu</i>
         </button>
         <h5 class="max center-align small">HBNI Audio</h5>
-        <button class="circle transparent" id="toggle-theme">
-            <i>dark_mode</i>
+        <button class="circle transparent">
+            <img src="/static/icon.png" class="responsive">
         </button>
     </nav>
 </header>
@@ -154,10 +163,6 @@
             <button class="border small-round left-align extra s6 m4 l4" onclick="window.location.href='/faq';">
                 <i>help</i>
                 <span>Help</span>
-            </button>
-            <button class="border small-round left-align extra s6 m4 l4" onclick="ui('#info-dialog');">
-                <i>info</i>
-                <span>Info</span>
             </button>
             <button class="border small-round left-align extra s6 m4 l4" id="install">
                 <i>download</i>

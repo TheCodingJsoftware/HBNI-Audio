@@ -66,7 +66,9 @@ function loadAnimationStyleSheet() {
 }
 
 export function loadTheme(){
-    const theme = localStorage.getItem('mode') || 'dark';
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = prefersDark ? 'dark' : 'light';
+    // const theme = localStorage.getItem('mode') || 'dark';
     ui('mode', theme);
     updateIcon(theme);
     updateImageSource();
@@ -75,3 +77,10 @@ export function loadTheme(){
     }, 100);
     document.body.classList.remove("hidden");
 }
+
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+    const newTheme = e.matches ? 'dark' : 'light';
+    ui('mode', newTheme);
+    updateIcon(newTheme);
+    updateImageSource();
+});

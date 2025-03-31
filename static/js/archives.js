@@ -99,7 +99,8 @@ function getArchiveBroadcastElement(itemData, index){
             <button class="s6 border" id="download-button-${index}" data-url="${itemData.static_url}">
                 <i>download</i>
                 <span>Download</span>
-            </button>`
+            </button>
+            `
             : ""}
         </nav>
     </div>
@@ -333,7 +334,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let lastWidth = window.innerWidth;
     const searchInput = document.getElementById('search');
 
-    document.getElementById('toggle-theme').addEventListener('click', toggleMode);
+    // document.getElementById('toggle-theme').addEventListener('click', toggleMode);
 
     searchInput.addEventListener('input', () => {
         renderPage(currentPage);

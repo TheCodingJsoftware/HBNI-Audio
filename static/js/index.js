@@ -67,9 +67,11 @@ function adjustDialogForScreenSize() {
     const infoDialog = document.getElementById('info-dialog');
     const scheduleDialog = document.getElementById('schedule-dialog');
     if (window.innerWidth <= 600) {
+        infoDialog.classList.remove('medium-width');
         infoDialog.classList.add('max');
         scheduleDialog.classList.add('max');
     } else {
+        infoDialog.classList.add('medium-width');
         scheduleDialog.classList.remove('max');
         infoDialog.classList.remove('max');
     }
@@ -220,6 +222,19 @@ async function isCorrectPassword(password) {
     }
 }
 
+async function getSystemInfo() {
+    try {
+        const response = await fetch('/system-info');
+        if (!response.ok) throw new Error('Failed to fetch system info');
+        const systemInfo = await response.json();
+        const hostNameSpan = document.getElementById('system-info-host');
+        hostNameSpan.textContent = systemInfo.hostname;
+    } catch (error) {
+        console.error('Error fetching system info:', error);
+        return null;
+    }
+}
+
 function checkIfAppInstalled() {
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
     if (isStandalone) {
@@ -279,7 +294,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let lastWidth = window.innerWidth;
 
-    document.getElementById('toggle-theme').addEventListener('click', toggleMode);
+    // document.getElementById('toggle-theme').addEventListener('click', toggleMode);
 
     adjustDialogForScreenSize();
 
@@ -341,8 +356,22 @@ document.addEventListener('DOMContentLoaded', function () {
         enableTime: true,
         dateFormat: "Y-m-d H:i",
         altInput: true,
-        altFormat: "F j, Y H:i",
+        altFormat: "F j, Y h:i K",
         defaultDate: new Date(),
     });
     setInterval(fetchLoveTaps, 1000 * 60); // Fetch every minute
+    const prefetch = (url) => {
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.href = url;
+        document.head.appendChild(link);
+    };
+
+    document.querySelectorAll('button').forEach(button => {
+        button.addEventListener('mouseenter', () => {
+            const url = button.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+            if (url) prefetch(url);
+        });
+    });
+    getSystemInfo();
 });

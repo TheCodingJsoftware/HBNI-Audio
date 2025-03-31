@@ -175,7 +175,7 @@ async function deleteSchedule(scheduleId) {
 document.addEventListener('DOMContentLoaded', async function () {
     loadTheme();
     const shouldShowEditButton = await isCorrectPassword(localStorage.getItem('password') || '') || false;
-    document.getElementById('toggle-theme').addEventListener('click', toggleMode);
+    // document.getElementById('toggle-theme').addEventListener('click', toggleMode);
     document.querySelectorAll('audio').forEach(audioElement => {
         audioElement.onerror = function () {
             alert('The audio stream is unavailable because it is served over an insecure connection. Please contact support for assistance.');

@@ -308,7 +308,6 @@ def get_active_icecast_broadcasts() -> list[dict[str, str | int]] | None:
     broadcast_data = []
 
     icecast_urls = [
-        "http://hbniaudio.hbni.net:443",
         "https://hbniaudio.hbni.net",
         "http://hbniaudio.hbni.net:8000",
         "https://broadcast.hbni.net",
@@ -742,6 +741,25 @@ class MainHandler(BaseHandler):
             self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
 
 
+class GoogleHandler(BaseHandler):
+    def get(self):
+        self.write("google-site-verification: google9d968a11b4bf61f7.html")
+
+
+class SystemInfoHandler(BaseHandler):
+    def get(self):
+        try:
+            self.set_header("Content-Type", "application/json")
+            system_info = {
+                "hostname": os.getenv("HOSTNAME"),
+                "port": os.getenv("PORT"),
+                "timezone": os.getenv("TZ"),
+            }
+            self.write(json.dumps(system_info, indent=4))
+        except Exception as e:
+            self.set_status(500)
+            self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
+
 class FaviconHandler(BaseHandler):
     def get(self):
         try:
@@ -934,20 +952,6 @@ class ValidatePasswordHandler(RequestHandler):
             self.set_status(500)
             self.write({"success": False, "error": str(e)})
 
-
-async def initialize_scheduled_broadcasts_table():
-    async with db_pool.acquire() as conn:
-        await conn.execute("""
-            CREATE TABLE IF NOT EXISTS scheduledbroadcasts (
-                id SERIAL PRIMARY KEY,
-                host TEXT NOT NULL,
-                description TEXT NOT NULL,
-                duration TEXT NOT NULL,
-                speakers TEXT NOT NULL DEFAULT '',
-                start_time TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
 
 
 class ScheduleBroadcastHandler(BaseHandler):
@@ -1421,6 +1425,8 @@ def make_app():
     return Application(
         [
             url(r"/", MainHandler),
+            url(r"/google9d968a11b4bf61f7.html", GoogleHandler),
+            url(r"/system-info", SystemInfoHandler),
             url(r"/update-love-taps", LoveTapsUpdateHandler),
             url(r"/fetch-love-taps", LoveTapsFetchHandler),
             url(r"/subscribe-to-topic", SubscribeToTopicHandler),
@@ -1475,14 +1481,20 @@ if __name__ == "__main__":
     app.start(1)
     # Run at startup
     tornado.ioloop.IOLoop.current().run_sync(initialize_db_pool)
-    # tornado.ioloop.IOLoop.current().run_sync(initialize_scheduled_broadcasts_table)
     tornado.ioloop.IOLoop.current().run_sync(initialize_analytics_table)
-    tornado.ioloop.IOLoop.current().run_sync(refresh_archive_data)
-    tornado.ioloop.IOLoop.current().run_sync(get_recording_files_share_hashes)
-    tornado.ioloop.IOLoop.current().run_sync(refresh_active_broadcasts_data)
-    tornado.ioloop.IOLoop.current().run_sync(refresh_scedule_data)
-    tornado.ioloop.IOLoop.current().run_sync(refresh_recording_status_data)
-    tornado.ioloop.IOLoop.current().run_sync(refresh_love_taps_cache)
+
+    loop = tornado.ioloop.IOLoop.current()
+    loop.add_callback(get_recording_files_share_hashes)
+    loop.add_callback(refresh_archive_data)
+    loop.add_callback(refresh_active_broadcasts_data)
+    loop.add_callback(refresh_scedule_data)
+    loop.add_callback(refresh_recording_status_data)
+    loop.add_callback(refresh_love_taps_cache)
+    loop.add_callback(refresh_trending_archives)
+    # tornado.ioloop.IOLoop.current().run_sync(refresh_active_broadcasts_data)
+    # tornado.ioloop.IOLoop.current().run_sync(refresh_scedule_data)
+    # tornado.ioloop.IOLoop.current().run_sync(refresh_recording_status_data)
+    # tornado.ioloop.IOLoop.current().run_sync(refresh_love_taps_cache)
 
     # Stagger the periodic callbacks by 1 minute each
     # First callback starts immediately (0 minutes offset)

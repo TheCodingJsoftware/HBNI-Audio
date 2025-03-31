@@ -383,7 +383,7 @@ document.addEventListener('DOMContentLoaded', function () {
         localStorage.setItem('password', this.value);
     });
 
-    document.getElementById('toggle-theme').addEventListener('click', toggleMode);
+    // document.getElementById('toggle-theme').addEventListener('click', toggleMode);
 
     const shareButton = document.getElementById('share-button');
     shareButton.addEventListener('click', function () {
