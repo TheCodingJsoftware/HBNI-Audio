@@ -74,55 +74,55 @@ function getArchiveBroadcastElement(itemData, index){
 
     article.innerHTML = `
     <div class="padding">
-        <div class="row top-align">
-            <h6 class="small bold max">
+        <nav class="row">
+            <h6 class="small max">
                 ${itemData.description}
             </h6>
             <span>${newBadgeHtml}</span>
-        </div>
-        <nav class="wrap no-space">
-            <button class="chip tiny-margin round">
+        </nav>
+        <nav class="wrap no-space no-margin">
+            <button class="chip tiny-margin">
                 <i>home_pin</i>
                 <span>${itemData.host.replace(/\//g, '')
                     .replace(/^./, char => char.toUpperCase())}</span>
             </button>
-            <button class="chip tiny-margin round">
+            <button class="chip tiny-margin">
+                <i>event</i>
+                <span>${itemData.date.replace('_', ':').split(" ").slice(0, 2).join(" ")}</span>
+                <div class="tooltip bottom">
+                    <span class="left-align">
+                    (${itemData.uploaded_days_ago})<br>${(() => { const parts = itemData.date.replace('_', ':').split(' '); if (parts.length > 3) {   parts.splice(3, 0, '<br>');   return parts.join(' '); } return parts.join(' ');})()}
+                    </span>
+                </div>
+            </button>
+            <button class="chip tiny-margin">
+                <i>schedule</i>
+                <span>${itemData.formatted_length}</span>
+            </button>
+            <button class="chip tiny-margin">
                 <i>web_traffic</i>
                 <span>${itemData.visit_count}</span>
                 <div class="tooltip bottom">
                     <span class="left-align">
-                    Latest Visit:<br>${itemData.latest_visit}
-                    </span>
-                </div>
-            </button>
-            <button class="chip tiny-margin round">
-                <i>schedule</i>
-                <span>${itemData.formatted_length}</span>
-            </button>
-            <button class="chip tiny-margin round">
-                <i>event</i>
-                <span>${itemData.uploaded_days_ago}</span>
-                <div class="tooltip bottom">
-                    <span class="left-align">
-                    ${itemData.date.replace('_', ':')}
+                        Latest Visit:<br>${(() => {const parts = itemData.latest_visit.split(' ');if (parts.length > 3) {parts.splice(3, 0, '<br>');}return parts.join(' ');})()}
                     </span>
                 </div>
             </button>
         </nav>
-        <nav class="grid">
-            <button class="${downloadLink.includes("play_recording") ? "s6" : "s12"}" id="play-button-${index}">
-                <i>${downloadIcon}</i>
-                <span>${downloadText}</span>
-            </button>
+        <nav class="right-align row top-margin">
             <!-- if "play_recording" is in the URL -->
             ${downloadLink.includes("play_recording")
             ?`
-            <button class="s6 border" id="download-button-${index}">
+            <button class="border" id="download-button-${index}">
                 <i>download</i>
                 <span>Download</span>
             </button>
             `
             : ""}
+            <button id="play-button-${index}">
+                <i>${downloadIcon}</i>
+                <span>${downloadText}</span>
+            </button>
         </nav>
     </div>
     `;

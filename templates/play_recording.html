@@ -25,26 +25,38 @@
 
 <body class="dark hidden">
     <main class="responsive">
-        <article class="absolute no-padding center middle" id="main-play-article">
-            <div class="center-align primary m l">
+        <article class="absolute no-padding center middle round" id="main-play-article">
+            <div class="center-align primary m l top-round">
                 <h1 class="extra music-note" style="color: var(--on-primary);">♫</h1>
             </div>
             <div class="padding">
                 <h6 class="small bottom-margin">
                     {{ description }}
                 </h6>
-                <div><i>home_pin</i> {{ title }}</div>
-                <div><i>event</i> {{ date.replace("_", ":") }}</div>
-                <div><i>schedule</i> {{ length }}</div>
-                <div class="row no-margin" style="max-height: 24.3px;">
-                    <div class="max"><i>web_traffic</i> <span>Visits:</span> <span id="visit-count">{{ visit_count }}</span></div>
-                    <button class="circle link transparent">
-                        <i>info</i>
-                        <div class="tooltip left">
-                            <span class="left-align">Latest Visit:<br><span id="latest-visit">{{ latest_visit }}</span></span>
+                <nav class="wrap no-space">
+                    <button class="chip tiny-margin">
+                        <i>event</i>
+                        <span>{{ date.replace("_", ":") }}</span>
+                    </button>
+                    <button class="chip tiny-margin">
+                        <i>home_pin</i>
+                        <span>{{ title }}</span>
+                    </button>
+                    <button class="chip tiny-margin">
+                        <i>schedule</i>
+                        <span>{{ length }}</span>
+                    </button>
+                    <button class="chip tiny-margin">
+                        <i>web_traffic</i>
+                        <span>{{ visit_count }}</span>
+                        <div class="tooltip bottom">
+                            <span class="left-align">
+                                Latest Visit:<br>
+                                {{ latest_visit }}
+                            </span>
                         </div>
                     </button>
-                </div>
+                </nav>
                 <div class="row center-align max">
                     <progress id="loading-spinner" class="circle large"></progress>
                 </div>
@@ -72,14 +84,14 @@
                     <span id="current-time">00:00</span>/
                     <span id="total-time">00:00</span>
                 </div>
-                <nav class="row">
-                    <button class="max" id="download-button" data-name="{{ file_name }}" data-url="/load_recording/{{ share_hash }}">
-                        <i>download</i>
-                        <span>Download</span>
-                    </button>
-                    <button id="share-button" class="link transparent no-border ">
+                <nav class="row right-align">
+                    <button id="share-button" class="border ">
                         <i>share</i>
                         <span>Share</span>
+                    </button>
+                    <button id="download-button" data-name="{{ file_name }}" data-url="/load_recording/{{ share_hash }}">
+                        <i>download</i>
+                        <span>Download</span>
                     </button>
                 </nav>
             </div>
