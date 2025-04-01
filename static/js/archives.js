@@ -43,7 +43,7 @@ function closeAllDetails() {
 function getArchiveBroadcastElement(itemData, index){
     const groupName = itemData.groupName;
     const article = document.createElement('article');
-    article.className = 'small-margin round no-padding s12 m6 l6 fade-in';
+    article.className = 'small-margin round no-padding s12 m6 l4 fade-in';
     article.id = 'article-version';
     article.dataset.name = itemData.filename.replace('_', ':').replace('.mp3', '');
 
