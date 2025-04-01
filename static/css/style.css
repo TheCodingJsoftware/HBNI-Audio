@@ -34,6 +34,15 @@ article {
     }
 }
 
+.fade-in {
+    opacity: 0;
+    transition: opacity 0.4s ease-in;
+}
+
+.fade-in.show {
+    opacity: 1;
+}
+
 @view-transition {
     navigation: auto;
 }

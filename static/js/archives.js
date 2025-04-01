@@ -43,9 +43,16 @@ function closeAllDetails() {
 function getArchiveBroadcastElement(itemData, index){
     const groupName = itemData.groupName;
     const article = document.createElement('article');
-    article.className = 'small-margin round no-padding s12 m6 l6';
+    article.className = 'small-margin round no-padding s12 m6 l6 fade-in';
     article.id = 'article-version';
     article.dataset.name = itemData.filename.replace('_', ':').replace('.mp3', '');
+
+    const prefetch = (url) => {
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.href = url;
+        document.head.appendChild(link);
+    };
 
     const isNewBadge = (
         groupName.includes("Days") ||
@@ -71,37 +78,46 @@ function getArchiveBroadcastElement(itemData, index){
             <h6 class="small bold max">
                 ${itemData.description}
             </h6>
-            <button class="circle link transparent">
-                <i>info</i>
-                <div class="tooltip left">
-                    <span><i>web_traffic</i> ${itemData.visit_count} visits</sp>
-                    <br>
+            <span>${newBadgeHtml}</span>
+        </div>
+        <nav class="wrap no-space">
+            <button class="chip tiny-margin round">
+                <i>home_pin</i>
+                <span>${itemData.host.replace(/\//g, '')
+                    .replace(/^./, char => char.toUpperCase())}</span>
+            </button>
+            <button class="chip tiny-margin round">
+                <i>web_traffic</i>
+                <span>${itemData.visit_count}</span>
+                <div class="tooltip bottom">
                     <span class="left-align">
-                    Latest Visit: ${itemData.latest_visit}
+                    Latest Visit:<br>${itemData.latest_visit}
                     </span>
                 </div>
             </button>
-        </div>
-        <div class="grid no-space">
-            <div class="s12"><i>home_pin</i>
-                ${itemData.host.replace(/\//g, '')
-                .replace(/^./, char => char.toUpperCase())}
-            </div>
-            <div class="s6"><i>schedule</i> ${itemData.formatted_length}</div>
-            <div class="s12"><i>event</i>(${itemData.uploaded_days_ago})
-                ${itemData.date.replace('_', ':')}
-                <span>${newBadgeHtml}</span>
-            </div>
-        </div>
+            <button class="chip tiny-margin round">
+                <i>schedule</i>
+                <span>${itemData.formatted_length}</span>
+            </button>
+            <button class="chip tiny-margin round">
+                <i>event</i>
+                <span>${itemData.uploaded_days_ago}</span>
+                <div class="tooltip bottom">
+                    <span class="left-align">
+                    ${itemData.date.replace('_', ':')}
+                    </span>
+                </div>
+            </button>
+        </nav>
         <nav class="grid">
-            <button class="${downloadLink.includes("play_recording") ? "s6" : "s12"}" target="_blank" onclick="window.location.href='${downloadLink}';">
+            <button class="${downloadLink.includes("play_recording") ? "s6" : "s12"}" id="play-button-${index}">
                 <i>${downloadIcon}</i>
                 <span>${downloadText}</span>
             </button>
             <!-- if "play_recording" is in the URL -->
             ${downloadLink.includes("play_recording")
             ?`
-            <button class="s6 border" id="download-button-${index}" data-url="${itemData.share_hash}">
+            <button class="s6 border" id="download-button-${index}">
                 <i>download</i>
                 <span>Download</span>
             </button>
@@ -110,13 +126,23 @@ function getArchiveBroadcastElement(itemData, index){
         </nav>
     </div>
     `;
+    const playButton = article.querySelector(`#play-button-${index}`);
+    if (playButton) {
+        playButton.addEventListener("click", function (e) {
+            e.preventDefault();
+            window.location.href = downloadLink;
+        });
+        playButton.addEventListener('mouseenter', () => {
+            const url = `/play_recording/${itemData.filename}`;
+            if (url) prefetch(url);
+        });
+    }
     const downloadButton = article.querySelector(`#download-button-${index}`);
     if (downloadButton) {
         downloadButton.addEventListener("click", function (e) {
             e.preventDefault();
-            const share_hash = this.getAttribute("data-url");
             const link = document.createElement("a");
-            link.href = `/load_recording/${share_hash}`;
+            link.href = `/load_recording/${itemData.share_hash}`;
             link.setAttribute("download", "");
             document.body.appendChild(link);
             link.click();
@@ -150,6 +176,9 @@ async function loadTrendingArchives() {
 
             const article = getArchiveBroadcastElement(archiveWithAnalytics, index);
             container.appendChild(article);
+            requestAnimationFrame(() => {
+                article.classList.add('show');
+            });
         });
     } catch (error) {
         console.error('Error loading trending archives:', error);
@@ -215,6 +244,9 @@ function renderPage(pageNumber) {
     itemsToRender.forEach((itemData, index) => {
         const article = getArchiveBroadcastElement(itemData, startIndex + index);
         fragment.appendChild(article);
+        requestAnimationFrame(() => {
+            article.classList.add('show');
+        });
     });
 
     contentsContainer.appendChild(fragment);
