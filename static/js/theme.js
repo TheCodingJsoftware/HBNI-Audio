@@ -65,16 +65,23 @@ function loadAnimationStyleSheet() {
     document.head.appendChild(style);
 }
 
-export function loadTheme(){
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const theme = prefersDark ? 'dark' : 'light';
-    // const theme = localStorage.getItem('mode') || 'dark';
+export function loadTheme() {
+    let theme;
+    if (localStorage.getItem('mode')) {
+        theme = localStorage.getItem('mode');
+    } else {
+        theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        localStorage.setItem('mode', theme); // Save for next time
+    }
+
     ui('mode', theme);
     updateIcon(theme);
     updateImageSource();
+
     setTimeout(() => {
         loadAnimationStyleSheet();
     }, 100);
+
     document.body.classList.remove("hidden");
 }
 
