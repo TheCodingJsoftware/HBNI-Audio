@@ -416,7 +416,6 @@ def get_active_icecast_broadcasts() -> list[dict[str, str | int]] | None:
 
     icecast_urls = [
         "https://hbniaudio.hbni.net",
-        "https://broadcast.hbni.net",
     ]
     for icecast_url in icecast_urls:
         try:
