@@ -42,7 +42,7 @@ function share() {
     const description = document.getElementById('description').value;
     let url = "";
     if (isPrivate) {
-        url = "https://broadcast.hbni.net/" + host;
+        url = "https://broadcasting.hbni.net/play_live/" + host;
     } else {
         url = window.location.origin + "/listeners_page";
     }

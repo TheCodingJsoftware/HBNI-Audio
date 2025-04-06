@@ -2,6 +2,7 @@ import json
 import os
 import shutil
 import subprocess
+import re
 import traceback
 from datetime import datetime
 from urllib.parse import unquote, urlparse
@@ -15,6 +16,7 @@ import tornado.escape
 import tornado.gen
 import tornado.httpserver
 import tornado.ioloop
+from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 import tornado.web
 import tornado.websocket
 from dotenv import load_dotenv
@@ -525,13 +527,26 @@ class BaseHandler(RequestHandler, AnalyticsMixin):
     async def prepare(self):
         await self.track_visit()
 
-    def write_error(self, status_code: int, stack_trace: str = "", **kwargs):
+        if broadcast_name := self._extract_broadcast_name():
+            for broadcast in active_broadcasts_chache["data"]:
+                if broadcast.get("host") == broadcast_name:
+                    self.redirect(f"/play_live/{broadcast_name}")
+                    self._finished = True
+                    return
+
+    def write_error(self, status_code: int, **kwargs):
         error_message = error_messages.get(status_code, "Something went majorly wrong.")
         template = env.get_template("error.html")
         rendered_template = template.render(
-            error_code=status_code, error_message=error_message, stack_trace=stack_trace
+            error_code=status_code, error_message=error_message
         )
         self.write(rendered_template)
+
+    def _extract_broadcast_name(self) -> str | None:
+        # Extracts the broadcast name from the URL if it looks like /play_live/<broadcast_name> or similar
+        path = self.request.path
+        match = re.search(r"/([a-zA-Z0-9_-]+)", path)
+        return match.group(1) if match else None
 
 
 async def refresh_archive_data():
@@ -1069,6 +1084,49 @@ class PlayRecordingHandler(BaseHandler):
             length=length,
             downloadableRecordings=audio_archive_cache["grouped_data"],
             share_hash=share_hash,
+        )
+        self.write(rendered_template)
+
+
+class PlayLiveHandler(BaseHandler):
+    def get(self, broadcast_name):
+        broadcast_data = None
+        date = None
+        colony = None
+        length = None
+        listeners = None
+        description = None
+        source_url = "https://hbniaudio.hbni.net"
+        is_private = False
+
+        for broadcast_data in active_broadcasts_chache["data"]:
+            if broadcast_data.get("host") == broadcast_name:
+                colony = broadcast_data.get("colony")
+                date = broadcast_data.get("stream_start")
+                length = broadcast_data.get("length")
+                listeners = broadcast_data.get("listeners")
+                description = broadcast_data.get("server_description")
+                source_url = broadcast_data.get("source_url")
+                is_private = broadcast_data.get("is_private")
+                listener_peak = broadcast_data.get("listener_peak")
+                break
+
+        if not broadcast_data:
+            self.set_status(404)
+            self.write_error(404)
+            return
+        template = env.get_template("play_live.html")
+        rendered_template = template.render(
+            title=broadcast_name,
+            colony=colony.title(),
+            broadcast=broadcast_name,
+            date=date,
+            length=length,
+            listeners=listeners,
+            description=description,
+            is_private=is_private,
+            listener_peak=listener_peak,
+            data_url=f"{source_url}/{broadcast_name}",
         )
         self.write(rendered_template)
 
@@ -1613,6 +1671,7 @@ def make_app():
             url(r"/frequently_asked_questions", FaqHandler),
             url(r"/recording_stats/(.*)", RecordingStatsHandler),
             url(r"/play_recording/(.*)", PlayRecordingHandler),
+            url(r"/play_live/(.*)", PlayLiveHandler),
             url(r"/load_recording/(.*)", LoadRecordingHandler),
             url(r"/broadcast_ws", BroadcastWSHandler),
             url(r"/schedule_broadcast", ScheduleBroadcastHandler),
@@ -1680,7 +1739,7 @@ if __name__ == "__main__":
     # First callback starts immediately (0 minutes offset)
     tornado.ioloop.PeriodicCallback(
         refresh_archive_data,
-        int(os.getenv("REFRESH_ARCHIVE_DATA_INTERVAL_MINUTES", default=5)) * 60 * 1000,
+        float(os.getenv("REFRESH_ARCHIVE_DATA_INTERVAL_MINUTES", default=5)) * 60 * 1000,
     ).start()
 
     # Second callback starts after 1 minute
@@ -1689,7 +1748,7 @@ if __name__ == "__main__":
         60,
         lambda: tornado.ioloop.PeriodicCallback(
             refresh_active_broadcasts_data,
-            int(os.getenv("REFRESH_ACTIVE_BROADCASTS_DATA_INTERVAL_MINUTES", default=5))
+            float(os.getenv("REFRESH_ACTIVE_BROADCASTS_DATA_INTERVAL_MINUTES", default=5))
             * 60
             * 1000,
         ).start(),
@@ -1698,7 +1757,7 @@ if __name__ == "__main__":
         60,
         lambda: tornado.ioloop.PeriodicCallback(
             get_recording_files_share_hashes,
-            int(os.getenv("REFRESH_ACTIVE_BROADCASTS_DATA_INTERVAL_MINUTES", default=5))
+            float(os.getenv("REFRESH_ACTIVE_BROADCASTS_DATA_INTERVAL_MINUTES", default=5))
             * 60
             * 1000,
         ).start(),
@@ -1708,7 +1767,7 @@ if __name__ == "__main__":
         120,
         lambda: tornado.ioloop.PeriodicCallback(
             refresh_recording_status_data,
-            int(os.getenv("REFRESH_RECORDING_STATUS_DATA_INTERVAL_MINUTES", default=1))
+            float(os.getenv("REFRESH_RECORDING_STATUS_DATA_INTERVAL_MINUTES", default=1))
             * 60
             * 1000,
         ).start(),
@@ -1719,7 +1778,7 @@ if __name__ == "__main__":
         180,
         lambda: tornado.ioloop.PeriodicCallback(
             refresh_scedule_data,
-            int(os.getenv("REFRESH_SCHEDULE_DATA_INTERVAL_MINUTES", default=5))
+            float(os.getenv("REFRESH_SCHEDULE_DATA_INTERVAL_MINUTES", default=5))
             * 60
             * 1000,
         ).start(),
@@ -1730,7 +1789,7 @@ if __name__ == "__main__":
         240,
         lambda: tornado.ioloop.PeriodicCallback(
             refresh_love_taps_cache,
-            int(os.getenv("REFRESH_LOVE_TAPS_CACHE_INTERVAL_MINUTES", default=5))
+            float(os.getenv("REFRESH_LOVE_TAPS_CACHE_INTERVAL_MINUTES", default=5))
             * 60
             * 1000,
         ).start(),

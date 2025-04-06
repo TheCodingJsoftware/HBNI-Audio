@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html lang="en">
+
+<head>
+    <title>{{ broadcast }}</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <meta name="google" content="notranslate" />
+    <link rel="icon" href="/static/icon.png" />
+    <meta property="og:title" content="{{ broadcast }}" />
+    <meta property="og:url" content="https://broadcasting.hbni.net/play_live/ {{ broadcast }}" />
+    <meta property="og:image" content="https://broadcasting.hbni.net/static/hbnilogo.png" />
+    <meta property="og:description" content="{{ broadcast }}" />
+    <meta name="color-scheme" content="dark light">
+</head>
+
+<header class="fixed primary" id="header">
+    <nav>
+        <button class="circle transparent" onclick="location.href='/';">
+            <i>arrow_back</i>
+        </button>
+        <h5 class="max small">{{ title }}</h5>
+        <button class="circle transparent" onclick="window.location.href='/events';">
+            <i>record_voice_over</i>
+            <span>Listeners Page</span>
+            <div class="tooltip left" id="event-tooltip-status">No broadcasts currently<br>online or events scheduled.</div>
+            <div class="badge hidden" id="event-count">0</div>
+        </button>
+    </nav>
+</header>
+
+<body class="dark hidden">
+    <main class="responsive">
+        <article class="absolute no-padding center middle round" id="main-play-article">
+            <div class="center-align primary m l top-round">
+                <h1 class="extra music-note" style="color: var(--on-primary);">♫</h1>
+            </div>
+            <div class="padding">
+                <h6 class="small bottom-margin fill border small-round padding no-line">
+                    {{ description }}
+                </h6>
+                <nav class="wrap no-space">
+                    <button class="chip tiny-margin">
+                        <i>event</i>
+                        <span>{{ date}}</span>
+                    </button>
+                    <button class="chip tiny-margin">
+                        <i>home_pin</i>
+                        <span>{{ colony }}</span>
+                    </button>
+                    <button class="chip tiny-margin">
+                        <i>schedule</i>
+                        <span id="length">{{ length }}</span>
+                    </button>
+                    <button class="chip tiny-margin">
+                        <i>people</i>
+                        <span id="listeners">{{ listeners }}</span>
+                        <div class="tooltip bottom">
+                            <span class="left-align">
+                                Listeners Peak: <span id="listener-peak">{{ listener_peak }}</span>
+                            </span>
+                        </div>
+                    </button>
+                    <button class="chip tiny-margin">
+                        <span id="current-time" class="live-indicator"></span>
+                    </button>
+                    {% if is_private %}
+                    <button class="chip tiny-margin">
+                        <i>lock</i>
+                        <span>Private</span>
+                        <div class="tooltip bottom">
+                            <span class="left-align">
+                                Private broadcasts are not<br>archived or visible to others.
+                            </span>
+                        </div>
+                    </button>
+                    {% else %}
+                    <button class="chip tiny-margin">
+                        <i>public</i>
+                        <span>Public</span>
+                        <div class="tooltip bottom">
+                            <span class="left-align">
+                                Public broadcasts are<br>archived and visible to others.
+                            </span>
+                        </div>
+                    </button>
+                    {% endif %}
+                </nav>
+                <div class="row center-align max">
+                    <progress id="loading-spinner" class="circle large"></progress>
+                </div>
+                <div class="row">
+                    <button id="play-button" class="circle extra center" style="height: 128px; width: 128px; border-radius: 50%;">
+                        <i class="extra" id="play-icon">play_circle</i>
+                    </button>
+                    <label class="slider hidden">
+                        <input type="range" max="100" value="0" id="timeline">
+                        <span></span>
+                    </label>
+                    <label class="checkbox icon extra absolute right">
+                        <input type="checkbox" id="sound-button" />
+                        <span>
+                            <i>volume_up</i>
+                            <i>volume_off</i>
+                        </span>
+                    </label>
+                </div>
+                <nav class="row right-align">
+                    <button id="share-button">
+                        <i>share</i>
+                        <span>Share</span>
+                    </button>
+                </nav>
+            </div>
+            <canvas id="canvas" style="width: 100%; height: 100px"></canvas>
+        </article>
+        <audio class="audio" id="audio" title="{{ broadcast }}" preload="auto" crossorigin="anonymous">
+            <source src="{{ data_url }}" type="audio/mpeg" />
+        </audio>
+    </main>
+</body>
+
+</html>

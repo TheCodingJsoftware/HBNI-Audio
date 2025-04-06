@@ -65,14 +65,25 @@ function loadAnimationStyleSheet() {
     document.head.appendChild(style);
 }
 
-export function loadTheme() {
-    let theme;
-    if (localStorage.getItem('mode')) {
-        theme = localStorage.getItem('mode');
-    } else {
-        theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        localStorage.setItem('mode', theme); // Save for next time
+function getPreferredTheme() {
+    try {
+        const stored = localStorage.getItem('mode');
+        if (stored === 'dark' || stored === 'light') {
+            return stored;
+        }
+    } catch (e) {
+        // In case localStorage is blocked
+        console.warn("LocalStorage is not available", e);
     }
+
+    // Fallback to system preference
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light';
+}
+
+export function loadTheme() {
+    const theme = getPreferredTheme();
 
     ui('mode', theme);
     updateIcon(theme);

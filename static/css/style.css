@@ -22,6 +22,18 @@ article {
     max-height: 400px;
 }
 
+.live-indicator::after {
+    content: " ● LIVE";
+    color: var(--error);
+    font-weight: bold;
+    animation: blink 1s ease-in infinite;
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0.5;
+    }
+}
 @media (max-width: 600px) {
     #contents{
         height: 450px;

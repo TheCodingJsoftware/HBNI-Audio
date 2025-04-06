@@ -9,6 +9,7 @@ const entries = {
     index: '/static/js/index.js',
     archives: '/static/js/archives.js',
     play_recording: '/static/js/play_recording.js',
+    play_live: '/static/js/play_live.js',
     broadcasting_page: '/static/js/broadcasting_page.js',
     broadcasting_guide: '/static/js/broadcasting_guide.js',
     listeners_page: '/static/js/listeners_page.js',
