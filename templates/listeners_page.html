@@ -113,18 +113,24 @@
                         <i>content_copy</i>
                     </button>
                 </div>
-                <div>
-                    <i>home_pin</i> {{ scheduled_broadcast.host.replace('/', '').title() }}
-                </div>
-                <div>
-                    <i>record_voice_over</i> {{ scheduled_broadcast.speakers if scheduled_broadcast.speakers else "No speakers listed" }}
-                </div>
-                <div>
-                    <i>event</i> {{ scheduled_broadcast.formatted_time }}
-                </div>
-                <div>
-                    <i>timer</i> {{ scheduled_broadcast.duration }}
-                </div>
+                <nav class="wrap no-space">
+                    <button class="chip tiny-margin">
+                        <i>event</i>
+                        <span>{{ scheduled_broadcast.formatted_time }}</span>
+                    </button>
+                    <button class="chip tiny-margin">
+                        <i>home_pin</i>
+                        <span>{{ scheduled_broadcast.host.replace('/', '').title() }}</span>
+                    </button>
+                    <button class="chip tiny-margin">
+                        <i>record_voice_over</i>
+                        <span>{{ scheduled_broadcast.speakers if scheduled_broadcast.speakers else "No speakers listed" }}</span>
+                    </button>
+                    <button class="chip tiny-margin">
+                        <i>timer</i>
+                        <span>{{ scheduled_broadcast.duration }}</span>
+                    </button>
+                </nav>
                 <blockquote class="no-line" id="scheduled-description-{{ scheduled_broadcast.id }}">
                     {{ scheduled_broadcast.host.title() }} has scheduled a broadcast with the description:
                     "{{ scheduled_broadcast.description }}".
@@ -149,27 +155,38 @@
                         {{ broadcast.server_description }}
                     </h6>
                     {% if "https" in broadcast.source_url %}
-                    <button class="circle link transparent" onclick="window.open('{{ broadcast.source_url }}/{{ broadcast.host }}')">
+                    <button class="circle link transparent" onclick="window.open('/play_live/{{ broadcast.host }}')">
                         <i>open_in_new</i>
                     </button>
                     {% endif %}
                     <div id="recording-status-{{ broadcast.host }}" class="badge min none hidden"></div>
                 </div>
-                <div>
-                    <i>home_pin</i> <span id="artist-{{ broadcast.host }}">{{ broadcast.host.replace('/', '').title() }} </span>
-                </div>
-                <div>
-                    <i>event</i> <span id="event-{{ broadcast.host }}">{{ broadcast.stream_start.replace('_', ':') }}</span>
-                </div>
-                <div>
-                    <i>schedule</i> <span>Length:</span> <span id="length-{{ broadcast.host }}">{{ broadcast.length }}</span>
-                </div>
-                <div>
-                    <i>people</i> <span>Current Listeners:</span> <span id="listeners-{{ broadcast.host }}">{{ broadcast.listeners }}</span>
-                </div>
-                <div>
-                    <i>trending_up</i> <span>Listener Peak:</span> <span id="listener-peak-{{ broadcast.host }}">{{ broadcast.listener_peak }}</span>
-                </div>
+                <nav class="wrap no-space">
+                    <button class="chip tiny-margin">
+                        <i>home_pin</i>
+                        <span id="artist-{{ broadcast.host }}">{{ broadcast.host.replace('/', '').title() }} </span>
+                    </button>
+                    <button class="chip tiny-margin">
+                        <i>event</i>
+                        <span id="event-{{ broadcast.host }}">{{ broadcast.stream_start.replace('_', ':') }}</span>
+                    </button>
+                    <button class="chip tiny-margin">
+                        <i>schedule</i>
+                        <span>Length:</span> <span id="length-{{ broadcast.host }}">{{ broadcast.length }}</span>
+                    </button>
+                    <button class="chip tiny-margin">
+                        <i>timer</i>
+                        <span>{{ scheduled_broadcast.duration }}</span>
+                    </button>
+                    <button class="chip tiny-margin">
+                        <i>people</i>
+                        <span>Current Listeners:</span> <span id="listeners-{{ broadcast.host }}">{{ broadcast.listeners }}</span>
+                    </button>
+                    <button class="chip tiny-margin">
+                        <i>trending_up</i>
+                        <span>Listener Peak:</span> <span id="listener-peak-{{ broadcast.host }}">{{ broadcast.listener_peak }}</span>
+                    </button>
+                </nav>
                 <div class="top-margin center-align middle-align">
                     <button id="copy-button" class="circle link transparent">
                         <i>content_copy</i>

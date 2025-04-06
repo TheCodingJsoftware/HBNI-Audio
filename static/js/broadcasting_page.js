@@ -40,16 +40,11 @@ function share() {
     const isPrivate = document.getElementById('isPrivate').checked;
     const host = document.getElementById('host').value;
     const description = document.getElementById('description').value;
-    let url = "";
-    if (isPrivate) {
-        url = "https://broadcasting.hbni.net/play_live/" + host;
-    } else {
-        url = window.location.origin + "/listeners_page";
-    }
+    let url = "https://broadcasting.hbni.net/play_live/" + host;
     if (navigator.share) {
         navigator.share({
-            title: "HBNI Audio Listeners Page",
-            text: "Listen to this broadcast on the HBNI Audio Listeners page!",
+            title: "HBNI Audio Live Broadcast",
+            text: description,
             url: url
         });
     } else {
