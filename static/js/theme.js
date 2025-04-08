@@ -66,15 +66,15 @@ function loadAnimationStyleSheet() {
 }
 
 function getPreferredTheme() {
-    try {
-        const stored = localStorage.getItem('mode');
-        if (stored === 'dark' || stored === 'light') {
-            return stored;
-        }
-    } catch (e) {
-        // In case localStorage is blocked
-        console.warn("LocalStorage is not available", e);
-    }
+    // try {
+    //     const stored = localStorage.getItem('mode');
+    //     if (stored === 'dark' || stored === 'light') {
+    //         return stored;
+    //     }
+    // } catch (e) {
+    //     // In case localStorage is blocked
+    //     console.warn("LocalStorage is not available", e);
+    // }
 
     // Fallback to system preference
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
