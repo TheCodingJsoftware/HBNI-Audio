@@ -88,10 +88,18 @@ function getArchiveBroadcastElement(itemData, index){
             </button>
             <button class="chip tiny-margin">
                 <i>event</i>
-                <span>${itemData.date.replace('_', ':').split(" ").slice(0, 2).join(" ")}</span>
+                <span>${itemData.date ? itemData.date.replace('_', ':').split(" ").slice(0, 2).join(" ") : 'No date'}</span>
                 <div class="tooltip bottom">
                     <span class="left-align">
-                    (${itemData.uploaded_days_ago})<br>${(() => { const parts = itemData.date.replace('_', ':').split(' '); if (parts.length > 3) {   parts.splice(3, 0, '<br>');   return parts.join(' '); } return parts.join(' ');})()}
+                        (${itemData.uploaded_days_ago})<br>
+                        ${(() => {
+                            if (!itemData.date) return 'No date';
+                            const parts = itemData.date.replace('_', ':').split(' ');
+                            if (parts.length > 3) {
+                                parts.splice(3, 0, '<br>');
+                            }
+                            return parts.join(' ');
+                        })()}
                     </span>
                 </div>
             </button>
@@ -104,7 +112,15 @@ function getArchiveBroadcastElement(itemData, index){
                 <span>${itemData.visit_count}</span>
                 <div class="tooltip bottom">
                     <span class="left-align">
-                        Latest Visit:<br>${(() => {const parts = itemData.latest_visit.split(' ');if (parts.length > 3) {parts.splice(3, 0, '<br>');}return parts.join(' ');})()}
+                        Latest Visit:<br>
+                        ${(() => {
+                            if (!itemData.latest_visit) return 'No date';
+                            const parts = itemData.latest_visit.split(' ');
+                            if (parts.length > 3) {
+                                parts.splice(3, 0, '<br>');
+                            }
+                            return parts.join(' ');
+                        })()}
                     </span>
                 </div>
             </button>
