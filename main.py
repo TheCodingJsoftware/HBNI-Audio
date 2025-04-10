@@ -553,7 +553,15 @@ async def refresh_archive_data():
     global audio_archive_cache, recording_files_share_hashes
     try:
         async with db_pool.acquire() as conn:
-            rows = await conn.fetch("SELECT * FROM audioarchives")
+            rows = await conn.fetch("""
+                                    SELECT * FROM audioarchives
+                                    WHERE download_link IS NOT NULL
+                                        AND download_link <> ''
+                                        AND NOT (
+                                            download_link LIKE '%mega.nz%' OR
+                                            download_link LIKE '%mega.co.nz%'
+                                        )
+                                    """)
             updated_data = [dict(row) for row in rows]
             audio_archive_cache["data"] = updated_data
             audio_archive_cache["grouped_data"] = get_grouped_data(updated_data)
