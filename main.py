@@ -1490,7 +1490,7 @@ class ListenHandler(BaseHandler):
             template = env.get_template("listeners_page.html")
             rendered_template = template.render(
                 broadcast_status=active_broadcasts_chache["data"],
-                schedule=schedule_chache["active_schedules"],
+                scheduled_broadcast=schedule_chache["active_schedules"],
                 broadcast_count=active_broadcasts_chache["active_broadcasts_count"],
                 scheduled_broadcast_count=schedule_chache["active_schedules_count"],
             )
