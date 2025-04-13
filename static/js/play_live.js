@@ -29,6 +29,9 @@ const playerButton = document.querySelector("#play-button"),
 let srcNode = null;
 var audioContext;
 
+soundButton.disabled = true;
+playerButton.disabled = true;
+
 audio.addEventListener("loadstart", (event) => {
     spinner.style.display = "block";
     timeline.disabled = true;

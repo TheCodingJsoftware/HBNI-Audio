@@ -411,7 +411,7 @@ def is_broadcast_private(host: str) -> bool:
     if broadcast := active_broadcasts.get(host):
         if broadcast.is_private:
             return True
-    return "priv" in host.lower()
+    return "priv" in host.lower() or host.endswith("priv")
 
 
 def get_active_icecast_broadcasts() -> list[dict[str, str | int]] | None:
