@@ -1110,7 +1110,7 @@ class PlayLiveHandler(BaseHandler):
 
         for broadcast_data in active_broadcasts_chache["data"]:
             if broadcast_data.get("host") == broadcast_name:
-                colony = broadcast_data.get("colony")
+                colony = broadcast_data.get("colony", broadcast_name)
                 date = broadcast_data.get("stream_start")
                 length = broadcast_data.get("length")
                 listeners = broadcast_data.get("listeners")
@@ -1120,10 +1120,16 @@ class PlayLiveHandler(BaseHandler):
                 listener_peak = broadcast_data.get("listener_peak")
                 break
 
+        if not date or not colony or not description or not source_url:
+            self.set_status(404)
+            self.write_error(404)
+            return
+
         if not broadcast_data:
             self.set_status(404)
             self.write_error(404)
             return
+
         template = env.get_template("play_live.html")
         rendered_template = template.render(
             title=broadcast_name,
