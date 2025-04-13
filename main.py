@@ -409,8 +409,9 @@ def get_grouped_data(audio_data):
 
 def is_broadcast_private(host: str) -> bool:
     if broadcast := active_broadcasts.get(host):
-        return broadcast.is_private
-    return False
+        if broadcast.is_private:
+            return True
+    return "priv" in host.lower()
 
 
 def get_active_icecast_broadcasts() -> list[dict[str, str | int]] | None:
