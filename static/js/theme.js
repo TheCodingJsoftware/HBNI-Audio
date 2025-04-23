@@ -50,6 +50,7 @@ function loadAnimationStyleSheet() {
     textarea,
     select,
     details,
+    nav,
     summary,
     footer,
     blockquote,

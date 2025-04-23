@@ -456,7 +456,7 @@ def get_active_icecast_broadcasts() -> list[dict[str, str | int]] | None:
                         "listeners": source.get("listeners", 0),
                         "host": mount_point,
                         "colony": mount_point,
-                        "moint_point": mount_point,
+                        "mount_point": mount_point,
                         "listener_peak": source.get("listener_peak", 0),
                         "listen_url": source.get(
                             "listenurl", f"{icecast_url}/{mount_point}"

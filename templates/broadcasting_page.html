@@ -26,72 +26,107 @@
 
 <body class="dark hidden">
     <main class="responsive">
-        <div class="grid">
-            <article class="s12 m12 l12 round no-padding" style="height: fit-content !important;">
-                <details id="broadcast-details">
-                    <summary class="padding row" style="font-size: 18px;">
-                        <span class="max">Broadcast Details</span>
-                        <button class="link transparent no-border" onclick="window.open('/broadcasting_guide', '_blank');">
-                            <i>developer_guide</i>
-                            <span>Broadcasting Guide</span>
-                        </button>
-                    </summary>
-                    <form class="padding margin" id="metadataForm">
-                        <div class="field label border small-round">
-                            <input type="text" id="host" name="host" required/>
-                            <label>Colony Name</label>
-                        </div>
-                        <div class="field border small-round label textarea">
-                            <textarea type="text" id="description" name="description" required></textarea>
-                            <label>Description</label>
-                            <span class="helper no-line left-align">Explain what the broadcast is about</span>
-                        </div>
-                        <div class="row">
-                        <div class="field label border small-round max">
-                            <input type="password" id="password" name="password" autocomplete="on" required />
-                            <label>Password</label>
-                        </div>
-                        <button class="circle transparent link" type="button">
-                            <i>help</i>
-                            <div class="tooltip left max" style="inline-size: 14rem !important;">
-                                <p class="small-width">
-                                    Contact
-                                    <a class="link" href="mailto:jared@pinelandfarms.ca">jared@pinelandfarms.ca</a>
-                                    or
-                                    <a class="link" href="mailto:justin@pinelandfarms.ca">justin@pinelandfarms.ca</a>
-                                    if you need the password. The password is required to start or schedule a broadcast.
-                                </p>
-                            </div>
-                        </button>
-                        </div>
-                        <div class="large-space"></div>
-                        <div class="field middle-align no-margin">
+        <article class="no-padding round" id="main-article">
+            <div class="padding">
+                <details id="broadcast-details" open>
+                    <summary>
+                        <article class="round primary no-elevate">
                         <nav>
-                            <div class="max">
-                                <h6>Private Broadcast</h6>
-                                <p class="no-line">Private broadcasts are not archived or visible to others.</p>
-                            </div>
-                            <label class="switch">
-                                <input type="checkbox" id="isPrivate" name="isPrivate">
-                                <span></span>
-                            </label>
-                            </nav>
-                        </div>
-                    </form>
-                </details>
-            </article>
-            <article class="s12 m12 l12 round no-padding" id="main-article" style="height: fit-content !important;">
-                <details id="broadcast-controls">
-                    <summary class="padding row" style="font-size: 18px;">
-                        <span class="max">Broadcast Controls</span>
-                        <button class="link transparent no-border" id="share-button">
-                            <i>share</i>
-                            <span>Share</span>
-                        </button>
+                            <div class="max">Broadcast Details</div>
+                            <i>expand_more</i>
+                        </nav>
+                        </article>
                     </summary>
-                    <nav class="center-align padding">
+                    <nav class="row tiny-space border round padding top-margin surface-container-low">
+                        <div class="max">
+                            <div class="field label border small-round">
+                                <input type="text" id="host" name="host" required/>
+                                <label>Colony Name</label>
+                                <span class="helper no-line left-align" id="host-helper"></span>
+                            </div>
+                            <div class="field label border small-round">
+                                <input type="password" id="password" name="password" autocomplete="on" required />
+                                <label>Password</label>
+                            </div>
+                            <div class="field border small-round label textarea">
+                                <textarea type="text" id="description" name="description" required></textarea>
+                                <label>Description</label>
+                                <span class="helper no-line left-align">Explain what the broadcast is about</span>
+                            </div>
+                            <label class="checkbox">
+                                <input type="checkbox" id="isPrivate" name="isPrivate">
+                                <span>Private Broadcast</span>
+                            </label>
+                        </div>
+                        <nav class="vertical">
+                            <button class="circle transparent link">
+                                <i>help</i>
+                                <div class="tooltip left max" style="inline-size: 14rem !important;">
+                                    <p class="small-width">
+                                        Contact
+                                        <a class="link underline" href="mailto:jared@hbni.net">jared@hbni.net</a>
+                                        or
+                                        <a class="link underline" href="mailto:justin@hbni.net">justin@hbni.net</a>
+                                        if you need the password. The password is required to start or schedule a broadcast.
+                                    </p>
+                                </div>
+                            </button>
+                            <button class="circle transparent link" onclick="window.open('/broadcasting_guide', '_blank');">
+                                <i>developer_guide</i>
+                                <div class="tooltip left">
+                                    Broadcasting Guide <i>open_in_new</i>
+                                </div>
+                            </button>
+                            <button class="circle transparent link" id="share-button">
+                                <i>share</i>
+                                <div class="tooltip left">
+                                    Share
+                                </div>
+                            </button>
+                        </nav>
+                    </nav>
+                </details>
+                <nav class="left-align bottom-margin grid">
+                    <button id="startBroadcast" class="s12 m3 l2 vertical" disabled>
+                        <i>play_circle</i>
+                        <span>Start Broadcast</span>
+                    </button>
+                    <button id="stopBroadcast" class="s12 m3 l2 vertical" disabled>
+                        <i>stop_circle</i>
+                        <span>Stop Broadcast</span>
+                    </button>
+                </nav>
+                <nav class="wrap no-space">
+                    <button class="chip tiny-margin">
+                        <i>schedule</i>
+                        <span id="length">Haven't started yet</span>
+                    </button>
+                    <button class="chip tiny-margin">
+                        <i>people</i>
+                        <span id="listeners">NA</span>
+                    </button>
+                    <button class="chip tiny-margin">
+                        <i>trending_up</i>
+                        <span id="listener-peak">NA</span>
+                    </button>
+                    <button class="chip tiny-margin">
+                        <i id="broadcast-status-icon">public</i>
+                        <span id="broadcast-status-text">Public</span>
+                        <div class="tooltip bottom">
+                            <span class="left-align" id="broadcast-status-tooltip">
+                                Public broadcasts are<br>archived and visible to others.
+                            </span>
+                        </div>
+                    </button>
+                    <button class="chip tiny-margin hidden" id="live-indicator">
+                        <span id="current-time" class="live-indicator"></span>
+                    </button>
+                </nav>
+                <fieldset class="round no-border">
+                    <legend>Volume Mixer</legend>
+                    <nav class="center-align">
                         <i>volume_down</i>
-                        <label class="small-width slider">
+                        <label class="slider">
                             <input
                                 type="range"
                                 id="volumeControl"
@@ -106,31 +141,17 @@
                         </label>
                         <i>volume_up</i>
                     </nav>
-                    <div class="grid padding">
-                        <div class="grid max s12 m8 l8">
-                            <div class="grid max s12 center-align">
-                                <button id="startBroadcast" class=" extra s12" disabled>
-                                    <i>play_circle</i>
-                                    <span>Start Broadcast</span>
-                                </button>
-                                <button id="stopBroadcast" class=" extra s12" disabled>
-                                    <i>stop_circle</i>
-                                    <span>End Broadcast</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="s12 m4 l4 middle-align center-align">
-                            <button id="muteToggle" class="circle extra" style="height: 128px; width: 128px;     border-radius: 50%; " disabled>
-                                <i class="mic-icon">mic</i>
-                                <i>pen_size_1</i>
-                                <i class="pause-icon">pause</i>
-                            </button>
-                        </div>
-                    </div>
-                    <canvas class="round" id="canvas" style="width: 100%; height: 100px"></canvas>
-                </details>
-            </article>
-        </div>
+                </fieldset>
+                <div class="row wrap padding center-align middle-align">
+                    <button id="muteToggle" class="circle extra center-align" style="height: 128px; width: 128px;     border-radius: 50%; " disabled>
+                        <i class="mic-icon">mic</i>
+                        <i>pen_size_1</i>
+                        <i class="pause-icon">pause</i>
+                    </button>
+                </div>
+            </div>
+            <canvas class="round" id="canvas" style="width: 100%; height: 100px"></canvas>
+        </article>
     </main>
     <div class="snackbar error" id="incorrect-password">
         Incorrect Password
@@ -145,9 +166,9 @@
     <div class="snackbar" id="copied-to-clipboard">
         Copied to Clipboard
     </div>
-    <dialog class="bottom" id="save-broadcast-dialog">
+    <dialog class="bottom modal" id="save-broadcast-dialog">
         <h5 class="center-align">Save Broadcast</h5>
-        <p class="center-align">File Name: <code id="broadcast-file-name"></code></p>
+        <p class="center-align">File Name: <code class="small-round" id="broadcast-file-name"></code></p>
         <p class="center-align">Do you want to save this broadcast? It will be saved to your device.</p>
         <nav class="center-align">
             <button id="save-broadcast-btn" >

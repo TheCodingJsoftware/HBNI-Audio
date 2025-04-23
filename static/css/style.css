@@ -44,6 +44,12 @@ article {
         background-color: var(--surface);
         border-radius: 0;
     }
+    #main-article{
+        height: 100%;
+        width: 100%;
+        background-color: var(--surface);
+        border-radius: 0;
+    }
 }
 
 .fade-in {

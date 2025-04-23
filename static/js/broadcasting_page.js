@@ -14,15 +14,20 @@ let timeout;
 let recordedChunks = [];
 let isPasswordValidated = false;
 let lastPassword = '';
+let mountPoint = null;
+let isLive = false;
+let startTime = null;
 
 function validateHostName() {
     const hostInput = document.getElementById('host');
+    const hostHelper = document.getElementById('host-helper');
     let hostValue = hostInput.value.toLowerCase();
     hostValue = hostValue.replace(/[<>:"/\\|?*]/g, '');
     hostValue = hostValue.replace(/ /g, '_');
     hostValue = hostValue.replace(/^_+|_+$/g, '');
     hostValue = hostValue.replace(/\d/g, '');
-    hostInput.value = hostValue;
+    mountPoint = hostValue;
+    hostHelper.textContent = `Mount: /${hostValue}`;
 }
 
 function validateDescription() {
@@ -98,6 +103,43 @@ async function checkPassword() {
     }
 }
 
+async function updateRecordingStats() {
+    console.log("Updating recording stats...");
+
+    if (!isLive) return;
+    try {
+        const response = await fetch(`/get_broadcast_data`);
+        if (!response.ok) throw new Error('Failed to fetch recording stats');
+
+        const data = await response.json();
+
+        data.forEach(broadcast_data => {
+            if (broadcast_data.mount_point === mountPoint) {
+                console.log(broadcast_data, mountPoint);
+                const listenersElem = document.querySelector('#listeners');
+                const listenerPeakElem = document.querySelector('#listener-peak');
+                const lengthElem = document.querySelector('#length');
+                lengthElem.textContent = `${broadcast_data.length}`;
+                listenersElem.textContent = `${broadcast_data.listeners}`;
+                listenerPeakElem.textContent = `${broadcast_data.listener_peak}`;
+            }
+        });
+    } catch (error) {
+        console.error('Error updating recording stats:', error);
+    }
+}
+document.getElementById("isPrivate").addEventListener("change", (e) => {
+    if (e.target.checked) {
+        document.getElementById("broadcast-status-icon").textContent = "lock";
+        document.getElementById("broadcast-status-text").textContent = "Private";
+        document.getElementById("broadcast-status-tooltip").innerHTML = "Private broadcasts are not<br>archived or visible to others.";
+    } else {
+        document.getElementById("broadcast-status-icon").textContent = "globe";
+        document.getElementById("broadcast-status-text").textContent = "Public";
+        document.getElementById("broadcast-status-tooltip").innerHTML = "Public broadcasts are<br>archived and visible to others.";
+    }
+});
+
 document.getElementById("password").addEventListener("input", async (e) => {
     if (e.target.value !== lastPassword) {
         isPasswordValidated = false;
@@ -140,7 +182,6 @@ function generateSilenceBuffer(durationMs) {
 document.getElementById('startBroadcast').addEventListener('click', async () => {
     try {
         const host = document.getElementById('host').value;
-        let mountPoint = host;
         const description = document.getElementById('description').value;
         const password = document.getElementById('password').value;
         const isPrivate = document.getElementById('isPrivate').checked;
@@ -179,6 +220,8 @@ document.getElementById('startBroadcast').addEventListener('click', async () => 
         const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
         ws = new WebSocket(`${protocol}://${window.location.host}/broadcast_ws`);
         ws.binaryType = 'arraybuffer';
+        isLive = true;
+        startTime = new Date();
 
         ws.onopen = () => {
             // Send metadata to the server
@@ -198,8 +241,12 @@ document.getElementById('startBroadcast').addEventListener('click', async () => 
             document.getElementById('stopBroadcast').disabled = false;
             document.getElementById('isPrivate').disabled = true;
             document.getElementById('password').disabled = true;
+            document.getElementById('host').disabled = true;
+            document.getElementById('description').disabled = true;
             document.getElementById('muteToggle').disabled = false;
             document.getElementById('volumeControl').disabled = false;
+            document.getElementById('live-indicator').classList.remove('hidden');
+            document.getElementById('length').textContent = "Just started";
 
             const options = { mimeType: 'audio/webm;codecs=opus' };
 
@@ -240,11 +287,15 @@ document.getElementById('startBroadcast').addEventListener('click', async () => 
             document.getElementById('stopBroadcast').disabled = true;
             document.getElementById('isPrivate').disabled = false;
             document.getElementById('password').disabled = false;
+            document.getElementById('host').disabled = false;
+            document.getElementById('description').disabled = false;
             document.getElementById('muteToggle').disabled = true;
             document.getElementById('volumeControl').disabled = true;
+            document.getElementById('live-indicator').classList.add('hidden');
 
             // Stop the audio stream
             stream.getTracks().forEach(track => track.stop());
+            isLive = false;
         };
     } catch (error) {
         alert("Error accessing microphone: " + error.message);
@@ -262,6 +313,7 @@ document.getElementById('stopBroadcast').addEventListener('click', () => {
     if (audioContext) {
         audioContext.close();
     }
+    document.getElementById('live-indicator').classList.add('hidden');
 
     canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -386,17 +438,9 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     const broadcastDetails = document.getElementById('broadcast-details');
-    const broadcastControls = document.getElementById('broadcast-controls');
-
     broadcastDetails.open = localStorage.getItem('broadcast-details-open') === 'true' ? true : false;
-    broadcastControls.open = localStorage.getItem('broadcast-controls-open') === 'true' ? true : false;
-
     broadcastDetails.addEventListener('click', function () {
         localStorage.setItem('broadcast-details-open', !broadcastDetails.open);
-    });
-
-    broadcastControls.addEventListener('click', function () {
-        localStorage.setItem('broadcast-controls-open', !broadcastControls.open);
     });
 
     // Initialize canvas and audio context
@@ -425,4 +469,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (document.getElementById('password').value !== "") {
         checkPassword();
     }
+    validateHostName();
+    setInterval(updateRecordingStats, 1000 * 60); // Update every minute
 });

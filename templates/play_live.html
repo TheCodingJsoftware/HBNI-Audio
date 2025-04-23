@@ -61,9 +61,6 @@
                         <i>trending_up</i>
                         <span id="listener-peak">{{ listener_peak }}</span>
                     </button>
-                    <button class="chip tiny-margin">
-                        <span id="current-time" class="live-indicator"></span>
-                    </button>
                     {% if is_private %}
                     <button class="chip tiny-margin">
                         <i>lock</i>
@@ -85,6 +82,9 @@
                         </div>
                     </button>
                     {% endif %}
+                    <button class="chip tiny-margin">
+                        <span id="current-time" class="live-indicator"></span>
+                    </button>
                 </nav>
                 <div class="row center-align max">
                     <progress id="loading-spinner" class="circle large"></progress>
