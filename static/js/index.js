@@ -193,6 +193,10 @@ async function submitSchedule() {
 
     if (response.ok) {
         ui("#schedule-dialog");
+        description.value = ""; // Clear the description field
+        speakers.value = ""; // Clear the speakers field
+        startTime.value = ""; // Clear the start time field
+        duration.value = ""; // Clear the duration field
     } else {
         ui("#schedule-error");
     }

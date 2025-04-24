@@ -612,24 +612,25 @@ async def refresh_scedule_data():
 
         schedule_chache["all_schedules"] = updated_data
 
-        current_time = datetime.now()
-        active_schedules = {}
-        active_schedules_count = 0
-
-        # Filter schedules where start_time is in the future or within the last 2 hours
+        current_time = datetime.now()        # Filter schedules where start_time is in the future or within the last 2 hours
+        filtered_schedules = []
         for schedule_id, schedule in updated_data.items():
             try:
                 start_time = datetime.strptime(schedule["start_time"], "%Y-%m-%d %H:%M")
                 time_diff = start_time - current_time
                 hours_diff = time_diff.total_seconds() / 3600
-                if (
-                    hours_diff >= -2
-                ):  # Show all future events and events up to 2 hours old
-                    active_schedules[schedule_id] = schedule
-                    active_schedules_count += 1
+                if hours_diff >= -2:
+                    filtered_schedules.append((start_time, schedule_id, schedule))
             except ValueError as e:
                 print(f"Error parsing date for schedule {schedule_id}: {e}")
                 continue
+
+        # Sort the filtered schedules by datetime
+        filtered_schedules.sort()
+
+        # Rebuild the active_schedules dict in sorted order
+        active_schedules = {schedule_id: schedule for _, schedule_id, schedule in filtered_schedules}
+        active_schedules_count = len(active_schedules)
 
         schedule_chache["active_schedules"] = active_schedules
         schedule_chache["active_schedules_count"] = active_schedules_count
