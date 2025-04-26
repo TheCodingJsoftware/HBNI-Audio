@@ -104,8 +104,6 @@ async function checkPassword() {
 }
 
 async function updateRecordingStats() {
-    console.log("Updating recording stats...");
-
     if (!isLive) return;
     try {
         const response = await fetch(`/get_broadcast_data`);
@@ -244,7 +242,6 @@ document.getElementById('startBroadcast').addEventListener('click', async () => 
             document.getElementById('host').disabled = true;
             document.getElementById('description').disabled = true;
             document.getElementById('muteToggle').disabled = false;
-            document.getElementById('volumeControl').disabled = false;
             document.getElementById('live-indicator').classList.remove('hidden');
             document.getElementById('length').textContent = "Just started";
 
@@ -260,17 +257,19 @@ document.getElementById('startBroadcast').addEventListener('click', async () => 
 
             mediaRecorder.ondataavailable = (event) => {
                 if (ws.readyState === WebSocket.OPEN) {
+                    // Convert Blob to ArrayBuffer and then send
+                    event.data.arrayBuffer().then(buffer => {
+                        ws.send(new Uint8Array(buffer));
+                    });
+                    // Save data locally
                     if (!isMuted) {
-                        // Convert Blob to ArrayBuffer and then send
-                        event.data.arrayBuffer().then(buffer => {
-                            ws.send(new Uint8Array(buffer));
-                        });
-                        // Save data locally
                         recordedChunks.push(event.data);
-                    } else {
-                        const silenceBuffer = generateSilenceBuffer(1); // Generate 100ms of silence
-                        ws.send(new Uint8Array(silenceBuffer));
                     }
+                    // if (!isMuted) {
+                    // } else {
+                    //     const silenceBuffer = generateSilenceBuffer(10); // Generate 100ms of silence
+                    //     ws.send(new Uint8Array(silenceBuffer));
+                    // }
                 }
             };
 
@@ -290,7 +289,6 @@ document.getElementById('startBroadcast').addEventListener('click', async () => 
             document.getElementById('host').disabled = false;
             document.getElementById('description').disabled = false;
             document.getElementById('muteToggle').disabled = true;
-            document.getElementById('volumeControl').disabled = true;
             document.getElementById('live-indicator').classList.add('hidden');
 
             // Stop the audio stream
@@ -340,28 +338,10 @@ document.getElementById('muteToggle').addEventListener('click', () => {
     if (gainNode) {
         isMuted = !isMuted;
 
-        if (isMuted) {
-            // Stop sending audio to the WebSocket and visualizer
-            // sourceNode.disconnect(analyser);
-            sourceNode.disconnect(gainNode);
-            ws.send(JSON.stringify({ type: "mute" })); // Notify server if needed
-        } else {
-            // Resume sending audio to the WebSocket and visualizer
-            // sourceNode.connect(analyser);
-            sourceNode.connect(gainNode);
-            ws.send(JSON.stringify({ type: "unmute" })); // Notify server if needed
-        }
-
-        gainNode.gain.value = isMuted ? 0 : parseFloat(document.getElementById('volumeControl').value);
+        gainNode.gain.value = isMuted ? 0.001 : 1;
 
         document.getElementById('muteToggle').querySelector('i.mic-icon').innerText = isMuted ? 'mic_off' : 'mic';
         document.getElementById('muteToggle').querySelector('i.pause-icon').innerText = isMuted ? 'play_arrow' : 'pause';
-    }
-});
-
-document.getElementById('volumeControl').addEventListener('input', (event) => {
-    if (gainNode && !isMuted) {
-        gainNode.gain.value = parseFloat(event.target.value);
     }
 });
 

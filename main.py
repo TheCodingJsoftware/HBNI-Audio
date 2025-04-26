@@ -16,15 +16,15 @@ import tornado.escape
 import tornado.gen
 import tornado.httpserver
 import tornado.ioloop
-from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 import tornado.web
 import tornado.websocket
 from dotenv import load_dotenv
 from firebase_admin import credentials, messaging
 from tornado.web import Application, RequestHandler, url
 
+import audio_file
 import filebrowser_uploader
-import synology_uploader
+import remove_silence
 
 cred = credentials.Certificate("hbni-audio-1c43f2c03734.json")
 firebase_admin.initialize_app(cred)
@@ -1374,9 +1374,8 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                         "wav",
                         self.output_filename,
                     ],
-                    stdin=subprocess.PIPE,  # We want to send binary audio data
+                    stdin=subprocess.PIPE,
                 )
-
                 # Check if the process started successfully
                 if self.ffmpeg_process.poll() is None:
                     print(
@@ -1430,11 +1429,11 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
             print("FFmpeg process has gracefully been terminated.")
 
             self.ending_time = datetime.now()
-
-            delta = self.ending_time - self.starting_time
-            total_minutes = delta.total_seconds() / 60
-            hours, remainder = divmod(delta.seconds, 3600)
-            minutes, seconds = divmod(remainder, 60)
+            remove_silence.remove_silence_everywhere(self.output_filename)
+            total_minutes = audio_file.get_audio_length(self.output_filename)
+            hours = total_minutes // 60
+            minutes = total_minutes % 60
+            seconds = (total_minutes - int(total_minutes)) * 60
 
             if hours <= 0:
                 formated_length = f"{minutes:02d}m {seconds:02d}s"
@@ -1465,12 +1464,13 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                     total_minutes,
                 )
             else:
-                os.remove(self.output_filename)
+                remove_silence.remove_silence_everywhere(self.output_filename)
+                # os.remove(self.output_filename)
             # elif not self.is_private:
-            #     shutil.move(
-            #         self.output_filename,
-            #         f"{static_recordings_path}\\TESTS\\{new_output_filename}",
-            #     )
+                # shutil.move(
+                #     self.output_filename,
+                #     f"{static_recordings_path}\\TESTS\\{new_output_filename}",
+                # )
 
 
 class BroadcastHandler(BaseHandler):
