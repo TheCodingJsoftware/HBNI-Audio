@@ -23,7 +23,10 @@ messaging.onBackgroundMessage(function (payload) {
             const notificationTitle = payload.notification.title;
             const notificationOptions = {
                 body: payload.notification.body,
-                icon: '/static/icon.png'
+                icon: '/static/icon.png',
+                data: {
+                    link: payload?.data?.link || '/events' // Fallback if no link provided
+                }
             };
             // self.registration.showNotification(notificationTitle, notificationOptions);
         }
@@ -32,5 +35,21 @@ messaging.onBackgroundMessage(function (payload) {
 
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
-    clients.openWindow('/events');
+
+    const link = event.notification.data?.link || '/events'; // fallback to /events if no link
+
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+            // Try to focus an existing window/tab first
+            for (const client of windowClients) {
+                if (client.url === link && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+            // Otherwise open new
+            if (clients.openWindow) {
+                return clients.openWindow(link);
+            }
+        })
+    );
 });

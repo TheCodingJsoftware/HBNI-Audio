@@ -869,6 +869,9 @@ def send_notification_to_topic(topic, title, body):
                 body=body,
                 image="/static/icon.png",
             ),
+            data={
+                "link": "https://broadcasting.hbni.net/events",
+            },
             topic=topic,
         )
         response = messaging.send(message)
