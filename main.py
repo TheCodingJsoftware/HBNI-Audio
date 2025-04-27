@@ -1370,9 +1370,9 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                         "-f",
                         "mp3",
                         f"icecast://source:{self.password}@{ICECAST_BROADCASTING_IP}:{ICECAST_BROADCASTING_PORT}/{self.mount_point}",  # Icecast URL
-                        "-f",
-                        "wav",
-                        self.output_filename,
+                        # "-f",
+                        # "wav",
+                        # self.output_filename,
                     ],
                     stdin=subprocess.PIPE,
                 )
@@ -1429,42 +1429,42 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
             print("FFmpeg process has gracefully been terminated.")
 
             self.ending_time = datetime.now()
-            remove_silence.remove_silence_everywhere(self.output_filename)
-            total_minutes = audio_file.get_audio_length(self.output_filename)
-            hours = total_minutes // 60
-            minutes = total_minutes % 60
-            seconds = (total_minutes - int(total_minutes)) * 60
+            # remove_silence.remove_silence_everywhere(self.output_filename)
+            # total_minutes = audio_file.get_audio_length(self.output_filename)
+            # hours = total_minutes // 60
+            # minutes = total_minutes % 60
+            # seconds = (total_minutes - int(total_minutes)) * 60
 
-            if hours <= 0:
-                formated_length = f"{minutes:02d}m {seconds:02d}s"
-            else:
-                formated_length = f"{hours:02d}h {minutes:02d}m {seconds:02d}s"
+            # if hours <= 0:
+            #     formated_length = f"{minutes:02d}m {seconds:02d}s"
+            # else:
+            #     formated_length = f"{hours:02d}h {minutes:02d}m {seconds:02d}s"
 
-            new_output_filename = self.output_filename.replace(
-                "BROADCAST_LENGTH", formated_length
-            )
-            # static_recordings_path = (
-            #     os.getenv("STATIC_RECORDINGS_PATH", "/app/static/Recordings")
-            #     .replace("\\", "/")
-            #     .replace("//", "/")
-            #     .replace("//", "\\\\")
-            #     .replace("/", "\\")
+            # new_output_filename = self.output_filename.replace(
+            #     "BROADCAST_LENGTH", formated_length
             # )
-            if total_minutes >= 10.0 and not (self.is_private or self.host == "test"):
-                shutil.move(
-                    self.output_filename,
-                    new_output_filename,
-                )
-                filebrowser_uploader.upload(
-                    new_output_filename,
-                    new_output_filename,
-                    self.host,
-                    self.description,
-                    self.starting_time.strftime("%B %d %A %Y %I_%M %p"),
-                    total_minutes,
-                )
-            else:
-                remove_silence.remove_silence_everywhere(self.output_filename)
+            # # static_recordings_path = (
+            # #     os.getenv("STATIC_RECORDINGS_PATH", "/app/static/Recordings")
+            # #     .replace("\\", "/")
+            # #     .replace("//", "/")
+            # #     .replace("//", "\\\\")
+            # #     .replace("/", "\\")
+            # # )
+            # if total_minutes >= 10.0 and not (self.is_private or self.host == "test"):
+            #     shutil.move(
+            #         self.output_filename,
+            #         new_output_filename,
+            #     )
+            #     filebrowser_uploader.upload(
+            #         new_output_filename,
+            #         new_output_filename,
+            #         self.host,
+            #         self.description,
+            #         self.starting_time.strftime("%B %d %A %Y %I_%M %p"),
+            #         total_minutes,
+            #     )
+            # else:
+            #     remove_silence.remove_silence_everywhere(self.output_filename)
                 # os.remove(self.output_filename)
             # elif not self.is_private:
                 # shutil.move(
