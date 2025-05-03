@@ -21,7 +21,6 @@ import tornado.websocket
 from dotenv import load_dotenv
 from firebase_admin import credentials, messaging
 from tornado.web import Application, RequestHandler, url
-from rich import print
 
 import audio_file
 import filebrowser_uploader
