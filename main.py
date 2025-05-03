@@ -21,6 +21,7 @@ import tornado.websocket
 from dotenv import load_dotenv
 from firebase_admin import credentials, messaging
 from tornado.web import Application, RequestHandler, url
+from rich import print
 
 import audio_file
 import filebrowser_uploader
@@ -443,6 +444,7 @@ def get_active_icecast_broadcasts() -> list[dict[str, str | int]] | None:
             if isinstance(sources, dict):
                 sources = [sources]
             for source in sources:
+                is_private_by_genre = source.get("genre", "various") == "private"
                 mount_point = source.get("listenurl", "/").split("/")[-1]
                 broadcast_data.append(
                     {
@@ -462,7 +464,7 @@ def get_active_icecast_broadcasts() -> list[dict[str, str | int]] | None:
                             "listenurl", f"{icecast_url}/{mount_point}"
                         ),
                         "stream_start": source.get("stream_start", "N/A"),
-                        "is_private": is_broadcast_private(mount_point),
+                        "is_private": is_broadcast_private(mount_point) or is_private_by_genre,
                         "source_url": icecast_url,
                         "length": f"{format_length(get_duration(source.get('stream_start', 'N/A')))}",
                     }
@@ -1305,10 +1307,12 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
         return b"\x00" * num_samples * 2  # 16-bit PCM (2 bytes per sample)
 
     def on_message(self, message):
+        global active_broadcasts
         # If the received message is JSON metadata, start the ffmpeg process
         if isinstance(message, str):
             try:
                 metadata: dict[str, str] = json.loads(message)
+                print(metadata)
                 self.password = metadata.get("password", "")
                 if self.password != os.getenv("ICECAST_BROADCASTING_PASSWORD"):
                     self.write_message("Invalid password.")
@@ -1357,15 +1361,15 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                         "-metadata",
                         f"artist={self.host}",
                         "-metadata",
-                        "genre=RECORDING",
+                        f"genre={'private' if self.is_private else 'public'}",
                         "-metadata",
-                        "comment=RECORDING",
+                        f"comment={'private' if self.is_private else 'public'}",
                         "-ice_name",
                         self.host,
                         "-ice_description",
                         self.description,
                         "-ice_genre",
-                        "RECORDING",
+                        f"{'private' if self.is_private else 'public'}",
                         "-ice_url",
                         f"{ICECAST_BROADCASTING_SOURCE}/{self.mount_point}",
                         "-ice_public",
@@ -1414,6 +1418,7 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                     print(f"Error writing to FFmpeg process stdin: {e}")
 
     def on_close(self):
+        global active_broadcasts
         if self.ffmpeg_process:
             try:
                 if self.ffmpeg_process.stdin:
@@ -1432,6 +1437,7 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
             print("FFmpeg process has gracefully been terminated.")
 
             self.ending_time = datetime.now()
+            del active_broadcasts[self.host]
             # remove_silence.remove_silence_everywhere(self.output_filename)
             # total_minutes = audio_file.get_audio_length(self.output_filename)
             # hours = total_minutes // 60
