@@ -12,3 +12,4 @@ app/
 .wellknown/
 .git/
 .vscode/
+.gradle/
