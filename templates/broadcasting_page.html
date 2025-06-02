@@ -26,18 +26,18 @@
 
 <body class="dark hidden">
     <main class="responsive">
-        <article class="no-padding round" id="main-article">
+        <article class="no-padding round border" id="main-article">
             <div class="padding">
                 <details id="broadcast-details" open>
-                    <summary>
+                    <summary style="font-size: 18pt;">
                         <article class="round primary no-elevate">
-                        <nav>
-                            <div class="max">Broadcast Details</div>
-                            <i>expand_more</i>
-                        </nav>
+                            <nav>
+                                <div class="max">Broadcast Details</div>
+                                <i>expand_more</i>
+                            </nav>
                         </article>
                     </summary>
-                    <nav class="row tiny-space border round padding top-margin surface-container-low">
+                    <nav class="row tiny-space border round padding top-margin surface-container-high">
                         <div class="max">
                             <div class="field label border small-round">
                                 <input type="text" id="host" name="host" required/>
@@ -58,7 +58,7 @@
                                 <span>Private Broadcast</span>
                             </label>
                         </div>
-                        <nav class="vertical">
+                        <nav class="toolbar vertical">
                             <button class="circle transparent link">
                                 <i>help</i>
                                 <div class="tooltip left max" style="inline-size: 14rem !important;">
@@ -79,9 +79,6 @@
                             </button>
                             <button class="circle transparent link" id="share-button">
                                 <i>share</i>
-                                <div class="tooltip left">
-                                    Share
-                                </div>
                             </button>
                         </nav>
                     </nav>

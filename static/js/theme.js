@@ -90,9 +90,9 @@ export function loadTheme() {
     updateIcon(theme);
     updateImageSource();
 
-    setTimeout(() => {
-        loadAnimationStyleSheet();
-    }, 100);
+    // setTimeout(() => {
+    //     loadAnimationStyleSheet();
+    // }, 100);
 
     document.body.classList.remove("hidden");
 }

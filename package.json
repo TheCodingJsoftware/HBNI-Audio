@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/TheCodingJsoftware/HBNI-Audio#readme",
   "dependencies": {
-    "beercss": "^3.9.7",
+    "beercss": "^3.11.11",
     "firebase": "^11.5.0",
     "flatpickr": "^4.6.13",
     "material-dynamic-colors": "^1.1.2"

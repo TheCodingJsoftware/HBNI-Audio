@@ -40,15 +40,20 @@
         </div>
         <div class="no-results center-align middle-align" style="display: none;">No recordings found</div>
         <div id="trending-container">
-            <article class="border round no-padding">
-                <details open>
-                    <summary class="center-align padding" style="font-size: 18pt;">Trending Broadcasts</summary>
-                    <div id="trending-archives-container" class="round scroll grid no-space">
-                    </div>
-                </details>
-            </article>
+            <details open>
+                <summary style="font-size: 18pt;">
+                    <article class="round primary no-elevate">
+                        <nav>
+                            <div class="max">Trending Broadcasts</div>
+                            <i>expand_more</i>
+                        </nav>
+                    </article>
+                </summary>
+                <article id="trending-archives-container" class="border round no-padding scroll grid no-space surface">
+                </article>
+            </details>
         </div>
-        <article id="contents" class="border round no-padding scroll grid no-space">
+        <article id="contents" class="border round no-padding scroll grid no-space surface">
         </article>
         <div id="pagination-controls" class="row top-align">
             <button id="prev-page-btn" class="border no-margin round" disabled>

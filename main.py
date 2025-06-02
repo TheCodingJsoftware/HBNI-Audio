@@ -1,8 +1,7 @@
 import json
 import os
-import shutil
-import subprocess
 import re
+import subprocess
 import traceback
 from datetime import datetime
 from urllib.parse import unquote, urlparse
@@ -21,10 +20,6 @@ import tornado.websocket
 from dotenv import load_dotenv
 from firebase_admin import credentials, messaging
 from tornado.web import Application, RequestHandler, url
-
-import audio_file
-import filebrowser_uploader
-import remove_silence
 
 cred = credentials.Certificate("hbni-audio-1c43f2c03734.json")
 firebase_admin.initialize_app(cred)
@@ -113,6 +108,7 @@ FILEBROWSER_UPLOAD_PATH = os.getenv("FILEBROWSER_UPLOAD_PATH", "HBNI-Audio/Recor
 
 # Global dict of filebrowser items {name: full_path}
 FILEBROWSER_ITEMS = {}
+
 
 async def get_filebrowser_token():
     async with aiohttp.ClientSession() as session:
@@ -463,7 +459,8 @@ def get_active_icecast_broadcasts() -> list[dict[str, str | int]] | None:
                             "listenurl", f"{icecast_url}/{mount_point}"
                         ),
                         "stream_start": source.get("stream_start", "N/A"),
-                        "is_private": is_broadcast_private(mount_point) or is_private_by_genre,
+                        "is_private": is_broadcast_private(mount_point)
+                        or is_private_by_genre,
                         "source_url": icecast_url,
                         "length": f"{format_length(get_duration(source.get('stream_start', 'N/A')))}",
                     }
@@ -613,7 +610,7 @@ async def refresh_scedule_data():
 
         schedule_chache["all_schedules"] = updated_data
 
-        current_time = datetime.now()        # Filter schedules where start_time is in the future or within the last 2 hours
+        current_time = datetime.now()  # Filter schedules where start_time is in the future or within the last 2 hours
         filtered_schedules = []
         for schedule_id, schedule in updated_data.items():
             try:
@@ -630,7 +627,9 @@ async def refresh_scedule_data():
         filtered_schedules.sort()
 
         # Rebuild the active_schedules dict in sorted order
-        active_schedules = {schedule_id: schedule for _, schedule_id, schedule in filtered_schedules}
+        active_schedules = {
+            schedule_id: schedule for _, schedule_id, schedule in filtered_schedules
+        }
         active_schedules_count = len(active_schedules)
 
         schedule_chache["active_schedules"] = active_schedules
@@ -1473,12 +1472,12 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
             #     )
             # else:
             #     remove_silence.remove_silence_everywhere(self.output_filename)
-                # os.remove(self.output_filename)
+            # os.remove(self.output_filename)
             # elif not self.is_private:
-                # shutil.move(
-                #     self.output_filename,
-                #     f"{static_recordings_path}\\TESTS\\{new_output_filename}",
-                # )
+            # shutil.move(
+            #     self.output_filename,
+            #     f"{static_recordings_path}\\TESTS\\{new_output_filename}",
+            # )
 
 
 class BroadcastHandler(BaseHandler):
@@ -1763,7 +1762,9 @@ if __name__ == "__main__":
     # First callback starts immediately (0 minutes offset)
     tornado.ioloop.PeriodicCallback(
         refresh_archive_data,
-        float(os.getenv("REFRESH_ARCHIVE_DATA_INTERVAL_MINUTES", default=5)) * 60 * 1000,
+        float(os.getenv("REFRESH_ARCHIVE_DATA_INTERVAL_MINUTES", default=5))
+        * 60
+        * 1000,
     ).start()
 
     # Second callback starts after 1 minute
@@ -1772,7 +1773,9 @@ if __name__ == "__main__":
         60,
         lambda: tornado.ioloop.PeriodicCallback(
             refresh_active_broadcasts_data,
-            float(os.getenv("REFRESH_ACTIVE_BROADCASTS_DATA_INTERVAL_MINUTES", default=5))
+            float(
+                os.getenv("REFRESH_ACTIVE_BROADCASTS_DATA_INTERVAL_MINUTES", default=5)
+            )
             * 60
             * 1000,
         ).start(),
@@ -1781,7 +1784,9 @@ if __name__ == "__main__":
         60,
         lambda: tornado.ioloop.PeriodicCallback(
             get_recording_files_share_hashes,
-            float(os.getenv("REFRESH_ACTIVE_BROADCASTS_DATA_INTERVAL_MINUTES", default=5))
+            float(
+                os.getenv("REFRESH_ACTIVE_BROADCASTS_DATA_INTERVAL_MINUTES", default=5)
+            )
             * 60
             * 1000,
         ).start(),
@@ -1791,7 +1796,9 @@ if __name__ == "__main__":
         120,
         lambda: tornado.ioloop.PeriodicCallback(
             refresh_recording_status_data,
-            float(os.getenv("REFRESH_RECORDING_STATUS_DATA_INTERVAL_MINUTES", default=1))
+            float(
+                os.getenv("REFRESH_RECORDING_STATUS_DATA_INTERVAL_MINUTES", default=1)
+            )
             * 60
             * 1000,
         ).start(),
