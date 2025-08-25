@@ -120,6 +120,66 @@
     </div>
 </dialog>
 
+<dialog class="right" id="set-theme-dialog">
+    <h4 class="center-align">Color Theme</h4>
+    <h6 class="padding">Select Color</h6>
+    <div id="theme-buttons">
+        <div class="padding">
+            <div class="row center-align">
+                <button class="l2 m2 s3 center-align circle small red" data-color="#f44336" id="theme-button"></button>
+                <button class="l2 m2 s3 center-align circle small pink" data-color="#e91e63" id="theme-button"></button>
+                <button class="l2 m2 s3 center-align circle small purple" data-color="#9c27b0" id="theme-button"></button>
+                <button class="l2 m2 s3 center-align circle small deep-purple" data-color="#673ab7" id="theme-button"></button>
+            </div>
+            <div class="row center-align">
+                <button class="l2 m2 s3 center-align circle small indigo" data-color="#3f51b5" id="theme-button"></button>
+                <button class="l2 m2 s3 center-align circle small blue" data-color="#2196f3" id="theme-button"></button>
+                <button class="l2 m2 s3 center-align circle small light-blue" data-color="#03a9f4" id="theme-button"></button>
+                <button class="l2 m2 s3 center-align circle small cyan" data-color="#00bcd4" id="theme-button"></button>
+            </div>
+            <div class="row center-align">
+                <button class="l2 m2 s3 center-align circle small teal" data-color="#009688" id="theme-button"></button>
+                <button class="l2 m2 s3 center-align circle small green" data-color="#4caf50" id="theme-button"></button>
+                <button class="l2 m2 s3 center-align circle small light-green" data-color="#8bc34a" id="theme-button"></button>
+                <button class="l2 m2 s3 center-align circle small lime" data-color="#cddc39" id="theme-button"></button>
+            </div>
+            <div class="row center-align">
+                <button class="l2 m2 s3 center-align circle small yellow" data-color="#ffeb3b" id="theme-button"></button>
+                <button class="l2 m2 s3 center-align circle small amber" data-color="#ffc107" id="theme-button"></button>
+                <button class="l2 m2 s3 center-align circle small orange" data-color="#ff9800" id="theme-button"></button>
+                <button class="l2 m2 s3 center-align circle small deep-orange" data-color="#ff5722" id="theme-button"></button>
+            </div>
+            <div class="small-space"></div>
+            <div class="row center-align">
+                <button class="small-round">
+                    <i>palette</i>
+                    <span>Select Color</span>
+                    <input type="color" id="select-color">
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="field top-padding middle-align">
+        <nav>
+            <div class="max">
+                <h6>Darkmode</h6>
+                <div>Enable dark mode</div>
+            </div>
+            <label class="switch icon">
+                <input type="checkbox" id="toggle-mode" autocomplete="off">
+                <span>
+                    <i id="mode-icon">dark_mode</i>
+                </span>
+            </label>
+        </nav>
+    </div>
+    <nav class="right-align">
+        <button class="transparent link small-round" onclick="ui('#set-theme-dialog')">
+            <span>Close</span>
+        </button>
+    </nav>
+</dialog>
+
 <header class="fixed primary" id="main-header">
     <nav>
         <button class="circle transparent" onclick="ui('#info-dialog');">
@@ -132,7 +192,7 @@
     </nav>
 </header>
 
-<body class="dark hidden">
+<body class="hidden">
     <main class="responsive">
         <div class="absolute center large-width padding grid">
             <div class="s12 m12 l12">
@@ -164,6 +224,10 @@
             <button class="border small-round left-align extra s6 m4 l4" onclick="window.location.href='/faq';">
                 <i>help</i>
                 <span>Help</span>
+            </button>
+            <button class="border small-round left-align extra s6 m4 l4" onclick="ui('#set-theme-dialog')">
+                <i>color_lens</i>
+                <span>Color Theme</span>
             </button>
             <button class="border small-round left-align extra s6 m4 l4" id="install">
                 <i>download</i>

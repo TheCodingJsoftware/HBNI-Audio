@@ -30,21 +30,21 @@ if ('serviceWorker' in navigator && 'Notification' in window) {
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ token: currentToken, topic: 'broadcasts' }),
                             })
-                            .then((response) => response.json())
-                            .then((data) => {
-                                console.log('Successfully subscribed to topic:', data);
-                                localStorage.setItem('firebaseToken', currentToken); // Store the new token
-                                Notification.requestPermission().then((permission) => {
-                                    if (permission === 'granted') {
-                                        console.log('Notification permission granted.');
-                                    } else {
-                                        console.log('Unable to get permission to notify.');
-                                    }
+                                .then((response) => response.json())
+                                .then((data) => {
+                                    console.log('Successfully subscribed to topic:', data);
+                                    localStorage.setItem('firebaseToken', currentToken); // Store the new token
+                                    Notification.requestPermission().then((permission) => {
+                                        if (permission === 'granted') {
+                                            console.log('Notification permission granted.');
+                                        } else {
+                                            console.log('Unable to get permission to notify.');
+                                        }
+                                    });
+                                })
+                                .catch((error) => {
+                                    console.error('Error subscribing to topic:', error);
                                 });
-                            })
-                            .catch((error) => {
-                                console.error('Error subscribing to topic:', error);
-                            });
                         } else {
                             console.log('Token already subscribed.');
                         }
@@ -365,6 +365,7 @@ document.addEventListener('DOMContentLoaded', function () {
         altFormat: "F j, Y h:i K",
         defaultDate: new Date(),
     });
+
     setInterval(fetchLoveTaps, 1000 * 60); // Fetch every minute
     const prefetch = (url) => {
         const link = document.createElement('link');
@@ -380,4 +381,39 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
     getSystemInfo();
+
+    const themeButtons = document.querySelectorAll('#theme-button');
+    themeButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const theme = button.getAttribute('data-color');
+            if (theme) {
+                ui('theme', theme);
+                localStorage.setItem('theme', theme);
+            }
+        });
+    });
+    const selectColorInput = document.querySelector("#select-color");
+    selectColorInput.addEventListener("change", () => {
+        const color = selectColorInput.value;
+        ui('theme', color);
+        localStorage.setItem('theme', color);
+    });
+
+    const modeIcon = document.querySelector("#mode-icon");
+    const toggleModeButton = document.querySelector("#toggle-mode");
+    if (localStorage.getItem("mode")) {
+        toggleModeButton.checked = localStorage.getItem("mode") === "dark";
+    } else {
+        toggleModeButton.checked = true;
+    }
+    toggleModeButton.addEventListener("change", () => {
+        const newMode = toggleModeButton.checked ? "dark" : "light";
+        localStorage.setItem("mode", newMode);
+        ui("mode", newMode);
+        updateIcon(newMode);
+        updateImageSource();
+        modeIcon.textContent = toggleModeButton.checked ? "dark_mode" : "light_mode";
+    });
+    modeIcon.textContent = toggleModeButton.checked ? "dark_mode" : "light_mode";
+
 });

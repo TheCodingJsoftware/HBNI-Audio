@@ -475,7 +475,7 @@ async def get_recording_files_share_hashes():
     headers = {"X-Auth": token.strip(), "accept": "*/*"}
     async with aiohttp.ClientSession() as session:
         async with session.get(
-            f"{os.getenv("FILEBROWSER_URL")}/api/shares",
+            f"{os.getenv('FILEBROWSER_URL')}/api/shares",
             headers=headers,
         ) as response:
             if response.status != 200:
@@ -1324,7 +1324,7 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                 self.is_private = metadata.get("isPrivate", False)
                 self.mount_point = metadata.get("mountPoint", "unknown")
                 self.starting_time = datetime.now()
-                self.output_filename = f'{self.host.title()} - {self.description} - {self.starting_time.strftime("%B %d %A %Y %I_%M %p")} - BROADCAST_LENGTH.wav'
+                self.output_filename = f"{self.host.title()} - {self.description} - {self.starting_time.strftime('%B %d %A %Y %I_%M %p')} - BROADCAST_LENGTH.wav"
 
                 ICECAST_BROADCASTING_IP = (
                     os.getenv("ICECAST_BROADCASTING_IP")

@@ -84,11 +84,20 @@ function getPreferredTheme() {
 }
 
 export function loadTheme() {
-    const theme = getPreferredTheme();
+    let savedMode = localStorage.getItem("mode");
+    const savedTheme = localStorage.getItem("theme");
+    if (!savedMode) {
+        savedMode = getPreferredTheme();;
+    }
 
-    ui('mode', theme);
-    updateIcon(theme);
+    ui('mode', savedMode);
+    updateIcon(savedMode);
     updateImageSource();
+
+    if (savedTheme) {
+        ui("theme", savedTheme);
+    }
+
 
     // setTimeout(() => {
     //     loadAnimationStyleSheet();
@@ -98,8 +107,12 @@ export function loadTheme() {
 }
 
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+    const savedMode = localStorage.getItem("mode");
+    if (savedMode) {
+        return; // User has a preference, do nothing
+    }
     const newTheme = e.matches ? 'dark' : 'light';
-    ui('mode', newTheme);
+    ui('mode', "light");
     updateIcon(newTheme);
     updateImageSource();
 });

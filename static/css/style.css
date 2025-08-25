@@ -12,14 +12,10 @@ article {
     color: var(--primary);
 }
 
-#contents{
+#contents {
     height: 700px;
     overflow-y: auto;
     overflow-x: hidden;
-}
-
-#trending-archives-container{
-    max-height: 400px;
 }
 
 .live-indicator::after {
@@ -34,18 +30,21 @@ article {
         opacity: 0.5;
     }
 }
+
 @media (max-width: 600px) {
-    #contents{
+    #contents {
         height: 450px;
     }
-    #main-play-article{
+
+    #main-play-article {
         height: 100%;
         width: 100%;
         background-color: var(--surface);
         border-radius: 0;
         border-color: transparent;
     }
-    #main-article{
+
+    #main-article {
         height: 100%;
         width: 100%;
         background-color: var(--surface);

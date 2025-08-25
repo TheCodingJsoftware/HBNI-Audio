@@ -21,6 +21,10 @@
             <i>arrow_back</i>
         </button>
         <h5 class="max small">Audio Archives</h5>
+        <button class="circle transparent" onclick="ui('#trending-dialog')" id="trending-btn" title="Trending">
+            <i>whatshot</i>
+            <span class="l m">Trending</span>
+        </button>
         <button class="circle transparent" onclick="window.location.href='/listeners_page';">
             <i>record_voice_over</i>
             <span>Listeners Page</span>
@@ -30,29 +34,31 @@
     </nav>
 </header>
 
-<body class="dark hidden">
+<dialog id="trending-dialog" class="max">
+    <nav>
+        <h5 class="max">Trending</h5>
+        <button class="circle transparent" onclick="ui('#trending-dialog')">
+            <i>close</i>
+        </button>
+    </nav>
+    <div id="trending-container"></div>
+        <div id="trending-archives-container" class="no-padding scroll grid no-space">
+        </div>
+    </div>
+    <nav class="right-align">
+        <button class="transparent link small-round" onclick="ui('#trending-dialog')">Close</button>
+    </nav>
+</dialog>
+
+<body class="hidden">
     <main class="responsive">
-        <div class="field label prefix border small-round fill">
+        <div class="field label prefix border round fill">
             <i>search</i>
             <input type="text" id="search">
             <label>Search</label>
             <div class="helper no-line">Search by date, description, or colony name</div>
         </div>
         <div class="no-results center-align middle-align" style="display: none;">No recordings found</div>
-        <div id="trending-container">
-            <details open>
-                <summary style="font-size: 18pt;">
-                    <article class="round primary no-elevate">
-                        <nav>
-                            <div class="max">Trending Broadcasts</div>
-                            <i>expand_more</i>
-                        </nav>
-                    </article>
-                </summary>
-                <article id="trending-archives-container" class="border round no-padding scroll grid no-space surface">
-                </article>
-            </details>
-        </div>
         <article id="contents" class="border round no-padding scroll grid no-space surface">
         </article>
         <div id="pagination-controls" class="row top-align">
