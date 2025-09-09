@@ -133,9 +133,7 @@ async def get_public_share_url(file_relative_path: str, token: str) -> str:
         ) as response:
             if response.status != 200:
                 body = await response.text()
-                raise Exception(
-                    f"Failed to create share link: {response.status} - {body}"
-                )
+                raise Exception(f"Failed to create share link: {response.status} - {body}")
             data = await response.json()
             return data["hash"]
 
@@ -156,9 +154,7 @@ async def list_filebrowser_items():
             data = await response.json()
 
     items = data.get("items", [])
-    FILEBROWSER_ITEMS = {
-        item["name"]: item["path"].lstrip("/") for item in items if not item["isDir"]
-    }
+    FILEBROWSER_ITEMS = {item["name"]: item["path"].lstrip("/") for item in items if not item["isDir"]}
 
 
 def extract_filename_from_download_link(download_link: str) -> str:
@@ -193,9 +189,7 @@ async def update_audio_hashes():
 
             try:
                 share_hash = await get_public_share_url(filebrowser_path, token)
-                update_query = (
-                    "UPDATE audioarchives SET share_hash = $1 WHERE download_link = $2;"
-                )
+                update_query = "UPDATE audioarchives SET share_hash = $1 WHERE download_link = $2;"
                 await conn.execute(update_query, share_hash, download_link)
                 print(f"✅ Added share_hash for: {filename} → {share_hash}")
             except Exception as e:
@@ -210,12 +204,8 @@ async def initialize_db_pool():
         database=os.getenv("POSTGRES_DB"),
         user=os.getenv("POSTGRES_USER"),
         password=os.getenv("POSTGRES_PASSWORD"),
-        min_size=int(
-            os.getenv("POSTGRES_MIN_SIZE", default=5)
-        ),  # Minimum number of connections
-        max_size=int(
-            os.getenv("POSTGRES_MAX_SIZE", default=10)
-        ),  # Adjust based on expected load
+        min_size=int(os.getenv("POSTGRES_MIN_SIZE", default=5)),  # Minimum number of connections
+        max_size=int(os.getenv("POSTGRES_MAX_SIZE", default=10)),  # Adjust based on expected load
     )
 
 
@@ -250,9 +240,7 @@ async def execute_query(query: str, *params):
 def format_length(length_in_minutes):
     hours, minutes = divmod(int(length_in_minutes), 60)
     hours_string = f"{hours} hour{'s' if hours > 1 else ''}" if hours > 0 else ""
-    minutes_string = (
-        f"{minutes} minute{'s' if minutes != 1 else ''}" if minutes > 0 else ""
-    )
+    minutes_string = f"{minutes} minute{'s' if minutes != 1 else ''}" if minutes > 0 else ""
 
     if hours_string and minutes_string:
         return f"{hours_string}, {minutes_string}"
@@ -421,9 +409,7 @@ def get_active_icecast_broadcasts() -> list[dict[str, str | int]] | None:
         try:
             response = requests.get(f"{icecast_url}/status-json.xsl", timeout=10)
             if response.status_code == 200:
-                json_content = response.text.replace(
-                    '"title": - ,', '"title": null,'
-                )  # Some broadcasts are weird
+                json_content = response.text.replace('"title": - ,', '"title": null,')  # Some broadcasts are weird
                 json_data = json.loads(json_content)
             else:
                 continue
@@ -447,21 +433,16 @@ def get_active_icecast_broadcasts() -> list[dict[str, str | int]] | None:
                         "admin": icestats.get("admin", "N/A"),
                         "location": icestats.get("location", "N/A"),
                         "server_name": source.get("server_name", "Unspecified name"),
-                        "server_description": source.get(
-                            "server_description", "Unspecified description"
-                        ),
+                        "server_description": source.get("server_description", "Unspecified description"),
                         "genre": source.get("genre", "various"),
                         "listeners": source.get("listeners", 0),
                         "host": mount_point,
                         "colony": mount_point,
                         "mount_point": mount_point,
                         "listener_peak": source.get("listener_peak", 0),
-                        "listen_url": source.get(
-                            "listenurl", f"{icecast_url}/{mount_point}"
-                        ),
+                        "listen_url": source.get("listenurl", f"{icecast_url}/{mount_point}"),
                         "stream_start": source.get("stream_start", "N/A"),
-                        "is_private": is_broadcast_private(mount_point)
-                        or is_private_by_genre,
+                        "is_private": is_broadcast_private(mount_point) or is_private_by_genre,
                         "source_url": icecast_url,
                         "length": f"{format_length(get_duration(source.get('stream_start', 'N/A')))}",
                     }
@@ -480,15 +461,11 @@ async def get_recording_files_share_hashes():
         ) as response:
             if response.status != 200:
                 body = await response.text()
-                raise Exception(
-                    f"Failed to create share link: {response.status} - {body}"
-                )
+                raise Exception(f"Failed to create share link: {response.status} - {body}")
             data = await response.json()
 
     for shared_file in data:
-        recording_files_share_hashes.update(
-            {shared_file["hash"]: shared_file["path"].split("/")[-1]}
-        )
+        recording_files_share_hashes.update({shared_file["hash"]: shared_file["path"].split("/")[-1]})
 
 
 def get_active_broadcast_count(broadcast_data) -> int:
@@ -537,9 +514,7 @@ class BaseHandler(RequestHandler, AnalyticsMixin):
     def write_error(self, status_code: int, **kwargs):
         error_message = error_messages.get(status_code, "Something went majorly wrong.")
         template = env.get_template("error.html")
-        rendered_template = template.render(
-            error_code=status_code, error_message=error_message
-        )
+        rendered_template = template.render(error_code=status_code, error_message=error_message)
         self.write(rendered_template)
 
     def _extract_broadcast_name(self) -> str | None:
@@ -577,9 +552,7 @@ def refresh_active_broadcasts_data():
         if updated_data is None:
             return
         active_broadcasts_chache["data"] = updated_data
-        active_broadcasts_chache["active_broadcasts_count"] = (
-            get_active_broadcast_count(updated_data)
-        )
+        active_broadcasts_chache["active_broadcasts_count"] = get_active_broadcast_count(updated_data)
         active_broadcasts_chache["last_updated"] = datetime.now()
     except Exception as e:
         print(f"Error refreshing active broadcasts data: {e}")
@@ -628,9 +601,7 @@ async def refresh_scedule_data():
         filtered_schedules.sort()
 
         # Rebuild the active_schedules dict in sorted order
-        active_schedules = {
-            schedule_id: schedule for _, schedule_id, schedule in filtered_schedules
-        }
+        active_schedules = {schedule_id: schedule for _, schedule_id, schedule in filtered_schedules}
         active_schedules_count = len(active_schedules)
 
         schedule_chache["active_schedules"] = active_schedules
@@ -659,9 +630,7 @@ async def refresh_recording_status_data():
     # await ensure_recording_status_table()
     try:
         async with db_pool.acquire() as conn:
-            rows = await conn.fetch(
-                "SELECT host, link, length, description, starting_time FROM recording_status"
-            )
+            rows = await conn.fetch("SELECT host, link, length, description, starting_time FROM recording_status")
             updated_data = {
                 row["host"]: {
                     "link": row["link"],
@@ -714,9 +683,7 @@ async def refresh_trending_archives():
                 matching_archive = None
                 for archive in audio_archive_cache["data"]:
                     if archive["filename"] == filename:
-                        item_date = datetime.strptime(
-                            archive["date"], "%B %d %A %Y %I_%M %p"
-                        )
+                        item_date = datetime.strptime(archive["date"], "%B %d %A %Y %I_%M %p")
                         diff_days = (datetime.today().date() - item_date.date()).days
                         uploaded_days_ago = f"{diff_days} days ago"
 
@@ -747,9 +714,7 @@ class GetArchiveDataHandler(BaseHandler):
     def get(self):
         try:
             self.set_header("Content-Type", "application/json")
-            self.write(
-                json.dumps(audio_archive_cache["grouped_data"], cls=DateTimeEncoder)
-            )
+            self.write(json.dumps(audio_archive_cache["grouped_data"], cls=DateTimeEncoder))
         except Exception as e:
             self.set_status(500)
             self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
@@ -759,9 +724,7 @@ class GetScheduleDataHandler(BaseHandler):
     def get(self):
         try:
             self.set_header("Content-Type", "application/json")
-            self.write(
-                json.dumps(schedule_chache["all_schedules"], cls=DateTimeEncoder)
-            )
+            self.write(json.dumps(schedule_chache["all_schedules"], cls=DateTimeEncoder))
         except Exception as e:
             self.set_status(500)
             self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
@@ -771,9 +734,7 @@ class GetActiveSchedulesDataHandler(BaseHandler):
     def get(self):
         try:
             self.set_header("Content-Type", "application/json")
-            self.write(
-                json.dumps(schedule_chache["active_schedules"], cls=DateTimeEncoder)
-            )
+            self.write(json.dumps(schedule_chache["active_schedules"], cls=DateTimeEncoder))
         except Exception as e:
             self.set_status(500)
             self.write_error(500, stack_trace=f"{str(e)} {traceback.print_exc()}")
@@ -785,12 +746,8 @@ class GetEventCountHandler(BaseHandler):
         self.write(
             json.dumps(
                 {
-                    "broadcast_count": active_broadcasts_chache[
-                        "active_broadcasts_count"
-                    ],
-                    "scheduled_broadcast_count": schedule_chache[
-                        "active_schedules_count"
-                    ],
+                    "broadcast_count": active_broadcasts_chache["active_broadcasts_count"],
+                    "scheduled_broadcast_count": schedule_chache["active_schedules_count"],
                 }
             )
         )
@@ -996,9 +953,7 @@ class AudioArchivesHandler(BaseHandler):
 
 
 def url_for_static(filename):
-    static_recordings_path = os.getenv(
-        "STATIC_RECORDINGS_PATH", "/app/static/Recordings"
-    )
+    static_recordings_path = os.getenv("STATIC_RECORDINGS_PATH", "/app/static/Recordings")
     return f"{static_recordings_path}/{filename}"
 
 
@@ -1016,11 +971,7 @@ class RecordingStatsHandler(BaseHandler):
                 json.dumps(
                     {
                         "visit_count": matching_archive["visit_count"] or 0,
-                        "latest_visit": matching_archive["latest_visit"].strftime(
-                            "%B %d %A %Y %I:%M %p"
-                        )
-                        if matching_archive["latest_visit"]
-                        else "N/A",
+                        "latest_visit": matching_archive["latest_visit"].strftime("%B %d %A %Y %I:%M %p") if matching_archive["latest_visit"] else "N/A",
                     }
                 )
             )
@@ -1041,14 +992,10 @@ class LoadRecordingHandler(BaseHandler):
 
                 content = await resp.read()
                 self.set_header("Access-Control-Allow-Origin", "*")
-                self.set_header(
-                    "Content-Type", resp.headers.get("Content-Type", "audio/mp3")
-                )
+                self.set_header("Content-Type", resp.headers.get("Content-Type", "audio/mp3"))
                 self.set_header("Content-Length", str(len(content)))
                 self.set_header("Accept-Ranges", "bytes")
-                self.set_header(
-                    "content-Range", f"bytes 0-{len(content)}/{len(content)}"
-                )  # For resuming downloads
+                self.set_header("content-Range", f"bytes 0-{len(content)}/{len(content)}")  # For resuming downloads
                 self.set_header(
                     "Content-Disposition",
                     f'inline; filename="{recording_files_share_hashes[hash]}.mp3"',
@@ -1071,11 +1018,7 @@ class PlayRecordingHandler(BaseHandler):
         if matching_archive:
             visit_count = matching_archive["visit_count"] or 0
             share_hash = matching_archive["share_hash"] or ""
-            latest_visit = (
-                matching_archive["latest_visit"].strftime("%B %d %A %Y %I:%M %p")
-                if matching_archive["latest_visit"]
-                else "N/A"
-            )
+            latest_visit = matching_archive["latest_visit"].strftime("%B %d %A %Y %I:%M %p") if matching_archive["latest_visit"] else "N/A"
             date = matching_archive["date"] or "N/A"
             description = matching_archive["description"] or "N/A"
             length = format_length(matching_archive["length"]) or "N/A"
@@ -1100,6 +1043,44 @@ class PlayRecordingHandler(BaseHandler):
             share_hash=share_hash,
         )
         self.write(rendered_template)
+
+
+class LiveProxyHandler(RequestHandler):
+    async def get(self, index: str):
+        idx = int(index)
+
+        broadcasts = active_broadcasts_chache.get("data", [])
+        if idx >= len(broadcasts):
+            self.set_status(404)
+            self.write("Error: No such live index")
+            return
+
+        broadcast = broadcasts[idx]
+        listen_url = broadcast["listen_url"]
+
+        # Proxy audio from Icecast
+        async with aiohttp.ClientSession() as session:
+            async with session.get(listen_url) as resp:
+                if resp.status != 200:
+                    self.set_status(502)
+                    self.write("Error: Could not fetch audio")
+                    return
+
+                # Pass through headers
+                ctype = resp.headers.get("Content-Type", "audio/mpeg")
+                self.set_header("Content-Type", ctype)
+                self.set_header("Cache-Control", "no-cache")
+
+                # Stream audio in chunks
+                try:
+                    async for chunk in resp.content.iter_chunked(4096):
+                        if not chunk:
+                            break
+                        self.write(chunk)
+                        await self.flush()
+                except Exception:
+                    # client disconnected or network issue
+                    return
 
 
 class PlayLiveHandler(BaseHandler):
@@ -1202,9 +1183,7 @@ class ScheduleBroadcastHandler(BaseHandler):
 
             await refresh_scedule_data()
 
-            send_notification_to_topic(
-                "broadcasts", f"{host} scheduled a broadcast", description
-            )
+            send_notification_to_topic("broadcasts", f"{host} scheduled a broadcast", description)
 
             self.set_status(200)
             self.write({"success": True})
@@ -1318,29 +1297,15 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                     return
 
                 self.host = metadata.get("host", "unknown")
-                self.description = metadata.get(
-                    "description", "Unspecified description"
-                )
+                self.description = metadata.get("description", "Unspecified description")
                 self.is_private = metadata.get("isPrivate", False)
                 self.mount_point = metadata.get("mountPoint", "unknown")
                 self.starting_time = datetime.now()
                 self.output_filename = f"{self.host.title()} - {self.description} - {self.starting_time.strftime('%B %d %A %Y %I_%M %p')} - BROADCAST_LENGTH.wav"
 
-                ICECAST_BROADCASTING_IP = (
-                    os.getenv("ICECAST_BROADCASTING_IP")
-                    if not self.is_private
-                    else os.getenv("PRIVATE_ICECAST_BROADCASTING_IP")
-                )
-                ICECAST_BROADCASTING_PORT = (
-                    os.getenv("ICECAST_BROADCASTING_PORT")
-                    if not self.is_private
-                    else os.getenv("PRIVATE_ICECAST_BROADCASTING_PORT")
-                )
-                ICECAST_BROADCASTING_SOURCE = (
-                    os.getenv("ICECAST_BROADCASTING_SOURCE")
-                    if not self.is_private
-                    else os.getenv("PRIVATE_ICECAST_BROADCASTING_SOURCE")
-                )
+                ICECAST_BROADCASTING_IP = os.getenv("ICECAST_BROADCASTING_IP") if not self.is_private else os.getenv("PRIVATE_ICECAST_BROADCASTING_IP")
+                ICECAST_BROADCASTING_PORT = os.getenv("ICECAST_BROADCASTING_PORT") if not self.is_private else os.getenv("PRIVATE_ICECAST_BROADCASTING_PORT")
+                ICECAST_BROADCASTING_SOURCE = os.getenv("ICECAST_BROADCASTING_SOURCE") if not self.is_private else os.getenv("PRIVATE_ICECAST_BROADCASTING_SOURCE")
 
                 self.ffmpeg_process = subprocess.Popen(
                     [
@@ -1384,9 +1349,7 @@ class BroadcastWSHandler(tornado.websocket.WebSocketHandler):
                 )
                 # Check if the process started successfully
                 if self.ffmpeg_process.poll() is None:
-                    print(
-                        f"FFmpeg process started successfully for {self.output_filename}"
-                    )
+                    print(f"FFmpeg process started successfully for {self.output_filename}")
                     active_broadcasts[self.host] = Broadcast(
                         self.host,
                         self.description,
@@ -1641,9 +1604,7 @@ class AnalyticsHandler(BaseHandler):
                 daily_visits_data = [
                     {
                         **dict(row),
-                        "day_bucket": row["day_bucket"].isoformat()
-                        if row["day_bucket"]
-                        else None,
+                        "day_bucket": row["day_bucket"].isoformat() if row["day_bucket"] else None,
                     }
                     for row in daily_visits
                 ]
@@ -1696,6 +1657,7 @@ def make_app():
             url(r"/recording_stats/(.*)", RecordingStatsHandler),
             url(r"/play_recording/(.*)", PlayRecordingHandler),
             url(r"/play_live/(.*)", PlayLiveHandler),
+            url(r"/live/([0-9]+)", LiveProxyHandler),
             url(r"/load_recording/(.*)", LoadRecordingHandler),
             url(r"/broadcast_ws", BroadcastWSHandler),
             url(r"/schedule_broadcast", ScheduleBroadcastHandler),
@@ -1763,9 +1725,7 @@ if __name__ == "__main__":
     # First callback starts immediately (0 minutes offset)
     tornado.ioloop.PeriodicCallback(
         refresh_archive_data,
-        float(os.getenv("REFRESH_ARCHIVE_DATA_INTERVAL_MINUTES", default=5))
-        * 60
-        * 1000,
+        float(os.getenv("REFRESH_ARCHIVE_DATA_INTERVAL_MINUTES", default=5)) * 60 * 1000,
     ).start()
 
     # Second callback starts after 1 minute
@@ -1774,22 +1734,14 @@ if __name__ == "__main__":
         60,
         lambda: tornado.ioloop.PeriodicCallback(
             refresh_active_broadcasts_data,
-            float(
-                os.getenv("REFRESH_ACTIVE_BROADCASTS_DATA_INTERVAL_MINUTES", default=5)
-            )
-            * 60
-            * 1000,
+            float(os.getenv("REFRESH_ACTIVE_BROADCASTS_DATA_INTERVAL_MINUTES", default=5)) * 60 * 1000,
         ).start(),
     )
     loop.call_later(
         60,
         lambda: tornado.ioloop.PeriodicCallback(
             get_recording_files_share_hashes,
-            float(
-                os.getenv("REFRESH_ACTIVE_BROADCASTS_DATA_INTERVAL_MINUTES", default=5)
-            )
-            * 60
-            * 1000,
+            float(os.getenv("REFRESH_ACTIVE_BROADCASTS_DATA_INTERVAL_MINUTES", default=5)) * 60 * 1000,
         ).start(),
     )
     # Third callback starts after 2 minutes
@@ -1797,11 +1749,7 @@ if __name__ == "__main__":
         120,
         lambda: tornado.ioloop.PeriodicCallback(
             refresh_recording_status_data,
-            float(
-                os.getenv("REFRESH_RECORDING_STATUS_DATA_INTERVAL_MINUTES", default=1)
-            )
-            * 60
-            * 1000,
+            float(os.getenv("REFRESH_RECORDING_STATUS_DATA_INTERVAL_MINUTES", default=1)) * 60 * 1000,
         ).start(),
     )
 
@@ -1810,9 +1758,7 @@ if __name__ == "__main__":
         180,
         lambda: tornado.ioloop.PeriodicCallback(
             refresh_scedule_data,
-            float(os.getenv("REFRESH_SCHEDULE_DATA_INTERVAL_MINUTES", default=5))
-            * 60
-            * 1000,
+            float(os.getenv("REFRESH_SCHEDULE_DATA_INTERVAL_MINUTES", default=5)) * 60 * 1000,
         ).start(),
     )
 
@@ -1821,9 +1767,7 @@ if __name__ == "__main__":
         240,
         lambda: tornado.ioloop.PeriodicCallback(
             refresh_love_taps_cache,
-            float(os.getenv("REFRESH_LOVE_TAPS_CACHE_INTERVAL_MINUTES", default=5))
-            * 60
-            * 1000,
+            float(os.getenv("REFRESH_LOVE_TAPS_CACHE_INTERVAL_MINUTES", default=5)) * 60 * 1000,
         ).start(),
     )
 
@@ -1844,9 +1788,7 @@ if __name__ == "__main__":
         300,
         lambda: tornado.ioloop.PeriodicCallback(
             refresh_trending_archives,
-            int(os.getenv("REFRESH_TRENDING_ARCHIVES_INTERVAL_MINUTES", default=5))
-            * 60
-            * 1000,
+            int(os.getenv("REFRESH_TRENDING_ARCHIVES_INTERVAL_MINUTES", default=5)) * 60 * 1000,
         ).start(),
     )
 
