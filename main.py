@@ -1047,6 +1047,10 @@ class PlayRecordingHandler(BaseHandler):
 
 class LiveProxyHandler(RequestHandler):
     async def get(self, index: str):
+        if self.request.connection:
+            self.request.connection.set_max_body_size(10**12)
+            self.request.connection.stream.set_close_call_back(lambda: None)
+
         idx = int(index)
 
         broadcasts = active_broadcasts_chache.get("data", [])
@@ -1059,7 +1063,9 @@ class LiveProxyHandler(RequestHandler):
         listen_url = broadcast["listen_url"]
 
         # Proxy audio from Icecast
-        async with aiohttp.ClientSession() as session:
+        timeout = aiohttp.ClientTimeout(total=None, sock_read=None)
+
+        async with aiohttp.ClientSession(timeout=timeout) as session:
             async with session.get(listen_url) as resp:
                 if resp.status != 200:
                     self.set_status(502)
@@ -1070,12 +1076,14 @@ class LiveProxyHandler(RequestHandler):
                 ctype = resp.headers.get("Content-Type", "audio/mpeg")
                 self.set_header("Content-Type", ctype)
                 self.set_header("Cache-Control", "no-cache")
+                self.set_header("Pragma", "no-cache")
+                self.set_header("Transfer-Encoding", "chunked")
 
                 # Stream audio in chunks
                 try:
                     async for chunk in resp.content.iter_chunked(4096):
-                        if not chunk:
-                            break
+                        # if not chunk:
+                        #     break
                         self.write(chunk)
                         await self.flush()
                 except Exception:
