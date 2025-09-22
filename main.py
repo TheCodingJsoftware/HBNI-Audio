@@ -1005,6 +1005,46 @@ class LoadRecordingHandler(BaseHandler):
                 self.finish()
 
 
+class RecordingProxyHandler(RequestHandler):
+    async def get(self, index: str):
+        try:
+            idx = int(index)
+        except ValueError:
+            raise requests.HTTPError(400, "Index must be an integer")
+
+        # Ensure cache has data
+        if not audio_archive_cache.get("data"):
+            raise requests.HTTPError(404, "No recordings available")
+
+        # Sort recordings by date (latest first)
+        sorted_data = sorted(audio_archive_cache["data"], key=lambda r: r.get("date") or "", reverse=True)
+
+        if idx < 0 or idx >= len(sorted_data):
+            raise requests.HTTPError(404, f"No recording at index {idx}")
+
+        recording = sorted_data[idx]
+        file_path = recording.get("path")
+        filename = recording.get("filename")
+
+        if not file_path or not os.path.exists(file_path):
+            raise requests.HTTPError(404, f"Recording file not found for index {idx}")
+
+        # Stream the file
+        self.set_header("Content-Type", "audio/mpeg")  # adjust MIME if needed
+        self.set_header("Content-Disposition", f'inline; filename="{filename}"')
+        self.set_header("Accept-Ranges", "bytes")
+
+        with open(file_path, "rb") as f:
+            while True:
+                chunk = f.read(64 * 1024)
+                if not chunk:
+                    break
+                self.write(chunk)
+                await self.flush()
+
+        self.finish()
+
+
 class PlayRecordingHandler(BaseHandler):
     async def get(self, file_name):
         await update_visit(file_name)  # Keep the visit count update
@@ -1663,6 +1703,7 @@ def make_app():
             url(r"/faq", FaqHandler),
             url(r"/frequently_asked_questions", FaqHandler),
             url(r"/recording_stats/(.*)", RecordingStatsHandler),
+            url(r"/recording/([0-9]+)", RecordingProxyHandler),
             url(r"/play_recording/(.*)", PlayRecordingHandler),
             url(r"/play_live/(.*)", PlayLiveHandler),
             url(r"/live/([0-9]+)", LiveProxyHandler),
