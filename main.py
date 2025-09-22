@@ -1047,9 +1047,9 @@ class PlayRecordingHandler(BaseHandler):
 
 class LiveProxyHandler(RequestHandler):
     async def get(self, index: str):
-        if self.request.connection:
-            self.request.connection.set_max_body_size(10**12)
-            self.request.connection.stream.set_close_call_back(lambda: None)
+        # if self.request.connection:
+        #     self.request.connection.set_max_body_size(10**12)
+        #     self.request.connection.stream.set_close_call_back(lambda: None)
 
         idx = int(index)
 
