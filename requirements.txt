@@ -46,7 +46,7 @@ PyJWT==2.10.1
 pyparsing==3.2.1
 python-dotenv==1.0.1
 pytz==2024.2
-requests==2.32.3
+requests==2.32.4
 rsa==4.9
 tornado==6.4.1
 uritemplate==4.1.1
