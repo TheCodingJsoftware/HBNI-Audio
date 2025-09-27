@@ -1114,6 +1114,11 @@ class LiveProxyHandler(RequestHandler):
             return
 
         broadcast = broadcasts[idx]
+        if broadcast.get("is_private", False):
+            self.set_status(403)
+            self.write("Error: This broadcast is private")
+            return
+
         listen_url = broadcast["listen_url"]
 
         # Proxy audio from Icecast
