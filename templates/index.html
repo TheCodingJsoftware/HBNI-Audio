@@ -186,7 +186,7 @@
             <i>menu</i>
         </button>
         <h5 class="max center-align small">HBNI Audio</h5>
-        <button class="circle transparent">
+        <button class="circle transparent" onclick="ui('#info-dialog');">
             <img src="/static/icon.png" class="responsive">
         </button>
     </nav>
@@ -211,6 +211,17 @@
             <button id="schedule-broadcast-button" class="border small-round left-align extra s6 m4 l4">
                 <i>event</i>
                 <span>Schedule Event</span>
+                <div class="tooltip bottom max" style="inline-size: 14rem !important;">
+                    <p class="small-width">
+                        A password is required to schedule an event.
+                        <br>
+                        <br>
+                        For assistance, please contact:
+                        <a class="inverse-link underline" href="mailto:jared@hbni.net">jared@hbni.net</a>
+                        or
+                        <a class="inverse-link underline" href="mailto:justin@hbni.net">justin@hbni.net</a>.
+                    </p>
+                </div>
             </button>
             <button class="border small-round left-align extra s6 m4 l4" onclick="window.location.href='/events';">
                 <i>record_voice_over</i>
@@ -233,6 +244,19 @@
                 <i>download</i>
                 <span>Install</span>
             </button>
+            <article class="s12 border" style="margin-top: auto;">
+                <p class="center-align">
+                    For website-related inquiries or problems, please email:
+                    <a class="link underline" href="mailto:jared@hbni.net">jared@hbni.net</a>.<br>
+                    For technical difficulties with broadcasting or audio, please email:
+                    <a class="link underline" href="mailto:justin@hbni.net">justin@hbni.net</a>.
+                </p>
+            </article>
+        </div>
+        <div class="snackbar" id="safari-warning">
+            <i>warning</i>
+            <div class="max">This site works best in <b>Google Chrome</b></div>
+            <a class="inverse-link" href="https://apps.apple.com/us/app/google-chrome/id535886823" target="_blank">Get Chrome</a>
         </div>
         <div class="snackbar" id="notification-snackbar">
             <div class="max" id="text"></div>
