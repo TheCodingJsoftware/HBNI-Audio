@@ -147,15 +147,15 @@
         {% endif %}
         {% if broadcast_count %}
         <h5 class="center-align">Active Broadcasts</h5>
-        <div class="small-padding grid border round" id="broadcasts-container">
+        <div class="padding grid" id="broadcasts-container">
             {% for broadcast in broadcast_status %} {% if not broadcast.is_private %}
-            <article class="s12 m6 l6 round" id="article-{{ broadcast.host }}" data-title="{{ broadcast.host.title() }}" data-description="{{ broadcast.server_description }}">
+            <article class="s12 m6 l6 round padding border" id="article-{{ broadcast.host }}" data-title="{{ broadcast.host.title() }}" data-description="{{ broadcast.server_description }}">
                 <div class="row no-space top-align">
                     <h6 class="bottom-margin max" id="server-description-{{ broadcast.host }}">
                         {{ broadcast.server_description }}
                     </h6>
                     {% if "https" in broadcast.source_url %}
-                    <button class="circle link transparent" onclick="window.open('/play_live/{{ broadcast.host }}')">
+                    <button class="circle link transparent" onclick="window.location.href='/play_live/{{ broadcast.host }}'">
                         <i>open_in_new</i>
                     </button>
                     {% endif %}
@@ -234,6 +234,21 @@
         <div class="snackbar error" id="edit-schedule-error">
             Error Editing Schedule
         </div>
+        {% if scheduled_broadcast_count or broadcast_count %}
+        <footer>
+            <article class="border round padding">
+                <h5>Dial-in numbers:</h5>
+                <a class="round small-margin border small-padding link transparent wave" href="tel:+12042722188">
+                    <i>phone</i>
+                    <span>(204) 272-2188</span>
+                </a>
+                <a class="round small-margin border small-padding link transparent wave" href="tel:+12042722189">
+                    <i>phone</i>
+                    <span>(204) 272-2189</span>
+                </a>
+            </article>
+        </footer>
+        {% endif %}
     </main>
 </body>
 

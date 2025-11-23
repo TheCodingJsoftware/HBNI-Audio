@@ -14,7 +14,7 @@ let timeout;
 let recordedChunks = [];
 let isPasswordValidated = false;
 let lastPassword = '';
-let mountPoint = null;
+let mountPoint = localStorage.getItem('host') || "default";
 let isLive = false;
 let usesPhoneIn = false;
 let startTime = null;
@@ -31,7 +31,6 @@ function validateHostName() {
     hostValue = hostValue.replace(/\d/g, '');
 
     // Determine mount point
-    let mountPoint;
     if (usesPhoneIn) {
         mountPoint = 'phoneinlisten';
     } else {
@@ -54,9 +53,9 @@ function validateDescription() {
 
 function share() {
     const isPrivate = document.getElementById('isPrivate').checked;
-    const host = document.getElementById('host').value.toLowerCase();
+    // const host = document.getElementById('host').value.toLowerCase();
     const description = document.getElementById('description').value;
-    let url = "https://broadcasting.hbni.net/play_live/" + host;
+    let url = "https://broadcasting.hbni.net/play_live/" + mountPoint;
     if (navigator.share) {
         navigator.share({
             title: "HBNI Audio Live Broadcast",
@@ -137,6 +136,7 @@ async function updateRecordingStats() {
         console.error('Error updating recording stats:', error);
     }
 }
+
 document.getElementById("isPrivate").addEventListener("change", (e) => {
     if (e.target.checked) {
         document.getElementById("broadcast-status-icon").textContent = "lock";
@@ -415,7 +415,7 @@ function visualize() {
 document.addEventListener('DOMContentLoaded', function () {
     loadTheme();
 
-    const host = localStorage.getItem('host') || "";
+    const host = localStorage.getItem('host') || "default";
     document.getElementById('host').value = host;
     document.getElementById('host').addEventListener('input', function () {
         localStorage.setItem('host', this.value);
