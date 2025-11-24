@@ -57,17 +57,23 @@
                                 <input type="checkbox" id="isPrivate" name="isPrivate">
                                 <span>Private Broadcast</span>
                             </label>
+                            <label class="checkbox">
+                                <input type="checkbox" id="usePhoneIn" name="usePhoneIn">
+                                <span>Enable Phone-in Listening</span>
+                            </label>
                         </div>
                         <nav class="toolbar vertical">
                             <button class="circle transparent link">
                                 <i>help</i>
                                 <div class="tooltip left max" style="inline-size: 14rem !important;">
                                     <p class="small-width">
-                                        Contact
-                                        <a class="link underline" href="mailto:jared@hbni.net">jared@hbni.net</a>
+                                        For assistance, please contact:
+                                        <br>
+                                        <a class="link underline" href="mailto:jared@hbni.net">jared@hbni.net</a> for website-related inquiries
                                         or
-                                        <a class="link underline" href="mailto:justin@hbni.net">justin@hbni.net</a>
-                                        if you need the password. The password is required to start or schedule a broadcast.
+                                        <a class="link underline" href="mailto:justin@hbni.net">justin@hbni.net</a> for broadcasting or audio issues.
+                                        <br><br>
+                                        A password is required to start or schedule a broadcast.
                                     </p>
                                 </div>
                             </button>
@@ -112,6 +118,15 @@
                         <div class="tooltip bottom">
                             <span class="left-align" id="broadcast-status-tooltip">
                                 Public broadcasts are<br>archived and visible to others.
+                            </span>
+                        </div>
+                    </button>
+                    <button class="chip tiny-margin">
+                        <i id="phonein-status-icon">call_end</i>
+                        <span id="phonein-status-text">Phone-in Disabled</span>
+                        <div class="tooltip bottom">
+                            <span class="left-align" id="phonein-status-tooltip">
+                                Listeners cannot call in to listen<br>using a phone line.
                             </span>
                         </div>
                     </button>

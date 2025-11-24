@@ -14,20 +14,30 @@ let timeout;
 let recordedChunks = [];
 let isPasswordValidated = false;
 let lastPassword = '';
-let mountPoint = null;
+let mountPoint = localStorage.getItem('host') || "default";
 let isLive = false;
+let usesPhoneIn = false;
 let startTime = null;
 
 function validateHostName() {
     const hostInput = document.getElementById('host');
     const hostHelper = document.getElementById('host-helper');
     let hostValue = hostInput.value.toLowerCase();
+
+    // Clean up invalid characters and formatting
     hostValue = hostValue.replace(/[<>:"/\\|?*]/g, '');
     hostValue = hostValue.replace(/ /g, '_');
     hostValue = hostValue.replace(/^_+|_+$/g, '');
     hostValue = hostValue.replace(/\d/g, '');
-    mountPoint = hostValue;
-    hostHelper.textContent = `Mount: /${hostValue}`;
+
+    // Determine mount point
+    if (usesPhoneIn) {
+        mountPoint = 'phoneinlisten';
+    } else {
+        mountPoint = hostValue || 'default';
+    }
+
+    hostHelper.textContent = `Mount: /${mountPoint}`;
 }
 
 function validateDescription() {
@@ -43,9 +53,9 @@ function validateDescription() {
 
 function share() {
     const isPrivate = document.getElementById('isPrivate').checked;
-    const host = document.getElementById('host').value;
+    // const host = document.getElementById('host').value.toLowerCase();
     const description = document.getElementById('description').value;
-    let url = "https://broadcasting.hbni.net/play_live/" + host;
+    let url = "https://broadcasting.hbni.net/play_live/" + mountPoint;
     if (navigator.share) {
         navigator.share({
             title: "HBNI Audio Live Broadcast",
@@ -126,6 +136,7 @@ async function updateRecordingStats() {
         console.error('Error updating recording stats:', error);
     }
 }
+
 document.getElementById("isPrivate").addEventListener("change", (e) => {
     if (e.target.checked) {
         document.getElementById("broadcast-status-icon").textContent = "lock";
@@ -136,6 +147,20 @@ document.getElementById("isPrivate").addEventListener("change", (e) => {
         document.getElementById("broadcast-status-text").textContent = "Public";
         document.getElementById("broadcast-status-tooltip").innerHTML = "Public broadcasts are<br>archived and visible to others.";
     }
+});
+
+document.getElementById("usePhoneIn").addEventListener("change", (e) => {
+    usesPhoneIn = e.target.checked;
+    if (usesPhoneIn) {
+        document.getElementById("phonein-status-icon").textContent = "call";
+        document.getElementById("phonein-status-text").textContent = "Phone-in Enabled";
+        document.getElementById("phonein-status-tooltip").innerHTML = "Listeners can call in to listen<br>using a phone line.";
+    } else {
+        document.getElementById("phonein-status-icon").textContent = "call_end";
+        document.getElementById("phonein-status-text").textContent = "Phone-in Disabled";
+        document.getElementById("phonein-status-tooltip").innerHTML = "Listeners cannot call in to listen<br>using a phone line.";
+    }
+    validateHostName()
 });
 
 document.getElementById("password").addEventListener("input", async (e) => {
@@ -390,7 +415,7 @@ function visualize() {
 document.addEventListener('DOMContentLoaded', function () {
     loadTheme();
 
-    const host = localStorage.getItem('host') || "";
+    const host = localStorage.getItem('host') || "default";
     document.getElementById('host').value = host;
     document.getElementById('host').addEventListener('input', function () {
         localStorage.setItem('host', this.value);

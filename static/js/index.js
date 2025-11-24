@@ -273,6 +273,14 @@ document.addEventListener('DOMContentLoaded', async function () {
     Promise.all([updateEventCount(), showNotification(), fetchLoveTaps()]);
 });
 
+function detectSafari() {
+    const ua = navigator.userAgent.toLowerCase();
+    const isSafari = ua.includes("safari") && !ua.includes("chrome") && !ua.includes("chromium");
+    if (isSafari) {
+        ui("#safari-warning");
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     loadTheme();
     checkIfAppInstalled();
@@ -415,5 +423,5 @@ document.addEventListener('DOMContentLoaded', function () {
         modeIcon.textContent = toggleModeButton.checked ? "dark_mode" : "light_mode";
     });
     modeIcon.textContent = toggleModeButton.checked ? "dark_mode" : "light_mode";
-
+    detectSafari();
 });

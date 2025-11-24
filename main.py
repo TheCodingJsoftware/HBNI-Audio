@@ -6,6 +6,7 @@ import traceback
 from datetime import datetime
 from urllib.parse import unquote, urlparse
 
+import aiofiles
 import aiohttp
 import asyncpg
 import firebase_admin
@@ -19,7 +20,7 @@ import tornado.web
 import tornado.websocket
 from dotenv import load_dotenv
 from firebase_admin import credentials, messaging
-from tornado.web import Application, RequestHandler, url
+from tornado.web import Application, HTTPError, RequestHandler, url
 
 cred = credentials.Certificate("hbni-audio-1c43f2c03734.json")
 firebase_admin.initialize_app(cred)
@@ -1010,39 +1011,52 @@ class RecordingProxyHandler(RequestHandler):
         try:
             idx = int(index)
         except ValueError:
-            raise requests.HTTPError(400, "Index must be an integer")
+            raise HTTPError(400, "Index must be an integer")
 
         # Ensure cache has data
-        if not audio_archive_cache.get("data"):
-            raise requests.HTTPError(404, "No recordings available")
+        recordings = audio_archive_cache.get("data", [])
+        if not recordings:
+            raise HTTPError(404, "No recordings available")
 
         # Sort recordings by date (latest first)
-        sorted_data = sorted(audio_archive_cache["data"], key=lambda r: r.get("date") or "", reverse=True)
+        sorted_data = sorted(recordings, key=lambda r: r.get("id") or "", reverse=True)
 
         if idx < 0 or idx >= len(sorted_data):
-            raise requests.HTTPError(404, f"No recording at index {idx}")
+            raise HTTPError(404, f"No recording at index {idx}")
 
         recording = sorted_data[idx]
-        file_path = recording.get("path")
-        filename = recording.get("filename")
+        share_hash = recording.get("share_hash")
+        if not share_hash:
+            raise HTTPError(404, f"No share hash for index {idx}")
 
-        if not file_path or not os.path.exists(file_path):
-            raise requests.HTTPError(404, f"Recording file not found for index {idx}")
+        # Build internal load_recording URL
+        load_url = f"https://broadcasting.hbni.net/load_recording/{share_hash}"
+        # ↑ adjust host/port to your Tornado server
 
-        # Stream the file
-        self.set_header("Content-Type", "audio/mpeg")  # adjust MIME if needed
-        self.set_header("Content-Disposition", f'inline; filename="{filename}"')
-        self.set_header("Accept-Ranges", "bytes")
+        timeout = aiohttp.ClientTimeout(total=None, sock_read=None)
 
-        with open(file_path, "rb") as f:
-            while True:
-                chunk = f.read(64 * 1024)
-                if not chunk:
-                    break
-                self.write(chunk)
-                await self.flush()
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.get(load_url) as resp:
+                if resp.status != 200:
+                    self.set_status(502)
+                    self.write("Error: Could not fetch recording")
+                    return
 
-        self.finish()
+                # Pass through headers
+                ctype = resp.headers.get("Content-Type", "audio/mpeg")
+                self.set_header("Content-Type", ctype)
+                self.set_header("Cache-Control", "no-cache")
+                self.set_header("Pragma", "no-cache")
+                self.set_header("Transfer-Encoding", "chunked")
+
+                # Stream in chunks
+                try:
+                    async for chunk in resp.content.iter_chunked(4096):
+                        self.write(chunk)
+                        await self.flush()
+                except Exception:
+                    # client disconnected or network issue
+                    return
 
 
 class PlayRecordingHandler(BaseHandler):
@@ -1087,9 +1101,9 @@ class PlayRecordingHandler(BaseHandler):
 
 class LiveProxyHandler(RequestHandler):
     async def get(self, index: str):
-        if self.request.connection:
-            self.request.connection.set_max_body_size(10**12)
-            self.request.connection.stream.set_close_call_back(lambda: None)
+        # if self.request.connection:
+        #     self.request.connection.set_max_body_size(10**12)
+        #     self.request.connection.stream.set_close_call_back(lambda: None)
 
         idx = int(index)
 
@@ -1100,6 +1114,11 @@ class LiveProxyHandler(RequestHandler):
             return
 
         broadcast = broadcasts[idx]
+        if broadcast.get("is_private", False):
+            self.set_status(403)
+            self.write("Error: This broadcast is private")
+            return
+
         listen_url = broadcast["listen_url"]
 
         # Proxy audio from Icecast
