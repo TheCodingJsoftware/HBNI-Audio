@@ -6,7 +6,6 @@ import traceback
 from datetime import datetime
 from urllib.parse import unquote, urlparse
 
-import aiofiles
 import aiohttp
 import asyncpg
 import firebase_admin

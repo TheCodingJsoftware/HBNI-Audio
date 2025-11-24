@@ -16,7 +16,6 @@ let isPasswordValidated = false;
 let lastPassword = '';
 let mountPoint = localStorage.getItem('host') || "default";
 let isLive = false;
-let usesPhoneIn = false;
 let startTime = null;
 
 function validateHostName() {
@@ -30,12 +29,8 @@ function validateHostName() {
     hostValue = hostValue.replace(/^_+|_+$/g, '');
     hostValue = hostValue.replace(/\d/g, '');
 
-    // Determine mount point
-    if (usesPhoneIn) {
-        mountPoint = 'phoneinlisten';
-    } else {
-        mountPoint = hostValue || 'default';
-    }
+    mountPoint = hostValue;
+    localStorage.setItem('host', mountPoint);
 
     hostHelper.textContent = `Mount: /${mountPoint}`;
 }
@@ -147,20 +142,6 @@ document.getElementById("isPrivate").addEventListener("change", (e) => {
         document.getElementById("broadcast-status-text").textContent = "Public";
         document.getElementById("broadcast-status-tooltip").innerHTML = "Public broadcasts are<br>archived and visible to others.";
     }
-});
-
-document.getElementById("usePhoneIn").addEventListener("change", (e) => {
-    usesPhoneIn = e.target.checked;
-    if (usesPhoneIn) {
-        document.getElementById("phonein-status-icon").textContent = "call";
-        document.getElementById("phonein-status-text").textContent = "Phone-in Enabled";
-        document.getElementById("phonein-status-tooltip").innerHTML = "Listeners can call in to listen<br>using a phone line.";
-    } else {
-        document.getElementById("phonein-status-icon").textContent = "call_end";
-        document.getElementById("phonein-status-text").textContent = "Phone-in Disabled";
-        document.getElementById("phonein-status-tooltip").innerHTML = "Listeners cannot call in to listen<br>using a phone line.";
-    }
-    validateHostName()
 });
 
 document.getElementById("password").addEventListener("input", async (e) => {

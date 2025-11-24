@@ -37,82 +37,79 @@
                             </nav>
                         </article>
                     </summary>
-                    <nav class="row tiny-space border round padding top-margin surface-container-high">
-                        <div class="max">
-                            <div class="field label border small-round">
-                                <input type="text" id="host" name="host" required/>
-                                <label>Colony Name</label>
-                                <span class="helper no-line left-align" id="host-helper"></span>
-                            </div>
-                            <div class="field label border small-round">
-                                <input type="password" id="password" name="password" autocomplete="on" required />
-                                <label>Password</label>
-                            </div>
-                            <div class="field border small-round label textarea">
-                                <textarea type="text" id="description" name="description" required></textarea>
-                                <label>Description</label>
-                                <span class="helper no-line left-align">Explain what the broadcast is about</span>
-                            </div>
-                            <label class="checkbox">
-                                <input type="checkbox" id="isPrivate" name="isPrivate">
-                                <span>Private Broadcast</span>
-                            </label>
-                            <label class="checkbox">
-                                <input type="checkbox" id="usePhoneIn" name="usePhoneIn">
-                                <span>Enable Phone-in Listening</span>
-                            </label>
-                        </div>
-                        <nav class="toolbar vertical">
-                            <button class="circle transparent link">
+                    <article class="grid small-space border round padding top-margin surface-container-high">
+                        <nav class="s12 toolbar">
+                            <button class="transparent link">
                                 <i>help</i>
-                                <div class="tooltip left max" style="inline-size: 14rem !important;">
+                                <span class="l m">Help</span>
+                                <div class="tooltip right max" style="inline-size: 14rem !important;">
                                     <p class="small-width">
                                         For assistance, please contact:
                                         <br>
-                                        <a class="link underline" href="mailto:jared@hbni.net">jared@hbni.net</a> for website-related inquiries
+                                        <a class="inverse-link underline" href="mailto:jared@hbni.net">jared@hbni.net</a> for website-related inquiries
                                         or
-                                        <a class="link underline" href="mailto:justin@hbni.net">justin@hbni.net</a> for broadcasting or audio issues.
+                                        <a class="inverse-link underline" href="mailto:justin@hbni.net">justin@hbni.net</a> for broadcasting or audio issues.
                                         <br><br>
                                         A password is required to start or schedule a broadcast.
                                     </p>
                                 </div>
                             </button>
-                            <button class="circle transparent link" onclick="window.open('/broadcasting_guide', '_blank');">
+                            <button class="transparent link" onclick="window.open('/broadcasting_guide', '_blank');">
                                 <i>developer_guide</i>
-                                <div class="tooltip left">
+                                <span class="l m">Broadcasting Guide</span>
+                                <div class="tooltip bottom">
                                     Broadcasting Guide <i>open_in_new</i>
                                 </div>
                             </button>
-                            <button class="circle transparent link" id="share-button">
+                            <button class="transparent link" id="share-button">
                                 <i>share</i>
+                                <span class="l m">Share</span>
                             </button>
                         </nav>
-                    </nav>
+                        <div class="s12 m6 l6 field label border small-round bottom-margin">
+                            <input type="text" id="host" name="host" required/>
+                            <label>Colony Name</label>
+                            <span class="helper no-line left-align" id="host-helper"></span>
+                        </div>
+                        <div class="s12 m6 l6 field label border small-round">
+                            <input type="password" id="password" name="password" autocomplete="on" required />
+                            <label>Password</label>
+                        </div>
+                        <div class="s12 field border small-round label textarea">
+                            <textarea type="text" id="description" name="description" required></textarea>
+                            <label>Description</label>
+                            <span class="helper no-line left-align">Explain what the broadcast is about</span>
+                        </div>
+                        <label class="s12 checkbox">
+                            <input type="checkbox" id="isPrivate" name="isPrivate">
+                            <span>Private Broadcast</span>
+                        </label>
+                    </article>
                 </details>
-                <nav class="left-align bottom-margin grid">
-                    <button id="startBroadcast" class="s12 m3 l2 vertical" disabled>
+                <nav class="left-align top-margin bottom-margin grid">
+                    <button id="startBroadcast" class="s12 m3 l3 extra vertical" disabled>
                         <i>play_circle</i>
                         <span>Start Broadcast</span>
                     </button>
-                    <button id="stopBroadcast" class="s12 m3 l2 vertical" disabled>
+                    <button id="stopBroadcast" class="s12 m3 l3 extra vertical" disabled>
                         <i>stop_circle</i>
                         <span>Stop Broadcast</span>
                     </button>
                 </nav>
                 <nav class="wrap no-space">
-                    <button class="chip tiny-margin">
+                    <button class="chip round tiny-margin">
                         <i>schedule</i>
                         <span id="length">Haven't started yet</span>
                     </button>
-                    <button class="chip tiny-margin">
+                    <button class="chip round tiny-margin">
                         <i>people</i>
                         <span id="listeners">NA</span>
                     </button>
-                    <button class="chip tiny-margin">
+                    <button class="chip round tiny-margin">
                         <i>trending_up</i>
                         <span id="listener-peak">NA</span>
                     </button>
-                    <button class="chip tiny-margin">
+                    <button class="chip round tiny-margin">
                         <i id="broadcast-status-icon">public</i>
                         <span id="broadcast-status-text">Public</span>
                         <div class="tooltip bottom">
@@ -121,16 +118,7 @@
                             </span>
                         </div>
                     </button>
-                    <button class="chip tiny-margin">
-                        <i id="phonein-status-icon">call_end</i>
-                        <span id="phonein-status-text">Phone-in Disabled</span>
-                        <div class="tooltip bottom">
-                            <span class="left-align" id="phonein-status-tooltip">
-                                Listeners cannot call in to listen<br>using a phone line.
-                            </span>
-                        </div>
-                    </button>
-                    <button class="chip tiny-margin hidden" id="live-indicator">
+                    <button class="chip round tiny-margin hidden" id="live-indicator">
                         <span id="current-time" class="live-indicator"></span>
                     </button>
                 </nav>
