@@ -460,6 +460,7 @@ dependencies = [
     { name = "jinja2" },
     { name = "msgspec" },
     { name = "python-dotenv" },
+    { name = "requests" },
     { name = "tornado" },
 ]
 
@@ -471,6 +472,7 @@ requires-dist = [
     { name = "jinja2", specifier = ">=3.1.6" },
     { name = "msgspec", specifier = ">=0.19.0" },
     { name = "python-dotenv", specifier = ">=1.1.1" },
+    { name = "requests", specifier = ">=2.32.5" },
     { name = "tornado", specifier = ">=6.5.2" },
 ]
 
