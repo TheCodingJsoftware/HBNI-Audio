@@ -1,148 +1,194 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <meta name="google" content="notranslate">
-    <link rel="icon" href="/static/icon.png">
-    <title>Broadcasting Guide</title>
-    <meta property="og:title" content="Broadcasting Guide" />
-    <meta property="og:url" content="https://broadcasting.hbni.net/broadcasting_guide" />
-    <meta property="og:image" content="https://broadcasting.hbni.net/static/icon.png" />
-    <meta property="og:description" content="Broadcasting guide for the HBNI Audio Streaming Service." />
-    <meta name="color-scheme" content="dark light">
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <meta name="google" content="notranslate">
+        <link rel="icon" href="/static/icon.png">
+        <title>Broadcasting Guide</title>
+        <meta property="og:title" content="Broadcasting Guide" />
+        <meta property="og:url" content="https://broadcasting.hbni.net/broadcasting_guide" />
+        <meta property="og:image" content="https://broadcasting.hbni.net/static/icon.png" />
+        <meta property="og:description" content="Broadcasting guide for the HBNI Audio Streaming Service." />
+        <meta name="color-scheme" content="dark light">
+    </head>
 
-<header class="fixed primary" id="main-header">
-    <nav>
-        <button class="circle transparent" onclick="window.history.back();">
-            <i>arrow_back</i>
-        </button>
-        <h5 class="max small">Broadcasting Guide</h5>
-    </nav>
-</header>
+    <header class="fixed primary" id="main-header">
+        <nav>
+            <button class="circle transparent" onclick="window.history.back();">
+                <i>arrow_back</i>
+            </button>
+            <h5 class="max small">Broadcasting Guide</h5>
+        </nav>
+    </header>
 
-<body class="hidden">
-    <main class="responsive padding">
-        <section aria-labelledby="summary-title">
-            <h5 id="summary-title">Summary</h5>
-            <ol>
-                <li>Gather Your Equipment (<strong>microphone</strong> + optional <strong>mixer</strong>).</li>
-                <li>Visit the <strong>HBNI Audio Broadcasting Webpage</strong> on any device.</li>
-                <li>Enter Your <strong>Colony Name</strong>, <strong>Description</strong>, and <strong>Password</strong> (request it if you don’t have it).</li>
-                <li>Test by using <em>“test”</em> as the Colony Name to ensure the mic and connection are good.</li>
-                <li>Go Live and speak clearly.</li>
-                <li>Choose <strong>Public</strong> or <strong>Private</strong> broadcast settings:
+    <body class="hidden">
+        <main class="responsive padding">
+            <section aria-labelledby="summary-title">
+                <h5 id="summary-title">Broadcasting Guide (Read This First)</h5>
+
+                <p><strong>This service works best when these rules are followed.</strong></p>
+
                 <ul>
-                    <li><strong>Public:</strong> will show up on the listeners page and be archived.</li>
-                    <li><strong>Private:</strong> stays hidden, but you get a personal copy.</li>
+                    <li><strong>Wi-Fi is NOT allowed.</strong> Broadcasting must be done using a wired Ethernet connection.</li>
+                    <li><strong>A mixer is strongly recommended.</strong> Broadcasting without one will result in poor audio quality.</li>
                 </ul>
-                </li>
-                <li>Always Keep Your Connection Stable for uninterrupted streaming.</li>
-            </ol>
-            <p>That’s it! You’re now ready to broadcast your audio with HBNI Audio. <strong>Happy broadcasting!</strong></p>
-        </section>
-        <hr class="small-margin" />
-        <!-- Equipment Needed -->
-        <section aria-labelledby="equipment-title">
-            <h5 id="equipment-title">Equipment Needed</h5>
-            <p><strong>Microphone</strong> – At the very least, a decent microphone is required. This could be:</p>
-            <ul>
-                <li>A built-in microphone on your phone or laptop.</li>
-                <li>A USB microphone for improved audio quality.</li>
-                <li>A mixer (optional) if you want even higher-quality or more professional sound.</li>
-            </ul>
-            <p><strong>Stable Internet Connection</strong> – Reliable connectivity is crucial:</p>
-            <ul>
-                <li>Aim for at least <strong>1 Mbps upload speed</strong>.</li>
-                <li>Avoid network activities that might interrupt or slow your upload.</li>
-            </ul>
-        </section>
-        <hr class="small-margin" />
-        <!-- Accessing the Broadcasting Webpage -->
-        <section aria-labelledby="access-title">
-            <h5 id="access-title">2. Accessing the Broadcasting Webpage</h5>
 
-            <h6>Open the HBNI Audio Broadcasting Webpage</h6>
-            <ul>
-                <li>You can use any device—mobile phone, tablet, or computer.</li>
-                <li>Ensure your device’s microphone is enabled and has permission to capture audio in your browser.</li>
-            </ul>
+                <p>This guide is intentionally simple. Follow it exactly.</p>
+            </section>
 
-            <h6>Enter the Required Fields</h6>
-            <p>The webpage will prompt you for three pieces of information:</p>
-            <ol>
-                <li><strong>Colony Name</strong> – This is how your broadcast will be labeled/identified.</li>
-                <li><strong>Description</strong> – Give a brief description of your broadcast (e.g., topic, event).</li>
-                <li><strong>Password</strong> – A password is required to start broadcasting.
+            <hr class="small-margin" />
+
+            <section aria-labelledby="rules-title">
+                <h5 id="rules-title">Critical Requirements</h5>
+
                 <ul>
-                    <li>The password is always the same for authorized broadcasters.</li>
-                    <li>Contact the HBNI Audio administrator or team if you do not have it.</li>
+                    <li>
+                        <strong>Wired Internet (Ethernet Only)</strong>
+                        <ul>
+                            <li>Do NOT broadcast over Wi-Fi.</li>
+                            <li>Wi-Fi causes dropouts, lag, and unstable audio.</li>
+                            <li>If you are on Wi-Fi, stop and plug in an Ethernet cable.</li>
+                        </ul>
+                    </li>
+
+                    <li>
+                        <strong>Audio Mixer (Highly Recommended)</strong>
+                        <ul>
+                            <li>All microphones are supported.</li>
+                            <li>Using a mixer provides stable, clean, and consistent audio.</li>
+                            <li>Without a mixer, audio is often quiet, distorted, or unbalanced.</li>
+                            <li>Poor audio quality leads to listener complaints.</li>
+                        </ul>
+                    </li>
                 </ul>
-                </li>
-            </ol>
-        </section>
-        <hr class="small-margin" />
-        <!-- Starting Your Broadcast -->
-        <section aria-labelledby="start-title">
-            <h5 id="start-title">3. Starting Your Broadcast</h5>
+            </section>
 
-            <h6>Test First</h6>
-            <ul>
-                <li>We strongly recommend doing a quick test by setting your Colony Name to <em>“test”</em>.</li>
-                <li>Make sure your microphone is working, and your internet connection is steady.</li>
-                <li>If the test broadcast works smoothly, you’re ready to go live.</li>
-            </ul>
+            <hr class="small-margin" />
 
-            <h6>Go Live</h6>
-            <ul>
-                <li>Use your desired Colony Name, Description, and the same Password.</li>
-                <li>Once you press <strong>Start Broadcasting</strong>, you are on air.</li>
-            </ul>
-        </section>
-        <hr class="small-margin" />
-        <!-- Privacy Options & Archives -->
-        <section aria-labelledby="privacy-title">
-            <h5 id="privacy-title">4. Privacy Options &amp; Archives</h5>
+            <section aria-labelledby="equipment-title">
+                <h5 id="equipment-title">Recommended Equipment</h5>
 
-            <h6>Public Broadcasts</h6>
-            <ul>
-                <li>By default, your broadcasts will be available on the listeners page.</li>
-                <li>They are also automatically archived, and you will receive your own copy of the recorded broadcast.</li>
-            </ul>
-
-            <h6>Private Broadcasts</h6>
-            <ul>
-                <li>You can mark your broadcast as <strong>Private</strong> (if provided as an option on the broadcast page).</li>
-                <li><strong>Private broadcasts:</strong></li>
                 <ul>
-                <li>Will not appear on the listeners page.</li>
-                <li>Will not be archived publicly.</li>
-                <li>You still receive your own copy for personal records.</li>
+                    <li><strong>Microphone</strong> (any type supported)</li>
+                    <li><strong>Audio Mixer</strong> (USB or analog)</li>
+                    <li><strong>Ethernet Cable</strong> (connected directly to router or switch)</li>
+                    <li><strong>Stable Internet</strong> (minimum 1 Mbps upload)</li>
                 </ul>
-            </ul>
-            <h6>Rocket Broadcaster</h6>
-            <p>There are two ways to broadcast privately using Rocket Broadcaster:</p>
-            <img class="responsive small-round border fill" src="/static/screenshots/private-with-rocket-broadcast.png" alt="Private broadcast example">
-        </section>
-        <hr class="small-margin" />
-        <!-- Best Practices & Tips -->
-        <section aria-labelledby="tips-title">
-            <h5 id="tips-title">5. Best Practices &amp; Tips</h5>
+            </section>
 
-            <h6>Maintain a Stable Internet Connection</h6>
-            <ul>
-                <li>Use a wired Ethernet connection if possible, or stay close to your Wi-Fi router if using wireless.</li>
-                <li>Avoid other heavy internet usage during your broadcast.</li>
-            </ul>
+            <hr class="small-margin" />
 
-            <h6>Keep an Eye on Battery (for Mobile Devices)</h6>
-            <ul>
-                <li>Make sure your device is charged or plugged in if you plan an extended broadcast.</li>
-            </ul>
-        </section>
-    </main>
-</body>
+            <section aria-labelledby="access-title">
+                <h5 id="access-title">How to Broadcast</h5>
+
+                <h6>1. Open the Broadcasting Page</h6>
+                <ul>
+                    <li>Use a computer, tablet, or phone.</li>
+                    <li>Confirm Ethernet is plugged in.</li>
+                    <li>Allow microphone access in your browser.</li>
+                </ul>
+
+                <h6>2. Enter the Required Information</h6>
+                <ul>
+                    <li><strong>Colony Name</strong></li>
+                    <li><strong>Description</strong></li>
+                    <li><strong>Password</strong>
+                        <ul>
+                            <li>Same password for all authorized broadcasters.</li>
+                            <li>Contact the HBNI Audio admin if you don’t have it.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+
+            <hr class="small-margin" />
+
+            <section aria-labelledby="test-title">
+                <h5 id="test-title">Testing (Required)</h5>
+
+                <ul>
+                    <li>Set <strong>Colony Name</strong> to <em>test</em>.</li>
+                    <li>Speak for 10–20 seconds.</li>
+                    <li>Confirm:
+                        <ul>
+                            <li>Audio is clear</li>
+                            <li>No cutting out</li>
+                            <li>Ethernet is connected</li>
+                        </ul>
+                    </li>
+                    <li>If it fails:
+                        <ul>
+                            <li>Adjust microphone or mixer levels</li>
+                            <li>Check microphone connection</li>
+                            <li>Confirm Wi-Fi is disabled</li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+
+            <hr class="small-margin" />
+
+            <section aria-labelledby="live-title">
+                <h5 id="live-title">Go Live</h5>
+
+                <ul>
+                    <li>Enter your real Colony Name.</li>
+                    <li>Click <strong>Start Broadcasting</strong>.</li>
+                    <li>Speak clearly.</li>
+                    <li>Do not unplug Ethernet.</li>
+                    <li>Do not change networks.</li>
+                </ul>
+            </section>
+
+            <hr class="small-margin" />
+
+            <section aria-labelledby="privacy-title">
+                <h5 id="privacy-title">Public vs Private Broadcasts</h5>
+
+                <h6>Public</h6>
+                <ul>
+                    <li>Visible on listeners page.</li>
+                    <li>Automatically archived.</li>
+                    <li>You receive a copy.</li>
+                </ul>
+
+                <h6>Private</h6>
+                <ul>
+                    <li>Hidden from listeners page.</li>
+                    <li>Not publicly archived.</li>
+                    <li>You still receive a copy.</li>
+                </ul>
+                <h6>Rocket Broadcaster</h6>
+                <p>There are two ways to broadcast privately using Rocket Broadcaster:</p>
+                <img class="responsive small-round border fill" src="/static/screenshots/private-with-rocket-broadcast.png" alt="Private broadcast example">
+            </section>
+
+            <hr class="small-margin" />
+
+            <section aria-labelledby="problems-title">
+                <h5 id="problems-title">Common Problems</h5>
+
+                <ul>
+                    <li><strong>Audio cutting out</strong> → Network issue, usually Wi-Fi.</li>
+                    <li><strong>Quiet or distorted audio</strong> → No mixer or poor mic setup.</li>
+                    <li><strong>Listener complaints</strong> → Audio quality too low.</li>
+                </ul>
+
+                <p><strong>Fix:</strong> Use Ethernet. Use a mixer.</p>
+            </section>
+
+            <hr class="small-margin" />
+
+            <section aria-labelledby="final-title">
+                <h5 id="final-title">Final Reminder</h5>
+
+                <p>
+                    <strong>Ethernet is required. A mixer prevents bad audio.</strong>
+                </p>
+            </section>
+        </main>
+    </body>
 </html>
