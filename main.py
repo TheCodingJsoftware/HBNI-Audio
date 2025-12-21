@@ -1120,6 +1120,12 @@ class LiveProxyHandler(RequestHandler):
 
         listen_url = broadcast["listen_url"]
 
+        if listen_url.startswith("http://broadcast:"):
+            listen_url = listen_url.replace(
+                "http://broadcast:8000",
+                "http://127.0.0.1:8000"
+            )
+
         # Proxy audio from Icecast
         timeout = aiohttp.ClientTimeout(total=None, sock_read=None)
 
