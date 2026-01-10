@@ -48,7 +48,7 @@ python-dotenv==1.0.1
 pytz==2024.2
 requests==2.32.3
 rsa==4.9
-tornado==6.4.1
+tornado==6.5.1
 uritemplate==4.1.1
 urllib3==2.2.3
 websockets==13.1
